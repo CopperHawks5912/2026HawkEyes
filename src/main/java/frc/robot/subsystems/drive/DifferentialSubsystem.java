@@ -684,8 +684,8 @@ public class DifferentialSubsystem extends SubsystemBase {
    * @return Command that aims the robot at the alliance hub using PID control
    */
   public Command aimAtHubCommand() {
-    return runOnce(() -> {
-      // Set goal once at start
+    return run(() -> {
+      // Get current pose
       Pose2d currentPose = getPose();
 
       // Get the current alliance hub
@@ -697,17 +697,16 @@ public class DifferentialSubsystem extends SubsystemBase {
       Translation2d toHub = hubCenter.minus(currentPose.getTranslation());
       Rotation2d targetAngle = new Rotation2d(toHub.getX(), toHub.getY());
       
-      // Set the target angle as the goal for the PID controller.
-      // Add Math.PI so that the back of the robot (the launcher) faces the hub.
-      aimPIDController.setGoal(targetAngle.getRadians() + Math.PI);
-    })
-    .andThen(run(() -> {
-      // Calculate uses the previously set goal
-      double rotationSpeed = aimPIDController.calculate(getPose().getRotation().getRadians());
+      // Calculate rotation speed to aim at the hub using the PID controller.
+      // Add Math.PI so the rear-mounted launcher faces the hub.
+      double rotationSpeed = aimPIDController.calculate(
+        currentPose.getRotation().getRadians(),
+        targetAngle.getRadians() + Math.PI
+      );
       
       // Rotate the robot in place to aim at the hub (0 forward speed, only rotation)
       driveArcade(0.0, rotationSpeed);
-    }))
+    })
     .until(() -> aimPIDController.atSetpoint())
     .withTimeout(3.0)
     .finallyDo(() -> stop())
@@ -766,6 +765,7 @@ public class DifferentialSubsystem extends SubsystemBase {
       // Invert controls if the inverted flag is set
       if (inverted) {
         xSpeed = -xSpeed;
+        rSpeed = -rSpeed;
       }
 
       // 4. Drive the robot using the processed inputs (-1 to 1 range),
