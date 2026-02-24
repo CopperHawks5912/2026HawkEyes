@@ -246,8 +246,8 @@ public class DifferentialSubsystem extends SubsystemBase {
     // voltages (at the cost of a little bit of top speed on a fully charged
     // battery). The current limit helps prevent tripping breakers.
     motorConfig
-      .voltageCompensation(12) // volts
       .smartCurrentLimit(60) // amps
+      .voltageCompensation(12) // volts
       .idleMode(IdleMode.kBrake);
 
     // Set the position and velocity conversion factors for the encoders
