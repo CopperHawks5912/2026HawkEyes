@@ -84,12 +84,7 @@ public class ClimberSubsystem extends SubsystemBase {
   }
 
   @Override
-  public void periodic() {  
-    // Check limits and stop if exceeded
-    if (isAtUpperLimit() || isAtLowerLimit()) {
-      setPower(0);
-    }
-  }
+  public void periodic() {}
     
   // ==================== Internal State Modifiers ====================
   
@@ -101,13 +96,11 @@ public class ClimberSubsystem extends SubsystemBase {
     double clampedPower = MathUtil.clamp(power, -1, 1);
 
     // Safety: Stop at limits to prevent damage
-    // Use > instead of >= to create a "close to limit" zone
-    if (getPosition() > ClimberConstants.kUpperLimitDegrees && clampedPower > 0) {
+    if (isAtUpperLimit() && clampedPower > 0) {
       climberMotor.set(0);
       return;
-    }
-    
-    if (getPosition() < ClimberConstants.kLowerLimitDegrees && clampedPower < 0) {
+    }    
+    if (isAtLowerLimit() && clampedPower < 0) {
       climberMotor.set(0);
       return;
     }
