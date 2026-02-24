@@ -239,7 +239,7 @@ public class ClimberSubsystem extends SubsystemBase {
   
   /**
    * Command the climber to move to the upright home position
-   * @return Command that retracts to lower limit then stops
+   * @return Command that moves to the home position then stops
    */
   public Command homeCommand() {
     return run(() -> {
