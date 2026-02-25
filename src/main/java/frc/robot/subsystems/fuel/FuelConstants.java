@@ -44,8 +44,4 @@ public final class FuelConstants {
   // Or in the units the REV API expects: kV = 1/6000 = 0.00167 (assuming 12V compensation)  
 
   public static final double kLauncherToleranceRPM          =  150.0;
-
-  // Timing constants
-  public static final double kSpinUpSeconds                 =  0.75;
-  public static final double kRecoveryDelaySeconds          =  0.15;
 }
