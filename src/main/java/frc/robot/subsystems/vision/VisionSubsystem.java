@@ -77,21 +77,9 @@ public class VisionSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // CRITICAL: Update camera caches FIRST
-    updateCameraCache();
-    
-    // Process vision measurements using cached data
-    updateVisionMeasurements();
-  }
-
-  // ==================== Internal State Modifiers ====================
-  
-  /**
-   * Update each camera cache
-   * The camera's updateCache() function should be the ONLY
-   * place where getAllUnreadResults() gets called!
-   */
-  private void updateCameraCache() {
+    // CRITICAL: Update each camera's cache BEFORE processing measurements.
+    // The camera's updateCache() function should be the ONLY place where 
+    // getAllUnreadResults() gets called (once per camera per cycle)!
     for (Camera camera : cameras) {
       try {
         camera.updateCache();
@@ -99,7 +87,12 @@ public class VisionSubsystem extends SubsystemBase {
         Utils.logError("Error updating cache for " + camera.getName() + ": " + e.getMessage());
       }
     }
+    
+    // Process vision measurements using cached data
+    updateVisionMeasurements();
   }
+
+  // ==================== Internal State Modifiers ====================
 
   /**
    * Update vision measurements from cached camera data
@@ -348,15 +341,6 @@ public class VisionSubsystem extends SubsystemBase {
    */
   public boolean isEnabled() {
     return VisionConstants.kEnableVision && !cameras.isEmpty();
-  }
-
-  /**
-   * Force an immediate vision measurement update (useful for testing)
-   * This will update caches and process new measurements
-   */
-  public void forceUpdate() {
-    updateCameraCache();
-    updateVisionMeasurements();
   }
 
   /**
