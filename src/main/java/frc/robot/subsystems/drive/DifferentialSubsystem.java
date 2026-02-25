@@ -228,6 +228,10 @@ public class DifferentialSubsystem extends SubsystemBase {
 
     // Initialize dashboard
     SmartDashboard.putData("Drive/Field", field2d);
+    SmartDashboard.putData("Drive/Gyro", builder -> {
+      builder.setSmartDashboardType("Gyro");
+      builder.addDoubleProperty("Value", () -> gyro.getYaw().in(Degrees), null);
+    });
     SmartDashboard.putData("Drive/Differential", this);
     
     // Output initialization progress

@@ -269,19 +269,6 @@
             }
           },
           {
-            "title": "Gyro",
-            "x": 700.0,
-            "y": 200.0,
-            "width": 400.0,
-            "height": 375.0,
-            "type": "Gyro",
-            "properties": {
-              "topic": "/SmartDashboard/Drive/Gyro",
-              "period": 0.06,
-              "counter_clockwise_positive": true
-            }
-          },
-          {
             "title": "1. Choose Auto Command",
             "x": 300.0,
             "y": 50.0,
@@ -292,6 +279,19 @@
               "topic": "/SmartDashboard/Auto Command",
               "period": 0.06,
               "sort_options": false
+            }
+          },
+          {
+            "title": "Gyro",
+            "x": 700.0,
+            "y": 200.0,
+            "width": 400.0,
+            "height": 375.0,
+            "type": "Gyro",
+            "properties": {
+              "topic": "/SmartDashboard/Drive/Gyro",
+              "period": 0.06,
+              "counter_clockwise_positive": true
             }
           }
         ]
