@@ -313,7 +313,7 @@ public class FuelSubsystem extends SubsystemBase {
   }
   
   /**
-   * Set feeder motor to a specific voltage
+   * Set feeder motor to a percentage of max power.
    * @param power Percentage of voltage to apply (-1.0 to 1.0)
    */
   private void setFeederRoller(double power) {
