@@ -21,7 +21,7 @@ public final class FuelConstants {
 
   // Intake/Launcher percentages (for intake/eject mode - percentage control)
   public static final double kIntakeIntakingPercent         =  0.60;
-  public static final double kIntakeEjectPercent            =  0.80;
+  public static final double kIntakeEjectPercent            = -0.80;
 
   // Launcher RPM values (for shooting mode - velocity control)
   public static final double kLauncherLaunchingRPM          =  4500.0;  // Default launch RPM
