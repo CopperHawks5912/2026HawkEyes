@@ -186,13 +186,13 @@ public final class DifferentialConstants {
    * Maximum allowed translation jump for vision measurements (meters)
    * Rejects vision measurements that are too far from current estimate
    */
-  public static final double kVisionMaxTranslationJump = 1.0;
+  public static final double kVisionMaxTranslationJumpMeters = 1.0;
   
   /**
    * Maximum allowed rotation jump for vision measurements (degrees)
    * Rejects vision measurements with too much rotation difference
    */
-  public static final double kVisionMaxRotationJump = 30.0;
+  public static final double kVisionMaxRotationJumpDegrees = 30.0;
   
   // ==================== PathPlanner Configuration ====================
   

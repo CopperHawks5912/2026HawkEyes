@@ -371,13 +371,13 @@ public class DifferentialSubsystem extends SubsystemBase {
 
       // Reject large translation jumps
       double translationDistance = robotPose.getTranslation().getDistance(visionPose.getTranslation());
-      if (translationDistance > DifferentialConstants.kVisionMaxTranslationJump) {
+      if (translationDistance > DifferentialConstants.kVisionMaxTranslationJumpMeters) {
         return;
       }
 
       // Reject large rotation jumps
       double rotationDifference = Math.abs(robotPose.getRotation().minus(visionPose.getRotation()).getDegrees());
-      if (rotationDifference > DifferentialConstants.kVisionMaxRotationJump) {
+      if (rotationDifference > DifferentialConstants.kVisionMaxRotationJumpDegrees) {
         return;
       }
 
