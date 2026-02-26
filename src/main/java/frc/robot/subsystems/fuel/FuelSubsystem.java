@@ -444,8 +444,8 @@ public class FuelSubsystem extends SubsystemBase {
    */
   public Command ejectCommand() {
     return run(() -> {
-      setLauncherPower(FuelConstants.kLauncherEjectPercent);
-      setFeederRoller(FuelConstants.kFeederEjectPercent);
+      setLauncherPower(FuelConstants.kLauncherEjectingPercent);
+      setFeederRoller(FuelConstants.kFeederEjectingPercent);
     }).withName("EjectFuel");
   }
   
