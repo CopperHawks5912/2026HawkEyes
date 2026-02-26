@@ -25,24 +25,24 @@ public final class FuelConstants {
   public static final double kLauncherEjectPercent          = -0.80;
 
   // Launcher RPM values (for shooting mode - velocity control)
-  public static final double kLauncherLaunchingRPM          =  4500.0;  // Default launch RPM
-  public static final double kLauncherPassingRPM            =  2000.0;  // Passing RPM
+  public static final double kLauncherLaunchingRPM          = 4500.0;  // Default launch RPM
+  public static final double kLauncherPassingRPM            = 2000.0;  // Passing RPM
   
   // Launcher velocity control PID constants
-  public static final double kLauncherP                     =  0.0002;
-  public static final double kLauncherI                     =  0.0;
-  public static final double kLauncherD                     =  0.0;
+  public static final double kLauncherP                     = 0.0002;
+  public static final double kLauncherI                     = 0.0;
+  public static final double kLauncherD                     = 0.0;
 
   // Feedforward constants (Modern REV API)
   // These replace the deprecated velocityFF() method
   // Use SysId or empirical tuning to find these values
-  public static final double kLauncherKS                    =  0.0;      // Static friction (volts) - voltage to overcome friction
-  public static final double kLauncherKV                    =  0.00167;  // Velocity constant (volts per RPM) - was 1/6000
-  public static final double kLauncherKA                    =  0.0;      // Acceleration constant (volts per RPM/s) - usually small for flywheels
+  public static final double kLauncherKS                    = 0.0;      // Static friction (volts) - voltage to overcome friction
+  public static final double kLauncherKV                    = 0.00167;  // Velocity constant (volts per RPM) - was 1/6000
+  public static final double kLauncherKA                    = 0.0;      // Acceleration constant (volts per RPM/s) - usually small for flywheels
   
    // Note: kV = 1 / free_speed_rpm when battery is at 12V
   // Example: If free speed is 6000 RPM at 12V, then kV = 12/6000 = 0.002 V/(RPM)
   // Or in the units the REV API expects: kV = 1/6000 = 0.00167 (assuming 12V compensation)  
 
-  public static final double kLauncherToleranceRPM          =  150.0;
+  public static final double kLauncherToleranceRPM          = 150.0;
 }
