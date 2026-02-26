@@ -20,11 +20,11 @@ public final class FuelConstants {
   public static final double kFeederEjectingPercent         =  0.60; // A moderate reverse power to eject fuel without causing jams
   public static final double kFeederSpinUpPreLaunchPercent  = -0.25; // A small reverse power to hold back fuel while the launcher gets to speed
 
-  // Intake/Launcher percentages (for intake/eject mode - percentage control)
+  // Launcher percentages (for intake/eject mode - percentage control)
   public static final double kLauncherIntakingPercent       =  0.60;
   public static final double kLauncherEjectingPercent       = -0.80;
 
-  // Launcher RPM values (for shooting mode - velocity control)
+  // Launcher RPM velocity values (for shooting mode - velocity PID control)
   public static final double kLauncherLaunchingRPM          = 4500.0; // Default launch RPM
   public static final double kLauncherPassingRPM            = 2000.0; // Passing RPM
   
