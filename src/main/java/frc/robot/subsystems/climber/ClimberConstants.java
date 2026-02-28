@@ -37,8 +37,8 @@ public final class ClimberConstants {
   public static final double kVelocityConversionFactor = kPositionConversionFactor / 60.0;
 
   // Motor power percentages
-  public static final double kUpPercent   =  0.80;  // Power for extending climber
-  public static final double kDownPercent = -0.80;  // Power for retracting climber (negative)
+  public static final double kUpPercent   =  0.80;  // Power for climbing up
+  public static final double kDownPercent = -0.80;  // Power for climbing down (negative)
   
   // Soft limits (in encoder rotations)
   // Set these based on your climber's physical range of motion
