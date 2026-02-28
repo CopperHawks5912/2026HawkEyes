@@ -84,11 +84,11 @@ public class FuelSubsystem extends SubsystemBase {
     configureFeederMotor();
     configureIntakeLauncherMotors();
 
-    // Initialize controllers
+    // Initialize PID controllers
     leftController = leftIntakeLauncherMotor.getClosedLoopController();
     rightController = rightIntakeLauncherMotor.getClosedLoopController();
 
-    // Initialize encoders
+    // Get the NEO's builtin encoders
     leftEncoder = leftIntakeLauncherMotor.getEncoder();
     rightEncoder = rightIntakeLauncherMotor.getEncoder();
 
