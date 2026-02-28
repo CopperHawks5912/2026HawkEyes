@@ -113,9 +113,10 @@ public class ClimberSubsystem extends SubsystemBase {
   }
   
   /**
-   * Reset the encoder position to zero
+   * Reset the encoder position to zero.
+   * This should only be called when the climber is physically in the "home" position.
    */
-  public void resetEncoder() {
+  private void resetEncoder() {
     climberEncoder.setPosition(0);
   }
   
