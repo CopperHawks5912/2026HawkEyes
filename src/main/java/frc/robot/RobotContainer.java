@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -24,6 +25,7 @@ import frc.robot.subsystems.climber.ClimberSubsystem;
 import frc.robot.subsystems.feedback.FeedbackSubsystem;
 import frc.robot.subsystems.fuel.FuelSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
+import frc.robot.util.Elastic;
 import frc.robot.subsystems.drive.DifferentialSubsystem;
 
 /**
@@ -49,6 +51,7 @@ public class RobotContainer {
   
   // Cache the selected auto to avoid repeatedly loading path files while disabled
   private PathPlannerAuto selectedAuto = null;
+  private boolean hasGameData = false;
 
   /** 
    * The container for the robot. 
@@ -187,6 +190,28 @@ public class RobotContainer {
   }
 
   /**
+   * Use this to pass the starting pose to the main {@link Robot} class.
+   * @return the starting pose of the selected autonomous command
+   */
+  private Pose2d getStartingPose() {
+    // get the name of the selected auto from the chooser
+    String autoName = autoChooser.getSelected();
+
+    // if no auto is selected, return a default pose at the origin
+    if (autoName == null || autoName.isEmpty()) {
+      return new Pose2d();
+    }
+
+    // cache the selected auto to avoid repeatedly loading path files while disabled
+    if (selectedAuto == null || !autoName.equals(selectedAuto.getName())) {
+      selectedAuto = new PathPlannerAuto(autoName);
+    }
+
+    // return the cached starting pose
+    return selectedAuto.getStartingPose();
+  }
+
+  /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    * @return the command to run in autonomous
    */
@@ -209,40 +234,61 @@ public class RobotContainer {
   }
 
   /**
-   * Use this to pass the starting pose to the main {@link Robot} class.
-   * @return the starting pose of the selected autonomous command
+   * This function is called once each time the robot enters autonomous mode.
    */
-  public Pose2d getStartingPose() {
-    // get the name of the selected auto from the chooser
-    String autoName = autoChooser.getSelected();
-
-    // if no auto is selected, return a default pose at the origin
-    if (autoName == null || autoName.isEmpty()) {
-      return new Pose2d();
-    }
-
-    // cache the selected auto to avoid repeatedly loading path files while disabled
-    if (selectedAuto == null || !autoName.equals(selectedAuto.getName())) {
-      selectedAuto = new PathPlannerAuto(autoName);
-    }
-
-    // return the cached starting pose
-    return selectedAuto.getStartingPose();
+  public void autonomousInit() {
+    hasGameData = false;
+    CommandScheduler.getInstance().schedule(
+      driveSubsystem.autonomousInitCommand(),
+      feedbackSubsystem.scoringShiftCommand('A')
+    );
   }
 
   /**
-   * Use this to pass the drive subsystem to the main {@link Robot} class, 
-   * for use in the Robot's periodic methods.
+   * This function is called once each time the robot enters teleoperated mode.
    */
-  public DifferentialSubsystem getDriveSubsystem() {
-    return driveSubsystem;
+  public void teleopInit() {
+    CommandScheduler.getInstance().schedule(driveSubsystem.teleopInitCommand());
+    Elastic.selectTab("Teleop");
   }
 
   /**
-   * Use this to pass the feedback subsystem to the main {@link Robot} class, 
-   * for use in the Robot's periodic methods.
+   * This function is called periodically during teleop.
    */
-  public FeedbackSubsystem getFeedbackSubsystem() {
-    return feedbackSubsystem;
+  public void teleopPeriodic() {
+    // Poll for the game data and pass it to the feedback subsystem.
+    // Stop further polling once we have valid game data.
+    if (!hasGameData) {
+      String gameData = DriverStation.getGameSpecificMessage();
+      if (gameData.length() > 0) {
+        char inactiveAlliance = gameData.charAt(0);
+        if (inactiveAlliance == 'R' || inactiveAlliance == 'B') {
+          hasGameData = true;
+          CommandScheduler.getInstance().schedule(
+            feedbackSubsystem.scoringShiftCommand(inactiveAlliance)
+          );
+        }
+      }
+    }
+  }
+
+  /**
+   * This function is called periodically before the start of each match.
+   * It can be used to update the dashboard with information about the 
+   * selected autonomous routine, robot pose readiness, etc.
+   */
+  public void preMatch() {
+    driveSubsystem.updateAutoReadiness(getStartingPose());
+  }
+
+  /**
+   * This function is called once at the end of each match.
+   */
+  public void endOfMatch() {
+    hasGameData = false;
+    CommandScheduler.getInstance().schedule(
+      driveSubsystem.endOfMatchCommand(),
+      feedbackSubsystem.teamColorsCommand()
+    );
   }
 }

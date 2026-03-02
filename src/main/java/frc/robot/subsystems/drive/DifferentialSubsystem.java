@@ -610,7 +610,7 @@ public class DifferentialSubsystem extends SubsystemBase {
     /**
    * Command factory for binding to initAutonomous
    */
-  public Command initAutonomousCommand() {
+  public Command autonomousInitCommand() {
     return runOnce(() -> {
       resetOdometry();
       setMotorBrake(true);
@@ -621,7 +621,7 @@ public class DifferentialSubsystem extends SubsystemBase {
   /**
    * Command factory for binding to initTeleop
    */
-  public Command initTeleopCommand() {
+  public Command teleopInitCommand() {
     return runOnce(() -> {
       setMotorBrake(true);
       inverted = false;

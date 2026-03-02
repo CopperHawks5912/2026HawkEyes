@@ -7,8 +7,8 @@ package frc.robot.subsystems.feedback;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -211,7 +211,7 @@ public class FeedbackSubsystem extends SubsystemBase {
    */
   private void scoringShiftPattern() {
     // current remaining match time
-    double time = Timer.getMatchTime();
+    double time = DriverStation.getMatchTime();
 
     // set our alliance color
     Color allianceColor = Utils.isRedAlliance() ? Color.kRed : Color.kBlue;
@@ -220,7 +220,7 @@ public class FeedbackSubsystem extends SubsystemBase {
     Color inactiveColor = Color.kYellow;
 
     // autonomous period 20 seconds (both alliances can score)
-    // set to 'A' in Robot.autonomousInit()
+    // set to 'A' in RobotContainer.autonomousInit()
     if (inactiveAlliance == 'A') {
       if (time <= 20 && time > 5) {
         // autonomous (both alliances can score)
@@ -426,7 +426,7 @@ public class FeedbackSubsystem extends SubsystemBase {
   public Command scoringShiftCommand(char inactiveAlliance) {
     return runOnce(() -> {
       this.inactiveAlliance = inactiveAlliance;
-      setDisplayMode(DisplayMode.SCORING_SHIFT);
+      setDisplayCommand(DisplayMode.SCORING_SHIFT);
     });
   }
 }

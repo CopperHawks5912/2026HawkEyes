@@ -6,11 +6,9 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.util.Elastic;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to each mode, as
@@ -20,8 +18,8 @@ import frc.robot.util.Elastic;
 public class Robot extends TimedRobot {
   private final RobotContainer m_robotContainer;
   private Command m_autonomousCommand;
-  private boolean hasGameData;
-  private boolean hasTeleopStarted;
+  private boolean wasInAuto;
+  private boolean wasInTeleop;
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -58,7 +56,7 @@ public class Robot extends TimedRobot {
     CommandScheduler.getInstance().run();
 
     // Send the remaing match time to the dashboard
-    SmartDashboard.putNumber("Match Time", Timer.getMatchTime());
+    SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
   }
 
   /**
@@ -66,10 +64,10 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void disabledInit() {
-    // If teleop has started and the match time is 0 or less, run the end of match command
-    if (hasTeleopStarted && Timer.getMatchTime() <= 0) {
-      m_robotContainer.getDriveSubsystem().endOfMatchCommand();
-      m_robotContainer.getFeedbackSubsystem().teamColorsCommand();
+    if (isEndOfMatch()) {
+      wasInAuto = false;
+      wasInTeleop = false;
+      m_robotContainer.endOfMatch();
     }
   }
 
@@ -78,11 +76,8 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void disabledPeriodic() {
-    // Show the translation errors of the pose estimator's position vs the starting pose 
-    // of the selected autonomous on the dashboard. Drive team can use this info to 
-    // place the robot more accurately on the field at the start of autonomous.
-    if (Timer.getMatchTime() <= 0) {
-      m_robotContainer.getDriveSubsystem().updateAutoReadiness(m_robotContainer.getStartingPose());
+    if (isPreMatch()) {
+      m_robotContainer.preMatch();
     }
   }
 
@@ -91,15 +86,11 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
-    // reset game data and teleop started flag at the start of every autonomous
-    hasGameData = false;
-    hasTeleopStarted = false;
+    // Set autonomous tracking flag
+    wasInAuto = true;
 
-    // run the autonomous init command for the drive subsystem to reset any necessary state
-    m_robotContainer.getDriveSubsystem().initAutonomousCommand();
-
-    // both teams can score at the start of autonomous
-    m_robotContainer.getFeedbackSubsystem().scoringShiftCommand('A');
+    // Run the autonomous init command for all subsystems
+    m_robotContainer.autonomousInit();
 
     // get the selected autonomous command
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
@@ -117,10 +108,13 @@ public class Robot extends TimedRobot {
   public void autonomousPeriodic() {}
 
   /**
-   * This function is called periodically during teleop.
+   * This function is called once each time the robot enters Teleop mode.
    */
   @Override
   public void teleopInit() {
+    // Set teleop tracking flag
+    wasInTeleop = true;
+
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
@@ -129,14 +123,8 @@ public class Robot extends TimedRobot {
       m_autonomousCommand.cancel();
     }
 
-    // Set teleop started flag
-    hasTeleopStarted = true;
-
-    // Run the teleop init command for the drive subsystem to reset any necessary state
-    m_robotContainer.getDriveSubsystem().initTeleopCommand();
-
-    // Select the Teleop tab on the dashboard
-    Elastic.selectTab("Teleop");
+    // Run the teleop init command for all subsystems
+    m_robotContainer.teleopInit();
   }
 
   /**
@@ -144,18 +132,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
-    // Poll for the game data and pass it to the feedback subsystem.
-    // Stop further polling once we have valid game data.
-    if (!hasGameData) {
-      String gameData = DriverStation.getGameSpecificMessage();
-      if (gameData.length() > 0) {
-        char inactiveAlliance = gameData.charAt(0);
-        if (inactiveAlliance == 'R' || inactiveAlliance == 'B') {
-          hasGameData = true;
-          m_robotContainer.getFeedbackSubsystem().scoringShiftCommand(inactiveAlliance);
-        }
-      }
-    }
+    m_robotContainer.teleopPeriodic();
   }
 
   /**
@@ -184,4 +161,20 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void simulationPeriodic() {}
+
+  /**
+   * Check if the match has not started yet by seeing if we were not in auto or teleop.
+   * @return true if the match has not started, false otherwise
+   */
+  private boolean isPreMatch() {
+    return !wasInAuto && !wasInTeleop && DriverStation.isDSAttached() && DriverStation.isFMSAttached();
+  }
+
+  /**
+   * Check if the match has ended by seeing if we were in teleop and the match time is 0 or less.
+   * @return true if the match has ended, false otherwise
+   */
+  private boolean isEndOfMatch() {
+    return wasInTeleop && DriverStation.getMatchTime() <= 0;
+  }
 }
