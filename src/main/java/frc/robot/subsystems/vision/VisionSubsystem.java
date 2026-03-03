@@ -196,65 +196,53 @@ public class VisionSubsystem extends SubsystemBase {
    * @return Array of standard deviations for x, y, and theta
    */
   private double[] calculateStandardDeviations(PhotonPipelineResult result) {
-    // Number of targets used in the estimate
     int numTargets = result.getTargets().size();
-    
-    // Calculate average distance to targets
+
     double avgDistance = result.getTargets().stream()
-      .mapToDouble(target -> {
-        var transform = target.getBestCameraToTarget();
-        return transform != null ? transform.getTranslation().getNorm() : VisionConstants.kMaxDistanceMeters;
-      })
+      .mapToDouble(t -> t.getBestCameraToTarget().getTranslation().getNorm())
       .average()
       .orElse(VisionConstants.kMaxDistanceMeters);
-        
-    // Clamp distance to reasonable range
+
     avgDistance = Math.min(avgDistance, VisionConstants.kMaxDistanceMeters);
 
-    /** 
-      * Recommended Tuning Process:
-      * 1. Start conservative (divide by 10-15)
-      * 2. Test pose estimation accuracy in known locations
-      * 3. Adjust based on results:      
-      *    - If vision corrections are too weak => increase divisor (30 => 50)
-      *    - If vision corrections fight odometry => decrease divisor (30 => 15)
-      * 4. Validate with field testing
-      *
-      * Physical Meaning:
-      *   The "/ 30" essentially means: "For every meter of distance, square it 
-      *   and divide by 30 to get the uncertainty multiplier."
-      *   XY uncertainty scaling:
-      *     At 3 meters: (3²/20) = 0.45, so 1.45x multiplier
-      *     At 5 meters: (5²/20) = 1.25, so 2.25x multiplier
-      *   Theta uncertainty scaling (less aggressive):
-      *     At 3 meters: (3²/40) = 0.225, so 1.225x multiplier
-      *     At 5 meters: (5²/40) = 0.625, so 1.625x multiplier
-      */
+    double avgAmbiguity = result.getTargets().stream()
+      .mapToDouble(PhotonTrackedTarget::getPoseAmbiguity)
+      .average()
+      .orElse(0.0);
 
-    // Base standard deviations (empirically determined)
-    double baseXYStdDev, baseThetaStdDev;
-    
-    // Set base standard deviation based on number of targets
-    if (numTargets == 1) {
-      // Single tag - less reliable
-      baseXYStdDev = VisionConstants.kSingleTagBaseXYstdDev;
-      baseThetaStdDev = VisionConstants.kSingleTagBaseThetaStdDev;
-    } else {
-      // Multi tag - more reliable  
-      baseXYStdDev = VisionConstants.kMultiTagBaseXYstdDev;
-      baseThetaStdDev = VisionConstants.kMultiTagBaseThetaStdDev;
+    double baseXY = (numTargets == 1)
+      ? VisionConstants.kSingleTagBaseXYstdDev
+      : VisionConstants.kMultiTagBaseXYstdDev;
+
+    double baseTheta = (numTargets == 1)
+      ? VisionConstants.kSingleTagBaseThetaStdDev
+      : VisionConstants.kMultiTagBaseThetaStdDev;
+
+    double xyStdDev = baseXY;
+    double thetaStdDev = baseTheta;
+
+    // Distance scaling
+    xyStdDev *= (1.0 + (avgDistance * avgDistance / 15.0));
+    thetaStdDev *= (1.0 + (avgDistance * avgDistance / 30.0));
+
+    // Tag count scaling
+    double tagFactor = 1.0 / Math.max(numTargets, 1);
+    xyStdDev *= tagFactor;
+    thetaStdDev *= tagFactor;
+
+    // Ambiguity scaling
+    if (avgAmbiguity > 0.1) {
+      double scale = 1.0 + (avgAmbiguity * 5.0);
+      xyStdDev *= scale;
+      thetaStdDev *= scale;
     }
-    
-    // Distance-based uncertainty scaling factors
-    // These values are tuned based on testing with your specific setup
-    double xyDistanceScale = 1.0 + (avgDistance * avgDistance / 20.0);    // More aggressive
-    double thetaDistanceScale = 1.0 + (avgDistance * avgDistance / 40.0); // Less aggressive for rotation
-    
-    // Calculate final standard deviations
-    double xyStdDev = baseXYStdDev * xyDistanceScale;
-    double thetaStdDev = baseThetaStdDev * thetaDistanceScale;
-    
-    // Return as array [x, y, theta]
+
+    // Single tag rotation penalty
+    if (numTargets == 1) {
+      thetaStdDev *= 2.0;
+    }
+
+    // Return the calculated standard deviations for x, y, and theta
     return new double[] {xyStdDev, xyStdDev, thetaStdDev};
   }
 
