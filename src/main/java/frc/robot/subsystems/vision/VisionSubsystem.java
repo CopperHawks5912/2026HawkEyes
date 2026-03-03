@@ -13,6 +13,7 @@ import org.photonvision.EstimatedRobotPose;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.util.sendable.SendableBuilder;
@@ -195,11 +196,16 @@ public class VisionSubsystem extends SubsystemBase {
    * @param result The photon camera pipeline result to calculate standard deviations for
    * @return Array of standard deviations for x, y, and theta
    */
-  private double[] calculateStandardDeviations(PhotonPipelineResult result) {
+  double[] calculateStandardDeviations(PhotonPipelineResult result) {
     int numTargets = result.getTargets().size();
 
     double avgDistance = result.getTargets().stream()
-      .mapToDouble(t -> t.getBestCameraToTarget().getTranslation().getNorm())
+      .mapToDouble(t -> {
+        var transform = t.getBestCameraToTarget();
+        return transform != null
+          ? transform.getTranslation().getNorm()
+          : VisionConstants.kMaxDistanceMeters;
+      })
       .average()
       .orElse(VisionConstants.kMaxDistanceMeters);
 
@@ -221,28 +227,32 @@ public class VisionSubsystem extends SubsystemBase {
     double xyStdDev = baseXY;
     double thetaStdDev = baseTheta;
 
-    // Distance scaling
-    xyStdDev *= (1.0 + (avgDistance * avgDistance / 15.0));
-    thetaStdDev *= (1.0 + (avgDistance * avgDistance / 30.0));
+    // Distance scaling (slightly softer)
+    xyStdDev *= (1.0 + (avgDistance * avgDistance / 20.0));
+    thetaStdDev *= (1.0 + (avgDistance * avgDistance / 40.0));
 
-    // Tag count scaling
-    double tagFactor = 1.0 / Math.max(numTargets, 1);
+    // Tag count scaling (less aggressive)
+    double tagFactor = 1.0 / Math.sqrt(numTargets);
     xyStdDev *= tagFactor;
     thetaStdDev *= tagFactor;
 
-    // Ambiguity scaling
-    if (avgAmbiguity > 0.1) {
+    // Ambiguity scaling (earlier + smooth)
+    if (avgAmbiguity > 0.05) {
       double scale = 1.0 + (avgAmbiguity * 5.0);
       xyStdDev *= scale;
       thetaStdDev *= scale;
     }
 
-    // Single tag rotation penalty
+    // Single tag rotation penalty (stronger)
     if (numTargets == 1) {
-      thetaStdDev *= 2.0;
+      thetaStdDev *= 2.5;
     }
 
-    // Return the calculated standard deviations for x, y, and theta
+    // Clamp to safe bounds
+    xyStdDev = MathUtil.clamp(xyStdDev, 0.01, 1.5);
+    thetaStdDev = MathUtil.clamp(thetaStdDev, 0.01, Math.PI);
+
+    // Return the calculated standard deviations
     return new double[] {xyStdDev, xyStdDev, thetaStdDev};
   }
 
