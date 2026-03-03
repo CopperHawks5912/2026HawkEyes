@@ -631,7 +631,7 @@ public class DifferentialSubsystem extends SubsystemBase {
   /**
    * Command factory for binding to end of match
    */
-  public Command endOfMatchCommand() {
+  public Command postMatchCommand() {
     return Commands.waitSeconds(5.0)
       .andThen(runOnce(() -> {
         setMotorBrake(false);

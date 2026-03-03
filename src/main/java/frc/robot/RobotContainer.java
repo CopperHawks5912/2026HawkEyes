@@ -22,11 +22,11 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 import frc.robot.subsystems.climber.ClimberSubsystem;
+import frc.robot.subsystems.drive.DifferentialSubsystem;
 import frc.robot.subsystems.feedback.FeedbackSubsystem;
 import frc.robot.subsystems.fuel.FuelSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import frc.robot.util.Elastic;
-import frc.robot.subsystems.drive.DifferentialSubsystem;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a "declarative" paradigm, very
@@ -234,9 +234,18 @@ public class RobotContainer {
   }
 
   /**
+   * This function is called periodically before the start of each match.
+   * It can be used to update the dashboard with information about the 
+   * selected autonomous routine, robot pose readiness, etc.
+   */
+  public void onPreMatch() {
+    driveSubsystem.updateAutoReadiness(getStartingPose());
+  }
+
+  /**
    * This function is called once each time the robot enters autonomous mode.
    */
-  public void autonomousInit() {
+  public void onAutonomousInit() {
     hasGameData = false;
     CommandScheduler.getInstance().schedule(
       driveSubsystem.autonomousInitCommand(),
@@ -247,7 +256,7 @@ public class RobotContainer {
   /**
    * This function is called once each time the robot enters teleoperated mode.
    */
-  public void teleopInit() {
+  public void onTeleopInit() {
     CommandScheduler.getInstance().schedule(driveSubsystem.teleopInitCommand());
     Elastic.selectTab("Teleop");
   }
@@ -255,7 +264,7 @@ public class RobotContainer {
   /**
    * This function is called periodically during teleop.
    */
-  public void teleopPeriodic() {
+  public void onTeleopPeriodic() {
     // Poll for the game data and pass it to the feedback subsystem.
     // Stop further polling once we have valid game data.
     if (!hasGameData) {
@@ -273,21 +282,12 @@ public class RobotContainer {
   }
 
   /**
-   * This function is called periodically before the start of each match.
-   * It can be used to update the dashboard with information about the 
-   * selected autonomous routine, robot pose readiness, etc.
-   */
-  public void preMatch() {
-    driveSubsystem.updateAutoReadiness(getStartingPose());
-  }
-
-  /**
    * This function is called once at the end of each match.
    */
-  public void endOfMatch() {
+  public void onPostMatch() {
     hasGameData = false;
     CommandScheduler.getInstance().schedule(
-      driveSubsystem.endOfMatchCommand(),
+      driveSubsystem.postMatchCommand(),
       feedbackSubsystem.teamColorsCommand()
     );
   }

@@ -64,10 +64,10 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void disabledInit() {
-    if (isEndOfMatch()) {
+    if (isPostMatch()) {
       wasInAuto = false;
       wasInTeleop = false;
-      m_robotContainer.endOfMatch();
+      m_robotContainer.onPostMatch();
     }
   }
 
@@ -77,7 +77,7 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledPeriodic() {
     if (isPreMatch()) {
-      m_robotContainer.preMatch();
+      m_robotContainer.onPreMatch();
     }
   }
 
@@ -90,7 +90,7 @@ public class Robot extends TimedRobot {
     wasInAuto = true;
 
     // Run the autonomous init command for all subsystems
-    m_robotContainer.autonomousInit();
+    m_robotContainer.onAutonomousInit();
 
     // get the selected autonomous command
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
@@ -124,7 +124,7 @@ public class Robot extends TimedRobot {
     }
 
     // Run the teleop init command for all subsystems
-    m_robotContainer.teleopInit();
+    m_robotContainer.onTeleopInit();
   }
 
   /**
@@ -132,7 +132,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
-    m_robotContainer.teleopPeriodic();
+    m_robotContainer.onTeleopPeriodic();
   }
 
   /**
@@ -167,14 +167,14 @@ public class Robot extends TimedRobot {
    * @return true if the match has not started, false otherwise
    */
   private boolean isPreMatch() {
-    return !wasInAuto && !wasInTeleop && DriverStation.isDSAttached() && DriverStation.isFMSAttached();
+    return !wasInAuto && !wasInTeleop;
   }
 
   /**
    * Check if the match has ended by seeing if we were in teleop and the match time is 0 or less.
    * @return true if the match has ended, false otherwise
    */
-  private boolean isEndOfMatch() {
-    return wasInTeleop && DriverStation.getMatchTime() <= 0;
+  private boolean isPostMatch() {
+    return wasInTeleop;
   }
 }
