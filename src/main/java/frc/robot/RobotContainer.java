@@ -235,6 +235,8 @@ public class RobotContainer {
         }
       }
     }));
+
+    // Set scoring shift based on game data once it's received in teleop
     RobotModeTriggers.teleop().and(() -> gameData != '?').onTrue(
       feedbackSubsystem.scoringShiftCommand(gameData)
     );
