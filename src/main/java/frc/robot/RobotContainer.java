@@ -202,7 +202,12 @@ public class RobotContainer {
     // ----------------------------------------------
     // Match phase transition triggers
     // ----------------------------------------------
-    // pre-match trigger
+    // pre-match init trigger
+    RobotModeTriggers.disabled().and(() -> !wasInAuto && !wasInTeleop).onTrue(
+      driveSubsystem.setMotorBrakeCommand(false)
+    );
+
+    // pre-match periodic trigger
     RobotModeTriggers.disabled().and(() -> !wasInAuto && !wasInTeleop).whileTrue(
       Commands.run(() -> driveSubsystem.updateAutoReadiness(getStartingPose()))
     );
@@ -225,7 +230,7 @@ public class RobotContainer {
       })
     ));
 
-    // poll for game data in teleop periodic and no game data yet trigger
+    // teleop periodic trigger - poll for game data until received
     RobotModeTriggers.teleop().and(() -> gameData == '?').whileTrue(Commands.run(() -> {
       String data = DriverStation.getGameSpecificMessage();
       if (data.length() > 0) {
