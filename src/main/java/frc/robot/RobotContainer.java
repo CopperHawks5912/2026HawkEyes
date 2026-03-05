@@ -54,7 +54,7 @@ public class RobotContainer {
   // Cache the selected auto to avoid repeatedly loading path files while disabled
   private PathPlannerAuto selectedAuto = null;
 
-  // Track match state in RobotContainer
+  // Track match state
   private boolean wasInAuto = false;
   private boolean wasInTeleop = false;
   private char gameData = '?';
