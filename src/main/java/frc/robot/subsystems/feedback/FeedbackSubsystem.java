@@ -421,11 +421,13 @@ public class FeedbackSubsystem extends SubsystemBase {
   
   /**
    * Function to schedule scoring shift feedback
+   * @param inactiveAlliance Character indicating which alliance will be inactive at the start of teleop
+   * @return Command that sets the scoring shift display mode
    */
   public Command scoringShiftCommand(char inactiveAlliance) {
     return runOnce(() -> {
       this.inactiveAlliance = inactiveAlliance;
-      setDisplayCommand(DisplayMode.SCORING_SHIFT);
-    });
+      setDisplayMode(DisplayMode.SCORING_SHIFT);
+    }).withName("ScoringShift");
   }
 }
