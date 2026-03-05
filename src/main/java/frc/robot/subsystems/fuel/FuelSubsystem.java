@@ -498,11 +498,11 @@ public class FuelSubsystem extends SubsystemBase {
   }
   
   /**
-   * Command to launch at a fixed RPM
+   * Command to launch at a fixed RPM for default distance (2 meters)
    * @return Command that launches fuel at default RPM
    */
   public Command launchCommand() {
-    return launchCommand(() -> 4.13); // Default to mid-range distance
+    return launchCommand(() -> 2.0); // Default to mid-range distance
   }
 
   /**
