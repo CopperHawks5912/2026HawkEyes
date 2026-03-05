@@ -263,7 +263,7 @@ public class RobotContainer {
   }
 
   /**
-   * Use this to pass the starting pose to the main {@link Robot} class.
+   * Use this to get the starting pose of the currently selected autonomous command
    * @return the starting pose of the selected autonomous command
    */
   private Pose2d getStartingPose() {
