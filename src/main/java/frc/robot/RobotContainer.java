@@ -70,18 +70,21 @@ public class RobotContainer {
       () -> -1 * driverXbox.getRightX()
     ));
 
-    // register our named commands
+    // register named commands
     registerNamedCommands();
 
-    // configure our auto routines
+    // configure auto routines
     configureAutos();
 
-    // configure our controller bindings
-    configureBindings();
+    // configure controller button bindings
+    configureButtonBindings();
 
-    // Preload PathPlanner Path finding 
-    // It's ok to call .schedule() since it's only called once during initialization
-    // Must be called after initializing the AutoBuilder in the drive subsystem
+    // configure state event triggers
+    configureEventTriggers();
+
+    // Warm up PathPlanner Path finding to avoid latency on the first path following.
+    // This schedule call is safe since it's only called once during initialization.
+    // Must be called after initializing the AutoBuilder in the drive subsystem.
     CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
    
     // silence joystick warnings during testing
@@ -90,9 +93,8 @@ public class RobotContainer {
 
   /**
    * Register named commands to be used in PathPlanner autos.
-   * Do this before the creation of any PathPlanner Autos or Paths. 
-   * It is recommended to do this in RobotContainer, after subsystem 
-   * initialization, but before the creation of any other commands.
+   * Do this before configuring autos. These named commands 
+   * can be used by name in the PathPlanner GUI.
    */
   public void registerNamedCommands() {
     NamedCommands.registerCommand("LAUNCH_FUEL", fuelSubsystem.launchCommand(() -> driveSubsystem.getDistanceToAllianceHub()));
@@ -105,9 +107,8 @@ public class RobotContainer {
   }
 
   /**
-   * Register named commands and configure the autonomous command chooser.
-   * This will build the auto chooser using the AutoBuilder class, 
-   * which pulls in all autos defined in the PathPlanner deploy folder.
+   * Configure the autonomous command chooser and delay chooser and add them to the dashboard.
+   * This reads and warms up all the autos found in the /deploy/pathplanner/autos folder.
    */
   private void configureAutos() {
     // Build the auto chooser and add it to the dashboard
@@ -147,7 +148,7 @@ public class RobotContainer {
    * {@link CommandXboxController Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller PS4}
    * controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight joysticks}.
    */
-  private void configureBindings() {
+  private void configureButtonBindings() {
     // manually reset odometry & climber home position
     driverXbox.start().onTrue(Commands.parallel(
       driveSubsystem.resetOdometryCommand(),
@@ -198,10 +199,13 @@ public class RobotContainer {
       driverXbox.rightTrigger().whileTrue(fuelSubsystem.sysIdDynamicCommand(SysIdRoutine.Direction.kForward));
       driverXbox.rightBumper().whileTrue(fuelSubsystem.sysIdDynamicCommand(SysIdRoutine.Direction.kReverse));
     }
+  }
 
-    // ----------------------------------------------
-    // Match phase transition triggers
-    // ----------------------------------------------
+  /**
+   * Use this to configure triggers that should respond to
+   * match phases or other robot/subsystem state changes.
+   */
+  private void configureEventTriggers() {
     // pre-match init trigger
     RobotModeTriggers.disabled().and(() -> !wasInAuto && !wasInTeleop && DriverStation.isFMSAttached()).onTrue(
       driveSubsystem.setMotorBrakeCommand(false)
