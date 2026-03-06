@@ -13,10 +13,12 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import frc.robot.Constants.CANConstants;
 import frc.robot.util.Utils;
@@ -126,7 +128,7 @@ public class ClimberSubsystem extends SubsystemBase {
    * Get the current position of the climber
    * @return Position in degrees
    */
-  public double getPosition() {
+  private double getPosition() {
     return climberEncoder.getPosition();
   }
   
@@ -134,7 +136,7 @@ public class ClimberSubsystem extends SubsystemBase {
    * Get the current draw of the climber motor
    * @return Current in amps
    */
-  public double getCurrent() {
+  private double getCurrent() {
     return climberMotor.getOutputCurrent();
   }
   
@@ -142,7 +144,7 @@ public class ClimberSubsystem extends SubsystemBase {
    * Get the temperature of the climber motor
    * @return Temperature in Celsius
    */
-  public double getTemperature() {
+  private double getTemperature() {
     return climberMotor.getMotorTemperature();
   }
   
@@ -150,7 +152,7 @@ public class ClimberSubsystem extends SubsystemBase {
    * Check if climber is at upper soft limit
    * @return true if at or past upper limit
    */
-  public boolean isAtUpperLimit() {
+  private boolean isAtUpperLimit() {
     return MathUtil.isNear(
       ClimberConstants.kUpperLimitDegrees,
       getPosition(),
@@ -162,7 +164,7 @@ public class ClimberSubsystem extends SubsystemBase {
    * Check if climber is at lower soft limit
    * @return true if at or past lower limit
    */
-  public boolean isAtLowerLimit() {
+  private boolean isAtLowerLimit() {
     return MathUtil.isNear(
       ClimberConstants.kLowerLimitDegrees,
       getPosition(),
@@ -174,7 +176,7 @@ public class ClimberSubsystem extends SubsystemBase {
    * Check if climber is at home position
    * @return true if within tolerance of home position
    */
-  public boolean isAtHomePosition() {
+  private boolean isAtHomePosition() {
     return MathUtil.isNear(
       ClimberConstants.kHomeDegrees,
       getPosition(),
@@ -187,10 +189,27 @@ public class ClimberSubsystem extends SubsystemBase {
    * Useful for detecting when climber hits a hard stop
    * @return true if motor appears stalled
    */
-  public boolean isStalled() {
+  private boolean isStalled() {
     return Math.abs(getCurrent()) > ClimberConstants.kStallCurrentThreshold &&
            Math.abs(climberEncoder.getVelocity()) < ClimberConstants.kStallVelocityThreshold;
   }
+
+  // ==================== State Triggers ====================
+
+  /**
+   * Emit when climber reaches upper limit
+   */
+  public final Trigger isAtUpperLimit = new Trigger(this::isAtUpperLimit).debounce(0.5, Debouncer.DebounceType.kFalling);
+
+  /**
+   * Emit when climber reaches lower limit
+   */
+  public final Trigger isAtLowerLimit = new Trigger(this::isAtLowerLimit).debounce(0.5, Debouncer.DebounceType.kFalling);
+  
+  /**
+   * Emit when climber is stalled
+   */
+  public final Trigger isStalled = new Trigger(this::isStalled).debounce(0.5, Debouncer.DebounceType.kFalling);
   
   // ==================== Command Factories ====================
   

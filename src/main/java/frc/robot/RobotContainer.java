@@ -246,9 +246,7 @@ public class RobotContainer {
     }));
 
     // set scoring shift based on game data once it's received in teleop
-    RobotModeTriggers.teleop().and(() -> gameData != '?').onTrue(
-      feedbackSubsystem.scoringShiftCommand(gameData)
-    );
+    new Trigger(() -> gameData != '?').onTrue(feedbackSubsystem.scoringShiftCommand(gameData));
 
     // post-match trigger
     RobotModeTriggers.disabled().and(() -> wasInTeleop).onTrue(Commands.parallel(
@@ -260,6 +258,21 @@ public class RobotContainer {
         gameData = '?';
       })
     ));
+
+    // show feedback when climber is at upper limit
+    climberSubsystem.isAtUpperLimit.onTrue(
+      feedbackSubsystem.warningCommand().withTimeout(2.0)
+    );
+
+    // show feedback when climber is at lower limit
+    climberSubsystem.isAtLowerLimit.onTrue(
+      feedbackSubsystem.warningCommand().withTimeout(2.0)
+    );
+
+    // show feedback when climber is stalled
+    climberSubsystem.isStalled.onTrue(
+      feedbackSubsystem.errorCommand().withTimeout(2.0)
+    );
   }
 
   /**

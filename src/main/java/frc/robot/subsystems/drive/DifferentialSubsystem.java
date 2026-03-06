@@ -549,23 +549,12 @@ public class DifferentialSubsystem extends SubsystemBase {
   }
 
   // ==================== State Methods ====================
-
-  /**
-   * Get the distance to the current alliance hub
-   * @return Distance in meters to the alliance hub
-   */
-  public double getDistanceToAllianceHub() {
-    if (Utils.isRedAlliance()) {
-      return getPose().getTranslation().getDistance(FieldConstants.kRedHubCenter);
-    }
-    return getPose().getTranslation().getDistance(FieldConstants.kBlueHubCenter);
-  }
   
   /**
    * Get the average motor current
    * @return Average current in amps
    */
-  public double getCurrent() {
+  private double getCurrent() {
     return (leftLeaderMotor.getOutputCurrent() + 
             leftFollowerMotor.getOutputCurrent() +
             rightLeaderMotor.getOutputCurrent() + 
@@ -576,7 +565,7 @@ public class DifferentialSubsystem extends SubsystemBase {
    * Get the average motor temperature
    * @return Average temperature in Celsius
    */
-  public double getTemperature() {
+  private double getTemperature() {
     return (leftLeaderMotor.getMotorTemperature() + 
             leftFollowerMotor.getMotorTemperature() +
             rightLeaderMotor.getMotorTemperature() + 
@@ -587,7 +576,7 @@ public class DifferentialSubsystem extends SubsystemBase {
    * Get the average motor voltage
    * @return Average applied voltage
    */
-  public double getVoltage() {
+  private double getVoltage() {
     return (leftLeaderMotor.getAppliedOutput() * leftLeaderMotor.getBusVoltage() +
             rightLeaderMotor.getAppliedOutput() * rightLeaderMotor.getBusVoltage()) / 2.0;
   }
@@ -596,8 +585,19 @@ public class DifferentialSubsystem extends SubsystemBase {
    * Check if the drive controls are currently inverted
    * @return True if the drive controls are inverted, false otherwise
    */
-  public boolean isInverted() {
+  private boolean isInverted() {
     return inverted;
+  }
+
+  /**
+   * Get the distance to the current alliance hub
+   * @return Distance in meters to the alliance hub
+   */
+  public double getDistanceToAllianceHub() {
+    if (Utils.isRedAlliance()) {
+      return getPose().getTranslation().getDistance(FieldConstants.kRedHubCenter);
+    }
+    return getPose().getTranslation().getDistance(FieldConstants.kBlueHubCenter);
   }
 
   // ==================== Command Factories ====================
