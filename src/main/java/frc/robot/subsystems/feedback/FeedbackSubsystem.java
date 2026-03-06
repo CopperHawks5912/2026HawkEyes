@@ -350,7 +350,8 @@ public class FeedbackSubsystem extends SubsystemBase {
    * @return Command that does a quick rumble
    */
   public Command quickRumbleCommand() {
-    return rumbleCommand(0.5, 0.2);
+    return rumbleCommand(0.5, 0.2)
+      .withName("QuickRumble");
   }
   
   /**
@@ -358,7 +359,8 @@ public class FeedbackSubsystem extends SubsystemBase {
    * @return Command that does a strong rumble
    */
   public Command strongRumbleCommand() {
-    return rumbleCommand(1.0, 0.4);
+    return rumbleCommand(1.0, 0.4)
+      .withName("StrongRumble");
   }
   
   /**
@@ -368,7 +370,8 @@ public class FeedbackSubsystem extends SubsystemBase {
   public Command doubleRumbleCommand() {
     return rumbleCommand(0.7, 0.15)
       .andThen(Commands.waitSeconds(0.1))
-      .andThen(rumbleCommand(0.7, 0.15));
+      .andThen(rumbleCommand(0.7, 0.15))
+      .withName("DoubleRumble");
   }
   
   /**
