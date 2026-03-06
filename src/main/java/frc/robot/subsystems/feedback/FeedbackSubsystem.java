@@ -410,7 +410,7 @@ public class FeedbackSubsystem extends SubsystemBase {
   }
   
   /**
-   * Function to schedule scoring shift feedback
+   * Command to display scoring shift feedback
    * @return Command that sets the scoring shift display mode
    */
   public Command scoringShiftCommand() {
