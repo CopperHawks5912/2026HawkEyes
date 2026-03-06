@@ -188,6 +188,12 @@ public class RobotContainer {
       fuelSubsystem.launchCommand(driveSubsystem::getDistanceToAllianceHub)
     );
 
+    // show various feedbacks for fun
+    driverXbox.povUp().onTrue(feedbackSubsystem.teamColorsCommand().withTimeout(5.0));
+    driverXbox.povRight().onTrue(feedbackSubsystem.idleCommand().withTimeout(5.0));
+    driverXbox.povDown().onTrue(feedbackSubsystem.warningCommand().withTimeout(5.0));
+    driverXbox.povLeft().onTrue(feedbackSubsystem.errorCommand().withTimeout(5.0));
+
     // Override above bindings with bindings to run SysId commands
     if (DriverStation.isTest()) {
       driverXbox.y().whileTrue(driveSubsystem.sysIdQuasistaticCommand(SysIdRoutine.Direction.kForward));
