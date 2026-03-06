@@ -136,6 +136,9 @@ public class DifferentialSubsystem extends SubsystemBase {
     leftEncoder = leftLeaderMotor.getAlternateEncoder();
     rightEncoder = rightLeaderMotor.getAlternateEncoder();
 
+    // set up differential drive class
+    drive = new DifferentialDrive(leftLeaderMotor, rightLeaderMotor);
+
     // Initialize PID controllers for driving
     leftPIDController = new PIDController(DifferentialConstants.kP, 0, 0);
     rightPIDController = new PIDController(DifferentialConstants.kP, 0, 0);
@@ -159,9 +162,6 @@ public class DifferentialSubsystem extends SubsystemBase {
     // CRITICAL: Enable continuous input for angle wrapping
     aimPIDController.enableContinuousInput(-Math.PI, Math.PI);
     aimPIDController.setTolerance(DifferentialConstants.kAimToleranceRad);
-
-    // set up differential drive class
-    drive = new DifferentialDrive(leftLeaderMotor, rightLeaderMotor);
 
     // set up kinematics
     kinematics = new DifferentialDriveKinematics(DifferentialConstants.kTrackWidthMeters);
