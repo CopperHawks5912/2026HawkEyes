@@ -219,7 +219,7 @@ public class RobotContainer {
     // autonomous init trigger
     RobotModeTriggers.autonomous().onTrue(Commands.parallel(
       driveSubsystem.autonomousInitCommand(),
-      feedbackSubsystem.scoringShiftCommand('A'),
+      feedbackSubsystem.setGameDataCommand('A'),
       Commands.runOnce(() -> {
         wasInAuto = true;
       })
@@ -246,7 +246,7 @@ public class RobotContainer {
     }));
 
     // set scoring shift based on game data once it's received in teleop
-    new Trigger(() -> gameData != '?').onTrue(feedbackSubsystem.scoringShiftCommand(gameData));
+    new Trigger(() -> gameData != '?').onTrue(feedbackSubsystem.setGameDataCommand(gameData));
 
     // post-match trigger
     RobotModeTriggers.disabled().and(() -> wasInTeleop).onTrue(Commands.parallel(

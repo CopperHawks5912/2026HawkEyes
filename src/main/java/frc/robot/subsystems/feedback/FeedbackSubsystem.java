@@ -31,7 +31,7 @@ public class FeedbackSubsystem extends SubsystemBase {
   private DisplayMode currentMode = DisplayMode.OFF;
   private double animationTimer = 0;
   private int animationOffset = 0;
-  private char inactiveAlliance = '?';
+  private char gameData = '?';
   
   /** Creates a new FeedbackSubsystem. */
   public FeedbackSubsystem(CommandXboxController controller) {
@@ -47,7 +47,7 @@ public class FeedbackSubsystem extends SubsystemBase {
     ledStrip.start();
 
     // Set default command to display
-    setDefaultCommand(scoringShiftCommand('?'));
+    setDefaultCommand(scoringShiftCommand());
     
     // Output initialization progress
     Utils.logInfo("Feedback subsystem initialized");
@@ -220,7 +220,7 @@ public class FeedbackSubsystem extends SubsystemBase {
     Color inactiveColor = Color.kYellow;
 
     // autonomous period 20 seconds (both alliances can score)
-    if (inactiveAlliance == 'A') {
+    if (gameData == 'A') {
       if (time <= 20 && time > 5) {
         // autonomous (both alliances can score)
         setAllLEDs(allianceColor);
@@ -236,11 +236,11 @@ public class FeedbackSubsystem extends SubsystemBase {
     }
 
     // check that we have valid game data
-    if (inactiveAlliance == 'R' || inactiveAlliance == 'B') {
+    if (gameData == 'R' || gameData == 'B') {
       // check if our alliance is inactive for the 1st shift
       boolean isInactiveFirst = 
-        (inactiveAlliance == 'R' && Utils.isRedAlliance()) ||
-        (inactiveAlliance == 'B' && !Utils.isRedAlliance());
+        (gameData == 'R' && Utils.isRedAlliance()) ||
+        (gameData == 'B' && !Utils.isRedAlliance());
 
       // shift data from 2026 FRC Game Manual
       // https://firstfrc.blob.core.windows.net/frc2026/Manual/2026GameManual.pdf
@@ -420,14 +420,21 @@ public class FeedbackSubsystem extends SubsystemBase {
   }
   
   /**
-   * Function to schedule scoring shift feedback
-   * @param inactiveAlliance Character indicating which alliance will be inactive at the start of teleop
+   * Function to set game data state for feedback
+   * @param gameData Character indicating which alliance will be inactive at the start of teleop
    * @return Command that sets the scoring shift display mode
    */
-  public Command scoringShiftCommand(char inactiveAlliance) {
-    return runOnce(() -> {
-      this.inactiveAlliance = inactiveAlliance;
-      setDisplayMode(DisplayMode.SCORING_SHIFT);
-    }).withName("ScoringShift");
+  public Command setGameDataCommand(char gameData) {
+    return runOnce(() -> { this.gameData = gameData; })
+      .withName("SetGameData");
+  }
+  
+  /**
+   * Function to schedule scoring shift feedback
+   * @return Command that sets the scoring shift display mode
+   */
+  public Command scoringShiftCommand() {
+    return setDisplayCommand(DisplayMode.SCORING_SHIFT)
+      .withName("ScoringShift");
   }
 }
