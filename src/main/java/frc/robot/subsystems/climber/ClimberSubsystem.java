@@ -102,11 +102,11 @@ public class ClimberSubsystem extends SubsystemBase {
 
     // Safety: Stop at limits to prevent damage
     if (isAtUpperLimit() && clampedPower > 0) {
-      climberMotor.set(0);
+      climberMotor.stopMotor();
       return;
     }    
     if (isAtLowerLimit() && clampedPower < 0) {
-      climberMotor.set(0);
+      climberMotor.stopMotor();
       return;
     }
     
@@ -275,7 +275,7 @@ public class ClimberSubsystem extends SubsystemBase {
    * @return Command that stops the climber motor
    */
   public Command stopCommand() {
-    return runOnce(() -> setPower(0))
+    return runOnce(() -> climberMotor.stopMotor())
       .withName("StopClimber");
   }
   

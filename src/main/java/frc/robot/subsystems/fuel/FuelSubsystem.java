@@ -427,8 +427,9 @@ public class FuelSubsystem extends SubsystemBase {
    */
   public Command stopCommand() {
     return runOnce(() -> {
-      setLauncherPower(0);
-      setFeederPower(0);
+      leftIntakeLauncherMotor.stopMotor();
+      rightIntakeLauncherMotor.stopMotor();
+      feederMotor.stopMotor();
       targetRPM = 0;
     }).withName("StopIntake");
   }
