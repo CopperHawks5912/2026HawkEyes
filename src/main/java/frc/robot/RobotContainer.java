@@ -93,8 +93,7 @@ public class RobotContainer {
 
   /**
    * Register named commands to be used in PathPlanner autos.
-   * Do this before configuring autos. These named commands 
-   * can be used by name in the PathPlanner GUI.
+   * Do this before configuring autos. These named commands can be used by exact name in the PathPlanner GUI.
    */
   public void registerNamedCommands() {
     NamedCommands.registerCommand("LAUNCH_FUEL", fuelSubsystem.launchCommand(driveSubsystem::getDistanceToAllianceHub));
