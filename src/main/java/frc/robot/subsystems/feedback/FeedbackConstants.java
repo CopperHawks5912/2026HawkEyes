@@ -58,6 +58,12 @@ public final class FeedbackConstants {
     /** Team colors gradient chase */
     TEAM_COLORS,
 
+    /** Candy cane pattern */
+    CANDY_CANE,
+
+    /** Funky disco mode */
+    FUNKY_DISCO,
+
     /** Scoring shift indication */
     SCORING_SHIFT
   }

@@ -102,6 +102,14 @@ public class FeedbackSubsystem extends SubsystemBase {
         teamColorsPattern();
         break;
 
+      case CANDY_CANE:
+        candyCanePattern();
+        break;
+
+      case FUNKY_DISCO:
+        funkyDiscoPattern();
+        break;
+
       case SCORING_SHIFT:
         scoringShiftPattern();
         break;
@@ -116,6 +124,20 @@ public class FeedbackSubsystem extends SubsystemBase {
     for (int i = 0; i < ledBuffer.getLength(); i++) {
       ledBuffer.setLED(i, color);
     }
+  }
+    
+  /**
+   * Interpolate between two colors
+   * @param color1 Starting color
+   * @param color2 Ending color
+   * @param t Position in gradient (0.0 to 1.0)
+   * @return Interpolated color
+   */
+  private Color interpolateColor(Color color1, Color color2, double t) {
+    double r = color1.red + (color2.red - color1.red) * t;
+    double g = color1.green + (color2.green - color1.green) * t;
+    double b = color1.blue + (color2.blue - color1.blue) * t;
+    return new Color(r, g, b);
   }
   
   /**
@@ -190,19 +212,53 @@ public class FeedbackSubsystem extends SubsystemBase {
   }
   
   /**
-   * Interpolate between two colors
-   * @param color1 Starting color
-   * @param color2 Ending color
-   * @param t Position in gradient (0.0 to 1.0)
-   * @return Interpolated color
+   * Candy cane pattern that alternates red and white stripes and rotates
    */
-  private Color interpolateColor(Color color1, Color color2, double t) {
-    double r = color1.red + (color2.red - color1.red) * t;
-    double g = color1.green + (color2.green - color1.green) * t;
-    double b = color1.blue + (color2.blue - color1.blue) * t;
-    return new Color(r, g, b);
+  private void candyCanePattern() {
+    // Calculate offset for rotation effect
+    animationOffset = (int)(animationTimer * 10) % ledBuffer.getLength(); // 10 pixels/second
+    
+    // Stripe width (number of LEDs per stripe)
+    int stripeWidth = 3;
+    
+    for (int i = 0; i < ledBuffer.getLength(); i++) {
+      // Calculate position with animation offset for rotation effect
+      int position = (i + animationOffset) % ledBuffer.getLength();
+      
+      // Determine which stripe we're in
+      boolean isRedStripe = ((position / stripeWidth) % 2) == 0;
+      
+      // Set color (red or white)
+      ledBuffer.setLED(i, isRedStripe ? Color.kRed : Color.kWhite);
+    }
   }
-  
+
+  /**
+   * Funky disco pattern with random flashing colors
+   */
+  private void funkyDiscoPattern() {
+    // Fast beat - change every 0.1 seconds
+    int beatPhase = (int)(animationTimer / 0.1);
+    
+    for (int i = 0; i < ledBuffer.getLength(); i++) {
+      // Create pseudo-random but repeatable colors based on position and time
+      // This ensures the same position gets the same color during the same beat
+      int seed = (i * 7 + beatPhase * 13) % 360;
+      
+      // Convert to HSV for vibrant colors
+      // Hue: based on seed (full spectrum)
+      // Saturation: 100% (fully saturated = vibrant)
+      // Value: randomly bright or dark for flashing effect
+      int hue = seed;
+      double saturation = 1.0;
+      double value = ((seed * 3) % 2 == 0) ? 1.0 : 0.3; // Alternate bright/dim
+      
+      // Convert HSV to RGB
+      Color color = Color.fromHSV(hue, (int)(saturation * 255), (int)(value * 255));
+      ledBuffer.setLED(i, color);
+    }
+  }
+
   /**
    * Scoring shift pattern that indicates which alliance is allowed to score.
    * Sets all LEDs to our alliance colour when our scoring shift is activate.
@@ -411,7 +467,25 @@ public class FeedbackSubsystem extends SubsystemBase {
     return setDisplayCommand(DisplayMode.TEAM_COLORS)
       .withName("TeamColors");
   }
-  
+
+  /**
+   * Command to display candy cane pattern
+   * @return Command that shows rotating red and white stripes
+   */
+  public Command candyCaneCommand() {
+    return setDisplayCommand(DisplayMode.CANDY_CANE)
+      .withName("CandyCane");
+  }
+
+  /**
+   * Command to display funky disco pattern
+   * @return Command that shows random flashing rainbow colors
+   */
+  public Command funkyDiscoCommand() {
+    return setDisplayCommand(DisplayMode.FUNKY_DISCO)
+      .withName("FunkyDisco");
+  }
+
   /**
    * Command to display scoring shift feedback
    * @return Command that sets the scoring shift display mode

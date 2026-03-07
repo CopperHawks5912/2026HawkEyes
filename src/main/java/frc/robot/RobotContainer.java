@@ -188,10 +188,10 @@ public class RobotContainer {
     );
 
     // show various feedbacks for fun
-    driverXbox.povUp().onTrue(feedbackSubsystem.teamColorsCommand().withTimeout(5.0));
-    driverXbox.povRight().onTrue(feedbackSubsystem.idleCommand().withTimeout(5.0));
-    driverXbox.povDown().onTrue(feedbackSubsystem.warningCommand().withTimeout(5.0));
-    driverXbox.povLeft().onTrue(feedbackSubsystem.errorCommand().withTimeout(5.0));
+    driverXbox.povUp().onTrue(feedbackSubsystem.teamColorsCommand().withTimeout(10.0));
+    driverXbox.povRight().onTrue(feedbackSubsystem.idleCommand().withTimeout(10.0));
+    driverXbox.povDown().onTrue(feedbackSubsystem.candyCaneCommand().withTimeout(10.0));
+    driverXbox.povLeft().onTrue(feedbackSubsystem.funkyDiscoCommand().withTimeout(10.0));
 
     // Override above bindings with bindings to run SysId commands
     if (DriverStation.isTest()) {
@@ -251,7 +251,10 @@ public class RobotContainer {
     }));
 
     // set scoring shift based on game data once it's received in teleop
-    new Trigger(() -> gameData != '?').onTrue(feedbackSubsystem.setGameDataCommand(gameData));
+    new Trigger(() -> gameData != '?').onTrue(
+      feedbackSubsystem.setGameDataCommand(gameData)
+      .andThen(feedbackSubsystem.scoringShiftCommand())
+    );
 
     // post-match trigger
     RobotModeTriggers.disabled().and(() -> wasInTeleop).onTrue(Commands.parallel(
