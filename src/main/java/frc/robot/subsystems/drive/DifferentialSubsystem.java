@@ -69,6 +69,7 @@ public class DifferentialSubsystem extends SubsystemBase {
   private final DifferentialDrive drive;
   private final Navx gyro;
 
+  // Kinematics and pose estimation
   private final DifferentialDriveKinematics kinematics;
   private final DifferentialDrivePoseEstimator poseEstimator;
 
