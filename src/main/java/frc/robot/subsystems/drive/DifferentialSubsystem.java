@@ -416,15 +416,15 @@ public class DifferentialSubsystem extends SubsystemBase {
    */
   private void driveRobotRelative(ChassisSpeeds speeds) {
     // Convert chassis speeds to wheel speeds
-    DifferentialDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(speeds);
+    DifferentialDriveWheelSpeeds targetSpeeds = kinematics.toWheelSpeeds(speeds);
     
     // Calculate feedforward
-    double leftFF = feedForward.calculate(wheelSpeeds.leftMetersPerSecond);
-    double rightFF = feedForward.calculate(wheelSpeeds.rightMetersPerSecond);
+    double leftFF = feedForward.calculate(targetSpeeds.leftMetersPerSecond);
+    double rightFF = feedForward.calculate(targetSpeeds.rightMetersPerSecond);
     
     // Calculate PID correction
-    double leftPID = leftPIDController.calculate(leftEncoder.getVelocity(), wheelSpeeds.leftMetersPerSecond);
-    double rightPID = rightPIDController.calculate(rightEncoder.getVelocity(), wheelSpeeds.rightMetersPerSecond);
+    double leftPID = leftPIDController.calculate(leftEncoder.getVelocity(), targetSpeeds.leftMetersPerSecond);
+    double rightPID = rightPIDController.calculate(rightEncoder.getVelocity(), targetSpeeds.rightMetersPerSecond);
     
     // Combine and set voltages
     double leftVoltage = MathUtil.clamp(leftFF + leftPID, -12.0, 12.0);

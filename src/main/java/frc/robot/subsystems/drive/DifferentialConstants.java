@@ -87,7 +87,7 @@ public final class DifferentialConstants {
    * Maximum speed in meters per second
    * Typical values: 2-4 m/s for FRC drivetrains
    */
-  public static final double kMaxSpeedMetersPerSecond = 3.0; // TODO: Characterize your robot
+  public static final double kMaxSpeedMetersPerSecond = 4.0; // TODO: Characterize your robot
   
   /**
    * Maximum acceleration in meters per second squared
@@ -140,15 +140,15 @@ public final class DifferentialConstants {
   /**
    * PID proportional gain for velocity control
    */
-  public static final double kP = 0.0002; // TODO: Tune this value
+  public static final double kP = 1.5; // TODO: Tune this value
 
   /**
-   * PID proportional gain for velocity control
+   * PID integral gain for velocity control
    */
   public static final double kI = 0.0; // TODO: Tune this value
   
   /**
-   * PID proportional gain for velocity control
+   * PID derivative gain for velocity control
    */
   public static final double kD = 0.0; // TODO: Tune this value
   
