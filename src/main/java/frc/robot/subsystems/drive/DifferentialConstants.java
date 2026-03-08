@@ -14,6 +14,60 @@ import edu.wpi.first.math.util.Units;
  * Constants for the differential drive subsystem
  */
 public final class DifferentialConstants {
+  // ==================== Drive Control Parameters ====================
+  
+  /**
+   * Translation scaling factor (0.0 to 1.0) - used by arcade drive
+   * Reduces max speed for finer control
+   */
+  public static final double kTranslationScaling = 0.8;
+  
+  /**
+   * Rotation scaling factor (0.0 to 1.0) - used by arcade drive
+   * Reduces max rotation for finer control
+   */
+  public static final double kRotationScaling = 0.6;
+  
+  /**
+   * Maximum speed in meters per second - used by Pathplanner only
+   * Typical values: 2-4 m/s for FRC drivetrains
+   */
+  public static final double kMaxSpeedMetersPerSecond = 4.0; // TODO: Characterize your robot
+  
+  /**
+   * Maximum acceleration in meters per second squared - used by Pathplanner only
+   */
+  public static final double kMaxAccelMetersPerSecondSq = 2.0; // TODO: Characterize your robot
+  
+  /**
+   * Maximum angular speed in radians per second - used by Pathplanner only
+   */
+  public static final double kMaxAngularSpeedRadsPerSecond = 2.0 * Math.PI; // TODO: Characterize
+  
+  /**
+   * Maximum angular acceleration in radians per second squared - used by Pathplanner only
+   */
+  public static final double kMaxAngularAccelRadsPerSecondSq = Math.PI; // TODO: Characterize
+  
+  // ==================== Joystick Control Parameters ====================
+  
+  /**
+   * Joystick deadband (ignore inputs below this threshold)
+   */
+  public static final double kJoystickDeadband = 0.1;
+  
+  /**
+   * Translational slew rate limit (units per second)
+   * Limits how quickly forward/backward speed can change
+   */
+  public static final double kTranslationalSlewRateLimit = 5.0;
+  
+  /**
+   * Rotational slew rate limit (units per second)
+   * Limits how quickly rotation speed can change
+   */
+  public static final double kRotationalSlewRateLimit = 3.0;
+
   // ==================== Physical Robot Parameters ====================
   
   /**
@@ -80,60 +134,6 @@ public final class DifferentialConstants {
    * Formula: position conversion factor / 60 (to convert minutes to seconds)
    */
   public static final double kVelocityConversionFactor = kPositionConversionFactor / 60.0;
-  
-  // ==================== Drive Control Parameters ====================
-  
-  /**
-   * Maximum speed in meters per second
-   * Typical values: 2-4 m/s for FRC drivetrains
-   */
-  public static final double kMaxSpeedMetersPerSecond = 4.0; // TODO: Characterize your robot
-  
-  /**
-   * Maximum acceleration in meters per second squared
-   */
-  public static final double kMaxAccelMetersPerSecondSq = 2.0; // TODO: Characterize your robot
-  
-  /**
-   * Maximum angular speed in radians per second
-   */
-  public static final double kMaxAngularSpeedRadsPerSecond = 2.0 * Math.PI; // TODO: Characterize
-  
-  /**
-   * Maximum angular acceleration in radians per second squared
-   */
-  public static final double kMaxAngularAccelRadsPerSecondSq = Math.PI; // TODO: Characterize
-  
-  // ==================== Joystick Control Parameters ====================
-  
-  /**
-   * Joystick deadband (ignore inputs below this threshold)
-   */
-  public static final double kJoystickDeadband = 0.1;
-  
-  /**
-   * Translational slew rate limit (units per second)
-   * Limits how quickly forward/backward speed can change
-   */
-  public static final double kTranslationalSlewRateLimit = 5.0;
-  
-  /**
-   * Rotational slew rate limit (units per second)
-   * Limits how quickly rotation speed can change
-   */
-  public static final double kRotationalSlewRateLimit = 3.0;
-  
-  /**
-   * Translation scaling factor (0.0 to 1.0)
-   * Reduces max speed for finer control
-   */
-  public static final double kTranslationScaling = 0.8;
-  
-  /**
-   * Rotation scaling factor (0.0 to 1.0)
-   * Reduces max rotation for finer control
-   */
-  public static final double kRotationScaling = 0.6;
   
   // ==================== PID Constants for Velocity Control ====================
   
