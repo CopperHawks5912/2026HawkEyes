@@ -30,7 +30,7 @@ public final class DifferentialConstants {
   
   /**
    * Maximum speed in meters per second
-   * Used by Pathplanner & drivePIDCommand
+   * Used by Pathplanner & driveArcadeByPIDCommand
    * Typical values: 2-4 m/s for FRC drivetrains
    */
   public static final double kMaxSpeedMetersPerSecond = 4.0;
@@ -43,7 +43,7 @@ public final class DifferentialConstants {
   
   /**
    * Maximum angular speed (rotation) in radians per second
-   * Used by Pathplanner & drivePIDCommand
+   * Used by Pathplanner & driveArcadeByPIDCommand
    */
   public static final double kMaxAngularSpeedRadsPerSecond = 2.0 * Math.PI;
   
