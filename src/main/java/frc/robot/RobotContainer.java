@@ -65,7 +65,7 @@ public class RobotContainer {
    */
   public RobotContainer() {
     // set our default driving method (arcade - differential drive)
-    driveSubsystem.setDefaultCommand(driveSubsystem.driveArcadeCommand(
+    driveSubsystem.setDefaultCommand(driveSubsystem.driveArcadeByPIDCommand(
       () -> -1 * driverXbox.getLeftY(),
       () -> -1 * driverXbox.getRightX()
     ));
@@ -188,10 +188,10 @@ public class RobotContainer {
     );
 
     // show various feedbacks for fun
-    driverXbox.povUp().onTrue(feedbackSubsystem.teamColorsCommand().withTimeout(10.0));
-    driverXbox.povRight().onTrue(feedbackSubsystem.candyCaneCommand().withTimeout(10.0));
-    driverXbox.povDown().onTrue(feedbackSubsystem.funkyDiscoCommand().withTimeout(10.0));
-    driverXbox.povLeft().onTrue(feedbackSubsystem.idleCommand().withTimeout(10.0));
+    driverXbox.povUp().onTrue(feedbackSubsystem.teamColorsCommand());
+    driverXbox.povRight().onTrue(feedbackSubsystem.candyCaneCommand());
+    driverXbox.povDown().onTrue(feedbackSubsystem.funkyDiscoCommand());
+    driverXbox.povLeft().onTrue(feedbackSubsystem.idleCommand());
 
     // Override above bindings with bindings to run SysId commands
     if (DriverStation.isTest()) {
@@ -265,13 +265,13 @@ public class RobotContainer {
     ));
 
     // show feedback when climber is at upper limit
-    climberSubsystem.isAtUpperLimit.onTrue(feedbackSubsystem.warningCommand().withTimeout(2.0));
+    climberSubsystem.isAtUpperLimit.onTrue(feedbackSubsystem.warningCommand());
 
     // show feedback when climber is at lower limit
-    climberSubsystem.isAtLowerLimit.onTrue(feedbackSubsystem.warningCommand().withTimeout(2.0));
+    climberSubsystem.isAtLowerLimit.onTrue(feedbackSubsystem.warningCommand());
 
     // show feedback when climber is stalled
-    climberSubsystem.isStalled.onTrue(feedbackSubsystem.errorCommand().withTimeout(2.0));
+    climberSubsystem.isStalled.onTrue(feedbackSubsystem.errorCommand());
   }
 
   /**

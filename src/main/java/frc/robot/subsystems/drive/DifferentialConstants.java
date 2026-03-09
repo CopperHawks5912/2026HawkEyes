@@ -17,37 +17,41 @@ public final class DifferentialConstants {
   // ==================== Drive Control Parameters ====================
   
   /**
-   * Translation scaling factor (0.0 to 1.0) - used by arcade drive
+   * Translation scaling factor (0.0 to 1.0) - used by driveArcadeCommand
    * Reduces max speed for finer control
    */
   public static final double kTranslationScaling = 0.8;
   
   /**
-   * Rotation scaling factor (0.0 to 1.0) - used by arcade drive
+   * Rotation scaling factor (0.0 to 1.0) - used by driveArcadeCommand
    * Reduces max rotation for finer control
    */
   public static final double kRotationScaling = 0.6;
   
   /**
-   * Maximum speed in meters per second - used by Pathplanner only
+   * Maximum speed in meters per second
+   * Used by Pathplanner & drivePIDCommand
    * Typical values: 2-4 m/s for FRC drivetrains
    */
-  public static final double kMaxSpeedMetersPerSecond = 4.0; // TODO: Characterize your robot
+  public static final double kMaxSpeedMetersPerSecond = 4.0;
   
   /**
-   * Maximum acceleration in meters per second squared - used by Pathplanner only
+   * Maximum acceleration in meters per second squared 
+   * Used by Pathplanner
    */
-  public static final double kMaxAccelMetersPerSecondSq = 2.0; // TODO: Characterize your robot
+  public static final double kMaxAccelMetersPerSecondSq = 2.0; 
   
   /**
-   * Maximum angular speed in radians per second - used by Pathplanner only
+   * Maximum angular speed (rotation) in radians per second
+   * Used by Pathplanner & drivePIDCommand
    */
-  public static final double kMaxAngularSpeedRadsPerSecond = 2.0 * Math.PI; // TODO: Characterize
+  public static final double kMaxAngularSpeedRadsPerSecond = 2.0 * Math.PI;
   
   /**
-   * Maximum angular acceleration in radians per second squared - used by Pathplanner only
+   * Maximum angular acceleration (rotation) in radians per second squared
+   * Used by Pathplanner
    */
-  public static final double kMaxAngularAccelRadsPerSecondSq = Math.PI; // TODO: Characterize
+  public static final double kMaxAngularAccelRadsPerSecondSq = Math.PI;
   
   // ==================== Joystick Control Parameters ====================
   

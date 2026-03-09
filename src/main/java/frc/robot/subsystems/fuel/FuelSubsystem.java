@@ -192,36 +192,6 @@ public class FuelSubsystem extends SubsystemBase {
   }
 
   /**
-   * Configure the feeder motor with all settings
-   */
-  private void configureFeederMotor() {
-    SparkMaxConfig feederConfig = new SparkMaxConfig();
-
-    // motor output
-    feederConfig
-      .smartCurrentLimit(40) // amps
-      .voltageCompensation(12)
-      .idleMode(IdleMode.kBrake);
-
-    // Optimize CAN status frames for reduced lag
-    feederConfig.signals
-      .primaryEncoderPositionPeriodMs(500)  // Position: not used
-      .primaryEncoderVelocityPeriodMs(20)   // Velocity: 50Hz (was Status2)
-      .appliedOutputPeriodMs(100)           // Applied output: 10Hz (was Status0)
-      .faultsPeriodMs(200)                  // Faults: 5Hz (was Status1)
-      .analogVoltagePeriodMs(500)           // Analog: unused (was Status3)
-      .externalOrAltEncoderPosition(500)    // Alt encoder: unused (was Status4)
-      .externalOrAltEncoderVelocity(500);   // Alt encoder: unused (was Status4)
-
-    // apply configuration
-    feederMotor.configure(
-      feederConfig, 
-      ResetMode.kResetSafeParameters, 
-      PersistMode.kPersistParameters
-    );
-  }
-  
-  /**
    * Configure the intake/launcher motors with all settings
    */
   private void configureIntakeLauncherMotors() {
@@ -274,6 +244,36 @@ public class FuelSubsystem extends SubsystemBase {
     );    
   }
 
+  /**
+   * Configure the feeder motor with all settings
+   */
+  private void configureFeederMotor() {
+    SparkMaxConfig feederConfig = new SparkMaxConfig();
+
+    // motor output
+    feederConfig
+      .smartCurrentLimit(40) // amps
+      .voltageCompensation(12)
+      .idleMode(IdleMode.kBrake);
+
+    // Optimize CAN status frames for reduced lag
+    feederConfig.signals
+      .primaryEncoderPositionPeriodMs(500)  // Position: not used
+      .primaryEncoderVelocityPeriodMs(20)   // Velocity: 50Hz (was Status2)
+      .appliedOutputPeriodMs(100)           // Applied output: 10Hz (was Status0)
+      .faultsPeriodMs(200)                  // Faults: 5Hz (was Status1)
+      .analogVoltagePeriodMs(500)           // Analog: unused (was Status3)
+      .externalOrAltEncoderPosition(500)    // Alt encoder: unused (was Status4)
+      .externalOrAltEncoderVelocity(500);   // Alt encoder: unused (was Status4)
+
+    // apply configuration
+    feederMotor.configure(
+      feederConfig, 
+      ResetMode.kResetSafeParameters, 
+      PersistMode.kPersistParameters
+    );
+  }
+  
   @Override
   public void periodic() {
     // Update tuning table for Elastic
@@ -327,6 +327,16 @@ public class FuelSubsystem extends SubsystemBase {
     feederMotor.set(MathUtil.clamp(power, -1, 1));
   }
   
+  /**
+   * Stop all motors immediately
+   */
+  private void stop() {
+    leftIntakeLauncherMotor.stopMotor();
+    rightIntakeLauncherMotor.stopMotor();
+    feederMotor.stopMotor();
+    targetRPM = 0;
+  }
+
   /**
    * Check if launcher is at target speed
    * @return true if both motors are within tolerance of target RPM
@@ -426,12 +436,8 @@ public class FuelSubsystem extends SubsystemBase {
    * @return Command that stops the roller motors
    */
   public Command stopCommand() {
-    return runOnce(() -> {
-      leftIntakeLauncherMotor.stopMotor();
-      rightIntakeLauncherMotor.stopMotor();
-      feederMotor.stopMotor();
-      targetRPM = 0;
-    }).withName("StopIntake");
+    return runOnce(this::stop)
+      .withName("StopFuel");
   }
   
   /**
@@ -487,12 +493,9 @@ public class FuelSubsystem extends SubsystemBase {
     return run(() -> {
       // get the clamped distance value
       double distance = MathUtil.clamp(distanceToHub.getAsDouble(), 0.0, 10.0);
-
-      // calculate target RPM based on distance
-      double rpm = launcherRPM.get(distance);
       
       // spin up the launcher
-      setLauncherRPM(rpm);
+      setLauncherRPM(launcherRPM.get(distance));
       
       // only feed when at speed - otherwise hold fuel back
       if (isAtSpeed()) {
@@ -500,7 +503,7 @@ public class FuelSubsystem extends SubsystemBase {
       } else {
         setFeederPower(FuelConstants.kFeederSpinUpPreLaunchPercent);
       }
-    }).withName("LaunchFuel");
+    }).withName("LaunchDistanceFuel");
   }
   
   /**
@@ -508,7 +511,8 @@ public class FuelSubsystem extends SubsystemBase {
    * @return Command that launches fuel at default RPM
    */
   public Command launchCommand() {
-    return launchCommand(() -> 2.0); // Default to mid-range distance
+    return launchCommand(() -> 2.0)
+      .withName("LaunchDefaultFuel"); // Default to mid-range distance
   }
 
   /**

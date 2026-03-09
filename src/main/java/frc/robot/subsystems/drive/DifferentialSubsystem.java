@@ -411,7 +411,7 @@ public class DifferentialSubsystem extends SubsystemBase {
   }
 
   /**
-   * Drive the robot using robot-relative chassis speeds (used in path following)
+   * Drive the robot using robot-relative chassis speeds with feedforward and PID control.
    * @param speeds The desired robot-relative chassis speeds
    */
   private void driveRobotRelative(ChassisSpeeds speeds) {
@@ -602,7 +602,17 @@ public class DifferentialSubsystem extends SubsystemBase {
   }
 
   // ==================== Command Factories ====================
-    /**
+  
+  /**
+   * Command to stop the drive
+   * @return Command that stops the differential drive
+   */
+  public Command stopCommand() {
+    return runOnce(this::stop)
+      .withName("StopDifferential");
+  }
+
+  /**
    * Command factory for binding to initAutonomous
    */
   public Command autonomousInitCommand() {
@@ -610,7 +620,8 @@ public class DifferentialSubsystem extends SubsystemBase {
       resetOdometry();
       setMotorBrake(true);
       inverted = false;
-    });
+    })
+    .withName("AutonomousInitDifferential");
   }
 
   /**
@@ -620,7 +631,8 @@ public class DifferentialSubsystem extends SubsystemBase {
     return runOnce(() -> {
       setMotorBrake(true);
       inverted = false;
-    });
+    })
+    .withName("TeleopInitDifferential");
   }
 
   /**
@@ -658,15 +670,6 @@ public class DifferentialSubsystem extends SubsystemBase {
   }
   
   /**
-   * Command to stop the drive
-   * @return Command that stops the differential drive
-   */
-  public Command stopCommand() {
-    return runOnce(this::stop)
-      .withName("StopDifferential");
-  }
-  
-  /**
    * Command to toggle the drive controls inversion
    * @return Command that toggles the drive controls inversion
    */
@@ -696,21 +699,23 @@ public class DifferentialSubsystem extends SubsystemBase {
       Translation2d toHub = hubCenter.minus(currentPose.getTranslation());
       Rotation2d targetAngle = new Rotation2d(toHub.getX(), toHub.getY());
       
-      // Calculate rotation speed to aim at the hub using the PID controller.
+      // Calculate rotation speed to aim at the hub using the "aim" PID controller.
       // Add Math.PI so the rear-mounted launcher faces the hub.
-      // The PID controller will automatically handle angle wrapping 
-      // and takes the shortest path to the target angle.
+      // The aim PID controller automatically handles:
+      //  1. angle wrapping
+      //  2. rotation acceleration constraints 
+      //  3. and takes the shortest path to the target angle
       double rotationSpeed = aimPIDController.calculate(
         currentPose.getRotation().getRadians(),
         targetAngle.getRadians() + Math.PI
       );
-      
-      // Rotate the robot in place to aim at the hub (0 forward speed, only rotation)
-      driveArcade(0.0, rotationSpeed);
+
+      // Drive the robot with the calculated rotation speed only
+      driveRobotRelative(new ChassisSpeeds(0.0, 0.0, rotationSpeed));
     })
     .until(() -> aimPIDController.atSetpoint())
     .withTimeout(3.0)
-    .finallyDo(() -> stop())
+    .finallyDo(this::stop)
     .withName("AimAtHubDifferential");
   }
 
@@ -739,11 +744,12 @@ public class DifferentialSubsystem extends SubsystemBase {
 
       // Since AutoBuilder is configured, we can use it to build pathfinding commands
       return AutoBuilder.pathfindToPose(targetPose, constraints, 0.0);
-    }, Set.of(this));
+    }, Set.of(this))
+    .withName("DriveToPoseDifferential");
   }
 
   /**
-   * Command to drive the differential in arcade mode
+   * Command to drive the differential in arcade mode using power percentages.
    * @param xSupplier The forward/backward speed supplier
    * @param rSupplier The rotation rate supplier
    * @return Command that drives the differential in arcade mode
@@ -763,16 +769,51 @@ public class DifferentialSubsystem extends SubsystemBase {
       xSpeed *= DifferentialConstants.kTranslationScaling;
       rSpeed *= DifferentialConstants.kRotationScaling;
 
-      // Invert controls if the inverted flag is set
+      // 4. Invert controls if the inverted flag is set
       if (inverted) {
         xSpeed = -xSpeed;
         rSpeed = -rSpeed;
       }
 
-      // 4. Drive the robot using the processed inputs (-1 to 1 range),
+      // 5. Drive the robot using the processed inputs (-1 to 1 range),
       //    arcadeDrive automatically squares inputs for finer control at low speeds
       driveArcade(xSpeed, rSpeed);
     }).withName("DriveArcadeDifferential");
+  }
+
+  /**
+   * Command to drive the differential in arcade mode using PID control.
+   * @param xSupplier The forward/backward speed supplier
+   * @param rSupplier The rotation rate supplier
+   * @return Command that drives the differential in arcade mode using PID control
+   */
+  public Command driveArcadeByPIDCommand(DoubleSupplier xSupplier, DoubleSupplier rSupplier) {
+    return run(() -> {
+      // 1. Apply deadband
+      double xSpeed = MathUtil.applyDeadband(xSupplier.getAsDouble(), DifferentialConstants.kJoystickDeadband);
+      double rSpeed = MathUtil.applyDeadband(rSupplier.getAsDouble(), DifferentialConstants.kJoystickDeadband);
+
+      // 2. Square inputs for finer low-speed control while preserving sign
+      xSpeed = Math.copySign(xSpeed * xSpeed, xSpeed);
+      rSpeed = Math.copySign(rSpeed * rSpeed, rSpeed);
+
+      // 3. Apply slew rate limiters
+      xSpeed = xSpeedLimiter.calculate(xSpeed);
+      rSpeed = rSpeedLimiter.calculate(rSpeed);
+
+      // 4. Invert if needed
+      if (inverted) {
+        xSpeed = -xSpeed;
+        rSpeed = -rSpeed;
+      }
+
+      // 5. Scale to real-world units using our constants
+      double xSpeedMps = xSpeed * DifferentialConstants.kMaxSpeedMetersPerSecond;
+      double rSpeedRadPerSecond = rSpeed * DifferentialConstants.kMaxAngularSpeedRadsPerSecond;
+
+      // 6. Drive via ChassisSpeeds so feedforward + PID enforce the actual velocity
+      driveRobotRelative(new ChassisSpeeds(xSpeedMps, 0.0, rSpeedRadPerSecond));
+    }).withName("DriveArcadeByPIDDifferential");
   }
 
   /**

@@ -102,11 +102,11 @@ public class ClimberSubsystem extends SubsystemBase {
 
     // Safety: Stop at limits to prevent damage
     if (isAtUpperLimit() && clampedPower > 0) {
-      climberMotor.stopMotor();
+      stop();
       return;
     }    
     if (isAtLowerLimit() && clampedPower < 0) {
-      climberMotor.stopMotor();
+      stop();
       return;
     }
     
@@ -120,6 +120,13 @@ public class ClimberSubsystem extends SubsystemBase {
    */
   private void resetEncoder() {
     climberEncoder.setPosition(0);
+  }
+
+  /**
+   * Stop the climber motor immediately
+   */
+  private void stop() {
+    climberMotor.stopMotor();
   }
   
   // ==================== State Queries ====================
@@ -211,15 +218,24 @@ public class ClimberSubsystem extends SubsystemBase {
    */
   public final Trigger isStalled = new Trigger(this::isStalled).debounce(0.5, Debouncer.DebounceType.kFalling);
   
-  // ==================== Command Factories ====================
+  // ==================== Command Factories ====================  
   
+  /**
+   * Command to stop the climber
+   * @return Command that stops the climber motor
+   */
+  public Command stopCommand() {
+    return runOnce(this::stop)
+      .withName("StopClimber");
+  }
+
   /**
    * Command to extend the climber upward
    * @return Command that runs climber up at configured speed
    */
   public Command upCommand() {
     return run(() -> setPower(ClimberConstants.kUpPercent))
-      .withName("ClimberUp");
+      .withName("UpClimber");
   }
   
   /**
@@ -228,7 +244,7 @@ public class ClimberSubsystem extends SubsystemBase {
    */
   public Command downCommand() {
     return run(() -> setPower(ClimberConstants.kDownPercent))
-      .withName("ClimberDown");
+      .withName("DownClimber");
   }
   
   /**
@@ -238,8 +254,8 @@ public class ClimberSubsystem extends SubsystemBase {
   public Command upToLimitCommand() {
     return run(() -> setPower(ClimberConstants.kUpPercent))
       .until(this::isAtUpperLimit)
-      .andThen(stopCommand())
-      .withName("UpToLimit");
+      .finallyDo(this::stop)
+      .withName("UpToLimitClimber");
   }
   
   /**
@@ -249,8 +265,8 @@ public class ClimberSubsystem extends SubsystemBase {
   public Command downToLimitCommand() {
     return run(() -> setPower(ClimberConstants.kDownPercent))
       .until(this::isAtLowerLimit)
-      .andThen(stopCommand())
-      .withName("DownToLimit");
+      .finallyDo(this::stop)
+      .withName("DownToLimitClimber");
   }
   
   /**
@@ -266,17 +282,8 @@ public class ClimberSubsystem extends SubsystemBase {
       }
     })
     .until(this::isAtHomePosition)
-    .andThen(stopCommand())
+    .finallyDo(this::stop)
     .withName("HomeClimber");
-  }
-  
-  /**
-   * Command to stop the climber
-   * @return Command that stops the climber motor
-   */
-  public Command stopCommand() {
-    return runOnce(() -> climberMotor.stopMotor())
-      .withName("StopClimber");
   }
   
   /**
@@ -287,7 +294,7 @@ public class ClimberSubsystem extends SubsystemBase {
   public Command setHomePositionCommand() {
     return runOnce(this::resetEncoder)
       .ignoringDisable(true)
-      .withName("ResetClimberEncoder");
+      .withName("SetHomePositionClimber");
   }
   
   // ==================== Telemetry Methods ====================

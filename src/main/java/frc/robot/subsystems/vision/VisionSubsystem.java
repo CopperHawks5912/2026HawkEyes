@@ -50,22 +50,26 @@ public class VisionSubsystem extends SubsystemBase {
     // Store the vision consumer for pose estimator updates
     this.visionConsumer = visionConsumer;
 
+    // Exit early if vision is not enabled to avoid unnecessary initialization
+    if (!VisionConstants.kEnableVision) {
+      Utils.logError("Vision is not enabled! Vision subsystem not initialized");
+      return;
+    }
+
     // Get the defined camera configurations
     HashMap<String, Transform3d> configs = VisionConstants.kCameraConfigs;
     
     // Add each to camera the list
-    if (VisionConstants.kEnableVision) {
-      for (String cameraName : configs.keySet()) {
-        try {
-          cameras.add(new Camera(cameraName, configs.get(cameraName)));
-        } catch (Exception e) {
-          Utils.logError("Failed to initialize camera " + cameraName + ": " + e.getMessage());
-        }
+    for (String cameraName : configs.keySet()) {
+      try {
+        cameras.add(new Camera(cameraName, configs.get(cameraName)));
+      } catch (Exception e) {
+        Utils.logError("Failed to initialize camera " + cameraName + ": " + e.getMessage());
       }
     }
     
     // Warn if no cameras initialized
-    if (cameras.isEmpty() && VisionConstants.kEnableVision) {
+    if (cameras.isEmpty()) {
       Utils.logError("Vision enabled but no cameras initialized!");
     }
 
@@ -196,7 +200,7 @@ public class VisionSubsystem extends SubsystemBase {
    * @param result The photon camera pipeline result to calculate standard deviations for
    * @return Array of standard deviations for x, y, and theta
    */
-  double[] calculateStandardDeviations(PhotonPipelineResult result) {
+  private double[] calculateStandardDeviations(PhotonPipelineResult result) {
     int numTargets = result.getTargets().size();
 
     double avgDistance = result.getTargets().stream()
@@ -257,6 +261,14 @@ public class VisionSubsystem extends SubsystemBase {
   }
 
   // ==================== Public state accessors ====================
+
+  /**
+   * Checks if vision subsystem is enabled (has at least one working camera)
+   * @return True if vision is enabled
+   */
+  public boolean isEnabled() {
+    return VisionConstants.kEnableVision && !cameras.isEmpty();
+  }
 
   /**
    * Check if a given pose is within the field boundaries
@@ -331,14 +343,6 @@ public class VisionSubsystem extends SubsystemBase {
    */
   public List<String> getCameraNames() {
     return cameras.stream().map(camera -> camera.getName()).toList();
-  }
-
-  /**
-   * Checks if vision subsystem is enabled (has at least one working camera)
-   * @return True if vision is enabled
-   */
-  public boolean isEnabled() {
-    return VisionConstants.kEnableVision && !cameras.isEmpty();
   }
 
   /**

@@ -19,6 +19,25 @@ import frc.robot.Constants.PWMConstants;
 import frc.robot.subsystems.feedback.FeedbackConstants.DisplayMode;
 import frc.robot.util.Utils;
 
+/**
+ * Since only one command can "require" the subsystem at a time, we need to separate 
+ * LED feedback from rumble feedback for them to co-exist in this feedback subsystem.
+ * Otherwise, a rumble command would interrupt any LED display command and vice 
+ * versa, which would lead to a poor user experience.
+ * 
+ * Therefore:
+ *  a. LED display is handled by the periodic loop that changes the LED buffer 
+ *     based on the current display mode (currentMode) and animation state. 
+ *     This is why the setDisplayCommand uses "runOnce" to just set the display mode, 
+ *     and the periodic loop takes care of updating the LED buffer accordingly.
+ *  
+ *  b. Rumble feedback is handled by "run" commands that "require" this subsystem
+ *     for the duration of their execution.
+ * 
+ *  NOTE: When combining LED and rumble commands, make sure to first set the display mode
+ *        as this finishes instantly. Then use "andThen" to chain on rumble commands 
+ *        so they can run sequentially without interrupting each other.
+ */
 public class FeedbackSubsystem extends SubsystemBase {
   // LED hardware
   private final AddressableLED ledStrip;
@@ -32,8 +51,11 @@ public class FeedbackSubsystem extends SubsystemBase {
   private double animationTimer = 0;
   private int animationOffset = 0;
   private char gameData = '?';
-  
-  /** Creates a new FeedbackSubsystem. */
+      
+  /**
+   * Creates a new FeedbackSubsystem.
+   * @param controller The Xbox controller to use for rumble feedback
+   */
   public FeedbackSubsystem(CommandXboxController controller) {
     // Set controller reference
     this.controller = controller;
@@ -60,7 +82,7 @@ public class FeedbackSubsystem extends SubsystemBase {
   }
 
   // ==================== LED Control Methods ====================
-  
+
   /**
    * Set the current LED display mode
    * @param mode Display mode to show
@@ -385,7 +407,7 @@ public class FeedbackSubsystem extends SubsystemBase {
   public Command setDisplayCommand(DisplayMode mode) {
     return runOnce(() -> setDisplayMode(mode))
       .ignoringDisable(true)
-      .withName("SetLED_" + mode.name());
+      .withName("SetLED_" + mode.name() + "_Feedback");
   }
   
   /**
@@ -398,7 +420,7 @@ public class FeedbackSubsystem extends SubsystemBase {
     return run(() -> setRumble(intensity))
       .withTimeout(duration)
       .finallyDo(this::stopRumble)
-      .withName("Rumble");
+      .withName("RumbleFeedback");
   }
   
   /**
@@ -407,7 +429,7 @@ public class FeedbackSubsystem extends SubsystemBase {
    */
   public Command quickRumbleCommand() {
     return rumbleCommand(0.5, 0.2)
-      .withName("QuickRumble");
+      .withName("QuickRumbleFeedback");
   }
   
   /**
@@ -416,7 +438,7 @@ public class FeedbackSubsystem extends SubsystemBase {
    */
   public Command strongRumbleCommand() {
     return rumbleCommand(1.0, 0.4)
-      .withName("StrongRumble");
+      .withName("StrongRumbleFeedback");
   }
   
   /**
@@ -427,36 +449,44 @@ public class FeedbackSubsystem extends SubsystemBase {
     return rumbleCommand(0.7, 0.15)
       .andThen(Commands.waitSeconds(0.1))
       .andThen(rumbleCommand(0.7, 0.15))
-      .withName("DoubleRumble");
+      .withName("DoubleRumbleFeedback");
   }
   
   /**
-   * Command to indicate error state
+   * Command to indicate error state for a short duration and
+   * then revert to the previous display mode.
    * @return Command with LED and rumble feedback
    */
   public Command errorCommand() {
+    DisplayMode previousMode = currentMode;
     return setDisplayCommand(DisplayMode.ERROR)
       .andThen(rumbleCommand(1.0, 0.5))
-      .withName("Error");
+      .andThen(Commands.waitSeconds(0.5))
+      .andThen(setDisplayCommand(previousMode))
+      .withName("ErrorFeedback");
   }
   
   /**
-   * Command to indicate warning
+   * Command to indicate warning state for a short duration and
+   * then revert to the previous display mode.
    * @return Command with LED and rumble feedback
    */
   public Command warningCommand() {
+    DisplayMode previousMode = currentMode;
     return setDisplayCommand(DisplayMode.WARNING)
       .andThen(rumbleCommand(0.4, 0.3))
-      .withName("Warning");
+      .andThen(Commands.waitSeconds(0.7))
+      .andThen(setDisplayCommand(previousMode))
+      .withName("WarningFeedback");
   }
   
   /**
-   * Command to set idle state
+   * Command to set idle feedback
    * @return Command that sets idle LED display
    */
   public Command idleCommand() {
     return setDisplayCommand(DisplayMode.IDLE)
-      .withName("Idle");
+      .withName("IdleFeedback");
   }
   
   /**
@@ -465,7 +495,7 @@ public class FeedbackSubsystem extends SubsystemBase {
    */
   public Command teamColorsCommand() {
     return setDisplayCommand(DisplayMode.TEAM_COLORS)
-      .withName("TeamColors");
+      .withName("TeamColorsFeedback");
   }
 
   /**
@@ -474,7 +504,7 @@ public class FeedbackSubsystem extends SubsystemBase {
    */
   public Command candyCaneCommand() {
     return setDisplayCommand(DisplayMode.CANDY_CANE)
-      .withName("CandyCane");
+      .withName("CandyCaneFeedback");
   }
 
   /**
@@ -483,7 +513,7 @@ public class FeedbackSubsystem extends SubsystemBase {
    */
   public Command funkyDiscoCommand() {
     return setDisplayCommand(DisplayMode.FUNKY_DISCO)
-      .withName("FunkyDisco");
+      .withName("FunkyDiscoFeedback");
   }
 
   /**
@@ -492,29 +522,29 @@ public class FeedbackSubsystem extends SubsystemBase {
    */
   public Command scoringShiftCommand() {
     return setDisplayCommand(DisplayMode.SCORING_SHIFT)
-      .withName("ScoringShift");
+      .withName("ScoringShiftFeedback");
   }
   
   /**
-   * Command to display aimed at hub state
+   * Command to display aimed at hub feedback
    * @return Command that shows aimed at hub LED display and rumble
    */
   public Command aimedAtHubCommand() {
     return setDisplayCommand(DisplayMode.AIMED_AT_HUB)
       .andThen(doubleRumbleCommand())
-      .andThen(Commands.waitSeconds(1.0))
+      .andThen(Commands.waitSeconds(0.6))
       .andThen(setDisplayCommand(DisplayMode.SCORING_SHIFT))
-      .withName("AimedAtHub");
+      .withName("AimedAtHubFeedback");
   }
   
   /**
-   * Function to set game data state for feedback
+   * Command to set game data and then start scoring shift feedback
    * @param gameData Character indicating which alliance will be inactive at the start of teleop
    * @return Command that sets the scoring shift display mode
    */
   public Command setGameDataCommand(char gameData) {
     return runOnce(() -> { this.gameData = gameData; })
       .andThen(scoringShiftCommand())
-      .withName("SetGameData");
+      .withName("SetGameDataFeedback");
   }
 }
