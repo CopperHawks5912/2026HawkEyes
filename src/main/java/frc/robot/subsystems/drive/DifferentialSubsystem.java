@@ -445,6 +445,8 @@ public class DifferentialSubsystem extends SubsystemBase {
     // set the motor voltages directly for more precise control (feedforward + PID)
     leftLeaderMotor.setVoltage(leftVoltage);
     rightLeaderMotor.setVoltage(rightVoltage);
+
+    // CRITICAL - Feed the motor safety watchdog
     drive.feed();
   }
 
