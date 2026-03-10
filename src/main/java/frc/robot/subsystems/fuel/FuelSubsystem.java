@@ -147,7 +147,7 @@ public class FuelSubsystem extends SubsystemBase {
 
     // closed-loop velocity control parameters
     launcherConfig.closedLoop
-      .outputRange(-1, 1)
+      .outputRange(0, 1)
       .p(FuelConstants.kLauncherP)
       .i(FuelConstants.kLauncherI)
       .d(FuelConstants.kLauncherD);
@@ -201,12 +201,12 @@ public class FuelSubsystem extends SubsystemBase {
     // Optimize CAN status frames for reduced lag
     feederConfig.signals
       .primaryEncoderPositionPeriodMs(500)  // Position: not used
-      .primaryEncoderVelocityPeriodMs(20)   // Velocity: 50Hz (was Status2)
+      .primaryEncoderVelocityPeriodMs(500)  // Velocity: not used
       .appliedOutputPeriodMs(100)           // Applied output: 10Hz (was Status0)
       .faultsPeriodMs(200)                  // Faults: 5Hz (was Status1)
-      .analogVoltagePeriodMs(500)           // Analog: unused (was Status3)
-      .externalOrAltEncoderPosition(500)    // Alt encoder: unused (was Status4)
-      .externalOrAltEncoderVelocity(500);   // Alt encoder: unused (was Status4)
+      .analogVoltagePeriodMs(500)           // Analog: not used
+      .externalOrAltEncoderPosition(500)    // Alt encoder: not used
+      .externalOrAltEncoderVelocity(500);   // Alt encoder: not used
 
     // apply configuration
     feederMotor.configure(
@@ -314,8 +314,8 @@ public class FuelSubsystem extends SubsystemBase {
    * @param rpm RPM to set the intake/launcher motors to
    */
   private void setLauncherRPM(double rpm) {
-    // clamp RPM to valid range (NEO max ~6000 RPM) 
-    double clampedRPM = MathUtil.clamp(rpm, 0, 6000); 
+    // clamp RPM to valid range (NEO max ~5676 RPM) 
+    double clampedRPM = MathUtil.clamp(rpm, 0, 5676); 
 
     // cache target RPM
     targetRPM = clampedRPM;
