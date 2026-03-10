@@ -25,8 +25,7 @@ public final class FuelConstants {
   public static final double kLauncherEjectingPercent       = -0.80;
 
   // Launcher RPM velocity values (for shooting mode - velocity PID control)
-  public static final double kLauncherLaunchingRPM          = 4500.0; // Default launch RPM
-  public static final double kLauncherPassingRPM            = 2000.0; // Passing RPM
+  public static final double kLauncherPassingRPM            = 1000.0; // Passing RPM
   
   // Launcher velocity control PID constants
   public static final double kLauncherP                     = 0.0002;
@@ -37,7 +36,7 @@ public final class FuelConstants {
   // These replace the deprecated velocityFF() method
   // Use SysId or empirical tuning to find these values
   public static final double kLauncherKS                    = 0.1;      // Static friction (volts) - voltage to overcome friction
-  public static final double kLauncherKV                    = 0.00167;  // Velocity constant (volts per RPM) - was 1/6000
+  public static final double kLauncherKV                    = 0.00211;  // 12/5676 with voltage compensation
   public static final double kLauncherKA                    = 0.0;      // Acceleration constant (volts per RPM/s) - usually small for flywheels
   
   // Note: kV = 1 / free_speed_rpm when battery is at 12V
