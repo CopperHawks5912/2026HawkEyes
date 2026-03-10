@@ -134,64 +134,6 @@ public class FuelSubsystem extends SubsystemBase {
   }
   
   /**
-   * Load default launcher RPM map
-   * These are starting values - tune them using Shuffleboard
-   */
-  private void loadDefaultLauncherMap() {
-    // Clear existing map
-    launcherRPM.clear();
-    
-    // Load from constants or use defaults
-    launcherRPM.put(0.0, 1000.0);   // Close range
-    launcherRPM.put(2.0, 2000.0);   // 2 meters
-    launcherRPM.put(3.0, 2500.0);   // 3 meters
-    launcherRPM.put(4.0, 3000.0);   // Mid range
-    launcherRPM.put(5.0, 3500.0);   // 5 meters
-    launcherRPM.put(6.0, 4000.0);   // 6 meters
-    launcherRPM.put(7.0, 4500.0);   // Far range (max distance for half field)
-  }
-  
-  /**
-   * Setup NetworkTables for tuning the launcher
-   * Compatible with both Shuffleboard and Elastic Dashboard
-   */
-  private void setupNetworkTables() {
-    // Get or create the tuning table
-    tuningTable = NetworkTableInstance.getDefault().getTable("LauncherTuning");
-    
-    // Create input entries with default values
-    tuningDistanceEntry = tuningTable.getEntry("TuneDistance");
-    tuningDistanceEntry.setDouble(5.0);
-    
-    tuningRPMEntry = tuningTable.getEntry("TuneRPM");
-    tuningRPMEntry.setDouble(3500.0);
-    
-    // Create output/display entries
-    currentDistanceEntry = tuningTable.getEntry("CurrentDistance");
-    currentDistanceEntry.setDouble(0.0);
-    
-    currentRPMEntry = tuningTable.getEntry("CurrentTargetRPM");
-    currentRPMEntry.setDouble(0.0);
-    
-    leftVelocityEntry = tuningTable.getEntry("LeftVelocity");
-    leftVelocityEntry.setDouble(0.0);
-    
-    rightVelocityEntry = tuningTable.getEntry("RightVelocity");
-    rightVelocityEntry.setDouble(0.0);
-    
-    atSpeedEntry = tuningTable.getEntry("AtSpeed");
-    atSpeedEntry.setBoolean(false);
-    
-    // Add commands to SmartDashboard so they appear in Elastic
-    SmartDashboard.putData("Launcher/TestTunedShot", testTunedShotCommand());
-    SmartDashboard.putData("Launcher/SaveTuningPoint", saveTuningPointCommand());
-    SmartDashboard.putData("Launcher/PrintLookupTable", printLookupTableCommand());
-    SmartDashboard.putData("Launcher/ResetToDefaults", resetLookupTableCommand());
-    
-    Utils.logInfo("Launcher tuning NetworkTables initialized");
-  }
-
-  /**
    * Configure the intake/launcher motors with all settings
    */
   private void configureIntakeLauncherMotors() {
@@ -274,6 +216,64 @@ public class FuelSubsystem extends SubsystemBase {
     );
   }
   
+  /**
+   * Load default launcher RPM map
+   * These are starting values - tune them using Shuffleboard
+   */
+  private void loadDefaultLauncherMap() {
+    // Clear existing map
+    launcherRPM.clear();
+    
+    // Load from constants or use defaults
+    launcherRPM.put(0.0, 1000.0);   // Close range
+    launcherRPM.put(2.0, 2000.0);   // 2 meters
+    launcherRPM.put(3.0, 2500.0);   // 3 meters
+    launcherRPM.put(4.0, 3000.0);   // Mid range
+    launcherRPM.put(5.0, 3500.0);   // 5 meters
+    launcherRPM.put(6.0, 4000.0);   // 6 meters
+    launcherRPM.put(7.0, 4500.0);   // Far range (max distance for half field)
+  }
+  
+  /**
+   * Setup NetworkTables for tuning the launcher
+   * Compatible with both Shuffleboard and Elastic Dashboard
+   */
+  private void setupNetworkTables() {
+    // Get or create the tuning table
+    tuningTable = NetworkTableInstance.getDefault().getTable("LauncherTuning");
+    
+    // Create input entries with default values
+    tuningDistanceEntry = tuningTable.getEntry("TuneDistance");
+    tuningDistanceEntry.setDouble(5.0);
+    
+    tuningRPMEntry = tuningTable.getEntry("TuneRPM");
+    tuningRPMEntry.setDouble(3500.0);
+    
+    // Create output/display entries
+    currentDistanceEntry = tuningTable.getEntry("CurrentDistance");
+    currentDistanceEntry.setDouble(0.0);
+    
+    currentRPMEntry = tuningTable.getEntry("CurrentTargetRPM");
+    currentRPMEntry.setDouble(0.0);
+    
+    leftVelocityEntry = tuningTable.getEntry("LeftVelocity");
+    leftVelocityEntry.setDouble(0.0);
+    
+    rightVelocityEntry = tuningTable.getEntry("RightVelocity");
+    rightVelocityEntry.setDouble(0.0);
+    
+    atSpeedEntry = tuningTable.getEntry("AtSpeed");
+    atSpeedEntry.setBoolean(false);
+    
+    // Add commands to SmartDashboard so they appear in Elastic
+    SmartDashboard.putData("Launcher/TestTunedShot", testTunedShotCommand());
+    SmartDashboard.putData("Launcher/SaveTuningPoint", saveTuningPointCommand());
+    SmartDashboard.putData("Launcher/PrintLookupTable", printLookupTableCommand());
+    SmartDashboard.putData("Launcher/ResetToDefaults", resetLookupTableCommand());
+    
+    Utils.logInfo("Launcher tuning NetworkTables initialized");
+  }
+
   @Override
   public void periodic() {
     // Update tuning table for Elastic
