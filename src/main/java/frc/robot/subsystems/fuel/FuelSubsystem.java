@@ -224,7 +224,7 @@ public class FuelSubsystem extends SubsystemBase {
     // Clear existing map
     launcherRPM.clear();
     
-    // Load from constants or use defaults
+    // These values should be determined from emperical testing
     launcherRPM.put(0.0, 1000.0);   // 0.0 meters - close range
     launcherRPM.put(0.5, 1100.0);   // 0.5 meters
     launcherRPM.put(1.0, 1200.0);   // 1.0 meters
