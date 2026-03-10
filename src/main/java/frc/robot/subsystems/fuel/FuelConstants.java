@@ -43,5 +43,5 @@ public final class FuelConstants {
   // Example: If free speed is 6000 RPM at 12V, then kV = 12/6000 = 0.002 V/(RPM)
   // Or in the units the REV API expects: kV = 1/6000 = 0.00167 (assuming 12V compensation)  
 
-  public static final double kLauncherToleranceRPM          = 150.0;
+  public static final double kLauncherToleranceRPM          = 100.0;
 }
