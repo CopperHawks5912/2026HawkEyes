@@ -16,8 +16,8 @@ public final class FuelConstants {
   // Feeder motor percentages (for brushed motor)
   public static final double kFeederIntakingPercent         = -0.80; // A strong reverse power to pull fuel into the hopper quickly
   public static final double kFeederLaunchingPercent        =  0.60; // Feed fuel into the launcher for launcher
-  public static final double kFeederPassingPercent          =  0.60; // Feed fuel into the launcher for lower power passing
-  public static final double kFeederEjectingPercent         =  0.60; // A moderate reverse power to eject fuel without causing jams
+  public static final double kFeederPassingPercent          =  0.60; // Feed fuel into the launcher for passing
+  public static final double kFeederEjectingPercent         = -0.60; // A moderate reverse power to eject fuel without causing jams
   public static final double kFeederSpinUpPreLaunchPercent  = -0.25; // A small reverse power to hold back fuel while the launcher gets to speed
 
   // Launcher percentages (for intake/eject mode - percentage control)
