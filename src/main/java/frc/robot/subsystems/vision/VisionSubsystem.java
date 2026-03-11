@@ -5,8 +5,8 @@
 package frc.robot.subsystems.vision;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.photonvision.EstimatedRobotPose;
@@ -57,7 +57,7 @@ public class VisionSubsystem extends SubsystemBase {
     }
 
     // Get the defined camera configurations
-    HashMap<String, Transform3d> configs = VisionConstants.kCameraConfigs;
+    Map<String, Transform3d> configs = VisionConstants.kCameraConfigs;
     
     // Add each to camera the list
     for (String cameraName : configs.keySet()) {

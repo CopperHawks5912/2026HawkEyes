@@ -4,11 +4,11 @@
 
 package frc.robot.subsystems.vision;
 
-import java.util.HashMap;
+import java.util.Map;
 
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 
 /**
@@ -20,49 +20,26 @@ import edu.wpi.first.math.util.Units;
  * constants are needed, to reduce verbosity.
  */
 public final class VisionConstants {
-    // Camera configurations - modify for your robot
-  public static final HashMap<String, Transform3d> kCameraConfigs = defineCameras();
-
-  /**
-   * Initialize the robot cameras
-   * @return A hashmap containing camera names and their Transform3ds
-   */
-  private static HashMap<String, Transform3d> defineCameras() {
-    HashMap<String, Transform3d> cameras = new HashMap<>();
-
-    // front facing AprilTag camera
-    cameras.put("VISION_FRONT", new Transform3d(
-      new Pose3d(
+  // Define AprilTag vision cameras and their transforms relative to the robot center
+  // The front of the robot is the intake side, the back is the launcher side
+  public static final Map<String, Transform3d> kCameraConfigs = Map.of(
+    "VISION_FRONT", new Transform3d(
+      new Translation3d(
         Units.inchesToMeters(8),  // forward 8 inches
-        Units.inchesToMeters(6),  // left 6 inches  
-        Units.inchesToMeters(12), // up 12 inches
-        Rotation3d.kZero
-      ).getTranslation(), 
-      new Rotation3d(
-        0,     // Roll (tilt left/right)
-        0,    // Pitch (tilt up/down) - negative = tilted down
-        0       // Yaw (rotate left/right)
-      )
-    ));
-    
-    // back facing AprilTag camera
-    cameras.put("VISION_BACK", new Transform3d(
-      new Pose3d(
-        Units.inchesToMeters(8),  // forward 8 inches
-        Units.inchesToMeters(-6),        // left 6 inches  
-        Units.inchesToMeters(12), // up 12 inches
-        Rotation3d.kZero
-      ).getTranslation(), 
-      new Rotation3d(
-        0,     // Roll (tilt left/right)
-        0,    // Pitch (tilt up/down) - negative = tilted down
-        0       // Yaw (rotate left/right)
-      )
-    ));
-
-    // return the camera map
-    return cameras;
-  }
+        Units.inchesToMeters(6),  // right 6 inches  
+        Units.inchesToMeters(12)  // up 12 inches 
+      ),
+      new Rotation3d(0, 0, 0) 
+    ),
+    "VISION_BACK", new Transform3d(
+      new Translation3d(
+        Units.inchesToMeters(8),   // forward 8 inches
+        Units.inchesToMeters(-6),         // left 6 inches  
+        Units.inchesToMeters(12)   // up 12 inches 
+      ),
+      new Rotation3d(0, 0, 0) 
+    )
+  );
 
   // Vision configuration constants
   public static final boolean kEnableVision             = true;
