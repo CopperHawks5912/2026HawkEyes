@@ -30,12 +30,27 @@ public final class VisionConstants {
   private static HashMap<String, Transform3d> defineCameras() {
     HashMap<String, Transform3d> cameras = new HashMap<>();
 
-    // define the robot's cameras here
+    // front facing AprilTag camer
     cameras.put("VISION_FRONT", new Transform3d(
       new Pose3d(
-        Units.inchesToMeters(12), // Forward 12 inches
-        Units.inchesToMeters(0),  // Centered left/right  
-        Units.inchesToMeters(24), // 24 inches high
+        Units.inchesToMeters(8),  // forward 8 inches
+        Units.inchesToMeters(6),  // left 6 inches  
+        Units.inchesToMeters(12), // up 12 inches
+        Rotation3d.kZero
+      ).getTranslation(), 
+      new Rotation3d(
+        0,     // Roll (tilt left/right)
+        0,    // Pitch (tilt up/down) - negative = tilted down
+        0       // Yaw (rotate left/right)
+      )
+    ));
+    
+    // back facing AprilTag camer
+    cameras.put("VISION_BACK", new Transform3d(
+      new Pose3d(
+        Units.inchesToMeters(8),  // forward 8 inches
+        Units.inchesToMeters(-6),        // left 6 inches  
+        Units.inchesToMeters(12), // up 12 inches
         Rotation3d.kZero
       ).getTranslation(), 
       new Rotation3d(
@@ -50,22 +65,22 @@ public final class VisionConstants {
   }
 
   // Vision configuration constants
-  public static final boolean kEnableVision = true;
-  public static final double kPoseAmbiguityThreshold = 0.2;
-  public static final double kTargetLogTimeSeconds = 0.1;
-  public static final double kFieldBorderMargin = 0.5; // meters
-  public static final double kZMargin = 0.75; // meters
+  public static final boolean kEnableVision             = true;
+  public static final double kPoseAmbiguityThreshold    = 0.20;
+  public static final double kTargetLogTimeSeconds      = 0.10;
+  public static final double kFieldBorderMargin         = 0.50; // meters
+  public static final double kZMargin                   = 0.75; // meters
 
   // Stand 5-6 meters from a tag
   // Check tag area in PhotonVision UI
   // Set threshold to 80% of that value
   // Example: If tag shows 1200 pixels² at 5m:
-  public static final double kMinTagAreaPixels = 1000.0; // Adjust based on testing
+  public static final double kMinTagAreaPixels          = 1000.0; // Adjust based on testing
   
   // Standard deviation calculation constants
-  public static final double kSingleTagBaseXYstdDev = 0.08; // meters
-  public static final double kSingleTagBaseThetaStdDev = 0.04; // radians (~2.3 degrees)
-  public static final double kMultiTagBaseXYstdDev = 0.02; // meters
-  public static final double kMultiTagBaseThetaStdDev = 0.01; // radians (~0.6 degrees)
-  public static final double kMaxDistanceMeters = 6.0; // anything over this is max std dev
+  public static final double kSingleTagBaseXYstdDev     = 0.08; // meters
+  public static final double kSingleTagBaseThetaStdDev  = 0.04; // radians (~2.3 degrees)
+  public static final double kMultiTagBaseXYstdDev      = 0.02; // meters
+  public static final double kMultiTagBaseThetaStdDev   = 0.01; // radians (~0.6 degrees)
+  public static final double kMaxDistanceMeters         = 6.00; // anything over this is max std dev
 }
