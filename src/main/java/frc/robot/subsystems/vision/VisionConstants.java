@@ -30,7 +30,7 @@ public final class VisionConstants {
   private static HashMap<String, Transform3d> defineCameras() {
     HashMap<String, Transform3d> cameras = new HashMap<>();
 
-    // front facing AprilTag camer
+    // front facing AprilTag camera
     cameras.put("VISION_FRONT", new Transform3d(
       new Pose3d(
         Units.inchesToMeters(8),  // forward 8 inches
@@ -45,7 +45,7 @@ public final class VisionConstants {
       )
     ));
     
-    // back facing AprilTag camer
+    // back facing AprilTag camera
     cameras.put("VISION_BACK", new Transform3d(
       new Pose3d(
         Units.inchesToMeters(8),  // forward 8 inches
