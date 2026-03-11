@@ -90,6 +90,7 @@ public class DifferentialSubsystem extends SubsystemBase {
 
   // Flag to indicate if drive controls are inverted (e.g. for climbing)
   private boolean inverted = false;
+  private int addedVisionMeasurementCount = 0;
 
   // Mutable holders for unit-safe voltage values, persisted to avoid reallocation.
   private final MutVoltage appliedVoltage = Volts.mutable(0);
@@ -381,7 +382,10 @@ public class DifferentialSubsystem extends SubsystemBase {
         visionPose,
         timestamp,
         VecBuilder.fill(stdDevs[0], stdDevs[1], stdDevs[2])
-      );        
+      );
+
+      // Increment the count of accepted vision measurements for monitoring purposes
+      addedVisionMeasurementCount++;
     } catch (Exception e) {
       Utils.logError("Error adding vision measurement: " + e.getMessage());
     }
@@ -406,6 +410,9 @@ public class DifferentialSubsystem extends SubsystemBase {
       rightEncoder.getPosition(),
       new Pose2d()
     );
+
+    // Reset the count of added vision measurements
+    addedVisionMeasurementCount = 0;
     
     Utils.logInfo("Odometry reset to origin");
   }
@@ -893,6 +900,7 @@ public class DifferentialSubsystem extends SubsystemBase {
     builder.addDoubleProperty("Voltage (V)", () -> Utils.showDouble(getVoltage()), null);
     builder.addDoubleProperty("Current (A)", () -> Utils.showDouble(getCurrent()), null);
     builder.addDoubleProperty("Temperature (C)", () -> Utils.showDouble(getTemperature()), null);
+    builder.addIntegerProperty("Added Vision Measurements", () -> addedVisionMeasurementCount, null);
     builder.addBooleanProperty("Inverted", this::isInverted, null);
   }
 }
