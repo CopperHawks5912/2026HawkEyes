@@ -22,11 +22,13 @@ import edu.wpi.first.math.util.Units;
 public final class VisionConstants {
   // Define AprilTag vision cameras and their transforms relative to the robot center
   // The front of the robot is the intake side, the back is the launcher side
+  // See: https://docs.wpilib.org/en/stable/docs/software/basic-programming/coordinate-system.html
+  //      for coordinate system conventions
   public static final Map<String, Transform3d> kCameraConfigs = Map.of(
     "VISION_FRONT", new Transform3d(
       new Translation3d(
         Units.inchesToMeters(8),  // forward 8 inches
-        Units.inchesToMeters(6),  // right 6 inches  
+        Units.inchesToMeters(-6),        // right 6 inches  
         Units.inchesToMeters(12)  // up 12 inches 
       ),
       new Rotation3d(0, 0, 0) 
@@ -34,7 +36,7 @@ public final class VisionConstants {
     "VISION_BACK", new Transform3d(
       new Translation3d(
         Units.inchesToMeters(8),   // forward 8 inches
-        Units.inchesToMeters(-6),         // left 6 inches  
+        Units.inchesToMeters(6),   // left 6 inches  
         Units.inchesToMeters(12)   // up 12 inches 
       ),
       new Rotation3d(0, 0, 0) 
