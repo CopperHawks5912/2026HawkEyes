@@ -21,6 +21,7 @@ public final class FuelConstants {
   public static final double kFeederSpinUpPreLaunchPercent  = -0.25; // A small reverse power to hold back fuel while the launcher gets to speed
 
   // Launcher percentages (for intake/eject mode - percentage control)
+  public static final double kLauncherLaunchingPercent      =  0.80;
   public static final double kLauncherIntakingPercent       =  0.60;
   public static final double kLauncherEjectingPercent       = -0.80;
 

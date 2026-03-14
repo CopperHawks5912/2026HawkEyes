@@ -23,6 +23,9 @@ public final class FeedbackConstants {
       
   /** Color when robot is idle/ready (soft blue) */
   public static final Color IdleColor = new Color(0.0, 0.3, 1.0);
+      
+  /** Color for informational messages (cyan) */
+  public static final Color InfoColor = new Color(0.0, 0.3, 1.0);
 
   /** Color for warnings (orange) */
   public static final Color WarningColor = new Color(1.0, 0.5, 0.0);
@@ -48,6 +51,9 @@ public final class FeedbackConstants {
     
     /** Robot is idle/ready state */
     IDLE,
+
+    /** Informational state */
+    INFO,
     
     /** Warning state */
     WARNING,

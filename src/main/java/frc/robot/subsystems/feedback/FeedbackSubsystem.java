@@ -69,7 +69,8 @@ public class FeedbackSubsystem extends SubsystemBase {
     ledStrip.start();
 
     // Set default command to display
-    setDefaultCommand(scoringShiftCommand());
+    // I think this is causing issues with animated patterns not displaying
+    // setDefaultCommand(scoringShiftCommand());
     
     // Output initialization progress
     Utils.logInfo("Feedback subsystem initialized");
@@ -110,6 +111,10 @@ public class FeedbackSubsystem extends SubsystemBase {
         
       case IDLE:
         chasePattern(FeedbackConstants.IdleColor, 0.50);
+        break;
+        
+      case INFO:
+        blinkPattern(FeedbackConstants.InfoColor, 0.50);
         break;
         
       case WARNING:
@@ -487,7 +492,7 @@ public class FeedbackSubsystem extends SubsystemBase {
    */
   public Command infoCommand() {
     DisplayMode previousMode = currentMode;
-    return setDisplayCommand(DisplayMode.IDLE)
+    return setDisplayCommand(DisplayMode.INFO)
       .andThen(rumbleCommand(0.4, 0.3))
       .andThen(Commands.waitSeconds(0.7))
       .andThen(setDisplayCommand(previousMode))
@@ -544,10 +549,11 @@ public class FeedbackSubsystem extends SubsystemBase {
    * @return Command that shows aimed at hub LED display and rumble
    */
   public Command aimedAtHubCommand() {
+    DisplayMode previousMode = currentMode;
     return setDisplayCommand(DisplayMode.AIMED_AT_HUB)
       .andThen(doubleRumbleCommand())
       .andThen(Commands.waitSeconds(0.6))
-      .andThen(setDisplayCommand(DisplayMode.SCORING_SHIFT))
+      .andThen(setDisplayCommand(previousMode))
       .withName("AimedAtHubFeedback");
   }
   
