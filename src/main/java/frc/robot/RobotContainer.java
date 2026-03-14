@@ -65,7 +65,7 @@ public class RobotContainer {
    */
   public RobotContainer() {
     // set our default driving method (arcade - differential drive)
-    driveSubsystem.setDefaultCommand(driveSubsystem.driveArcadeByPIDCommand(
+    driveSubsystem.setDefaultCommand(driveSubsystem.driveArcadeCommand(
       () -> -1 * driverXbox.getLeftY(),
       () -> -1 * driverXbox.getRightX()
     ));
@@ -270,6 +270,12 @@ public class RobotContainer {
 
     // show feedback when climber is at lower limit
     climberSubsystem.isAtLowerLimit.onTrue(feedbackSubsystem.warningCommand());
+
+    // show feedback when climber is at level 1 climb position
+    climberSubsystem.isAtLevelOneClimbPosition.onTrue(feedbackSubsystem.infoCommand());
+
+    // show feedback when climber is at level 2 climb position
+    climberSubsystem.isAtLevelTwoClimbPosition.onTrue(feedbackSubsystem.infoCommand());
 
     // show feedback when climber is stalled
     climberSubsystem.isStalled.onTrue(feedbackSubsystem.errorCommand());

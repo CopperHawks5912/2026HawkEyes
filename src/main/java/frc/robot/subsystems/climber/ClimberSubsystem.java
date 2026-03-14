@@ -71,10 +71,10 @@ public class ClimberSubsystem extends SubsystemBase {
 
     // Optimize CAN status frames for reduced lag
     climbConfig.signals
-      .externalOrAltEncoderPosition(500)      // Fast enough for limit detection
+      .primaryEncoderPositionPeriodMs(20)    // ensure motor is in ALTNERATE_ENCODER mode
+      .primaryEncoderVelocityPeriodMs(500)   // Not used
+      .externalOrAltEncoderPosition(500)     // Not used
       .externalOrAltEncoderVelocity(500)     // Not used
-      .primaryEncoderPositionPeriodMs(20)   // Not used (CIM has no built-in encoder)
-      .primaryEncoderVelocityPeriodMs(500)   // Not used (CIM has no built-in encoder)
       .appliedOutputPeriodMs(500)            // Not needed for open-loop control
       .faultsPeriodMs(200)                   // Keep at 200ms for fault detection
       .analogVoltagePeriodMs(500);           // Not used
@@ -227,6 +227,16 @@ public class ClimberSubsystem extends SubsystemBase {
    * Fires when climber reaches lower limit
    */
   public final Trigger isAtLowerLimit = new Trigger(this::isAtLowerLimit).debounce(0.5, Debouncer.DebounceType.kFalling);
+  
+  /**
+   * Fires when climber is at level 1 climb position
+   */
+  public final Trigger isAtLevelOneClimbPosition = new Trigger(this::isAtLevelOneClimbPosition).debounce(0.5, Debouncer.DebounceType.kFalling);
+  
+  /**
+   * Fires when climber is at level 2 climb position
+   */
+  public final Trigger isAtLevelTwoClimbPosition = new Trigger(this::isAtLevelTwoClimbPosition).debounce(0.5, Debouncer.DebounceType.kFalling);
   
   /**
    * Fires when climber is stalled

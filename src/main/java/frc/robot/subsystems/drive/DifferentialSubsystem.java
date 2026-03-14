@@ -263,13 +263,13 @@ public class DifferentialSubsystem extends SubsystemBase {
     // the leaders, while leaders need faster updates for position and 
     // velocity for odometry and closed-loop control
     motorConfig.signals
-      .externalOrAltEncoderPosition(500)    // Position: 100Hz (was Status2)
-      .externalOrAltEncoderVelocity(500)    // Velocity: 100Hz (was Status2)
-      .primaryEncoderPositionPeriodMs(500)  // Position: 100Hz (was Status2)
-      .primaryEncoderVelocityPeriodMs(500)  // Velocity: 100Hz (was Status2)
-      .appliedOutputPeriodMs(500)           // Applied output: 10Hz (was Status0)
-      .faultsPeriodMs(500)                  // Faults: 5Hz (was Status1)
-      .analogVoltagePeriodMs(500);          // Analog: unused (was Status3)
+      .primaryEncoderPositionPeriodMs(500)  // Not used on follower
+      .primaryEncoderVelocityPeriodMs(500)  // Not used on follower
+      .externalOrAltEncoderPosition(500)    // Not used on follower
+      .externalOrAltEncoderVelocity(500)    // Not used on follower
+      .appliedOutputPeriodMs(500)           // Not used on follower
+      .faultsPeriodMs(500)                  // Not used on follower
+      .analogVoltagePeriodMs(500);          // Not used on follower
 
     // Set configuration to follow each leader and then apply it to corresponding
     // follower. Resetting in case a new controller is swapped in and persisting 
@@ -292,13 +292,13 @@ public class DifferentialSubsystem extends SubsystemBase {
     // Leaders need faster updates for position and velocity for odometry and closed-loop control, 
     // while followers can be slower since they are just mirroring the leaders
     motorConfig.signals
-      .externalOrAltEncoderPosition(500)     // Position: 100Hz (was Status2)
-      .externalOrAltEncoderVelocity(500)     // Velocity: 100Hz (was Status2)
-      .primaryEncoderPositionPeriodMs(20)  // Position: 100Hz (was Status2)
-      .primaryEncoderVelocityPeriodMs(20)  // Velocity: 100Hz (was Status2)
+      .primaryEncoderPositionPeriodMs(20)   // ensure motor is in ALTNERATE_ENCODER mode
+      .primaryEncoderVelocityPeriodMs(20)   // ensure motor is in ALTNERATE_ENCODER mode
+      .externalOrAltEncoderPosition(500)    // Not used
+      .externalOrAltEncoderVelocity(500)    // Not used
       .appliedOutputPeriodMs(100)           // Applied output: 10Hz (was Status0)
       .faultsPeriodMs(200)                  // Faults: 5Hz (was Status1)
-      .analogVoltagePeriodMs(500);          // Analog: unused (was Status3)
+      .analogVoltagePeriodMs(500);          // Not used
     
     // Remove following, then apply config to right leader
     motorConfig.disableFollowerMode();

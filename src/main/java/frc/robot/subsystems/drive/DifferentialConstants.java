@@ -64,7 +64,7 @@ public final class DifferentialConstants {
    * Translational slew rate limit (units per second)
    * Limits how quickly forward/backward speed can change
    */
-  public static final double kTranslationalSlewRateLimit = 5.0;
+  public static final double kTranslationalSlewRateLimit = 4.0;
   
   /**
    * Rotational slew rate limit (units per second)

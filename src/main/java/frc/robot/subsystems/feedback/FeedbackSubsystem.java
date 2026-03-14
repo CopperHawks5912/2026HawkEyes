@@ -481,6 +481,20 @@ public class FeedbackSubsystem extends SubsystemBase {
   }
   
   /**
+   * Command to indicate info state for a short duration and
+   * then revert to the previous display mode.
+   * @return Command with LED and rumble feedback
+   */
+  public Command infoCommand() {
+    DisplayMode previousMode = currentMode;
+    return setDisplayCommand(DisplayMode.IDLE)
+      .andThen(rumbleCommand(0.4, 0.3))
+      .andThen(Commands.waitSeconds(0.7))
+      .andThen(setDisplayCommand(previousMode))
+      .withName("InfoFeedback");
+  }
+  
+  /**
    * Command to set idle feedback
    * @return Command that sets idle LED display
    */
