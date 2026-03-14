@@ -37,7 +37,7 @@ public class ClimberSubsystem extends SubsystemBase {
     configureMotor();
     
     // Initialize encoder
-    climberEncoder = climberMotor.getAlternateEncoder();
+    climberEncoder = climberMotor.getEncoder();
 
     // Reset the encoder (assumes climber starts at the home position)
     resetEncoder();
@@ -63,18 +63,17 @@ public class ClimberSubsystem extends SubsystemBase {
       .smartCurrentLimit(40) // amps
       .voltageCompensation(12) // Consistent behavior across battery voltage
       .idleMode(IdleMode.kBrake); // CRITICAL: Brake mode prevents falling
-
-    // configure the alternate encoder
-    climbConfig.alternateEncoder
+      
+    climbConfig.encoder
       .countsPerRevolution(ClimberConstants.kEncoderTicksPerRevolution) 
       .positionConversionFactor(ClimberConstants.kPositionConversionFactor)
       .velocityConversionFactor(ClimberConstants.kVelocityConversionFactor);
 
     // Optimize CAN status frames for reduced lag
     climbConfig.signals
-      .externalOrAltEncoderPosition(40)      // Fast enough for limit detection
+      .externalOrAltEncoderPosition(500)      // Fast enough for limit detection
       .externalOrAltEncoderVelocity(500)     // Not used
-      .primaryEncoderPositionPeriodMs(500)   // Not used (CIM has no built-in encoder)
+      .primaryEncoderPositionPeriodMs(20)   // Not used (CIM has no built-in encoder)
       .primaryEncoderVelocityPeriodMs(500)   // Not used (CIM has no built-in encoder)
       .appliedOutputPeriodMs(500)            // Not needed for open-loop control
       .faultsPeriodMs(200)                   // Keep at 200ms for fault detection
@@ -160,11 +159,7 @@ public class ClimberSubsystem extends SubsystemBase {
    * @return true if at or past upper limit
    */
   private boolean isAtUpperLimit() {
-    return MathUtil.isNear(
-      ClimberConstants.kUpperLimitDegrees,
-      getPosition(),
-      ClimberConstants.kPositionToleranceDegrees
-    );
+    return getPosition() <= ClimberConstants.kUpperLimitDegrees;
   }
   
   /**
@@ -172,11 +167,7 @@ public class ClimberSubsystem extends SubsystemBase {
    * @return true if at or past lower limit
    */
   private boolean isAtLowerLimit() {
-    return MathUtil.isNear(
-      ClimberConstants.kLowerLimitDegrees,
-      getPosition(),
-      ClimberConstants.kPositionToleranceDegrees
-    );
+    return getPosition() >= ClimberConstants.kLowerLimitDegrees;
   }
   
   /**
@@ -275,7 +266,7 @@ public class ClimberSubsystem extends SubsystemBase {
    */
   public Command homeCommand() {
     return run(() -> {
-      if (getPosition() > ClimberConstants.kHomeDegrees) {
+      if (getPosition() < ClimberConstants.kHomeDegrees) {
         setPower(ClimberConstants.kDownPercent);
       } else {
         setPower(ClimberConstants.kUpPercent);

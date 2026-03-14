@@ -229,7 +229,7 @@ public class FuelSubsystem extends SubsystemBase {
     launcherRPM.put(0.5, 1300.0);   // 0.5 meters
     launcherRPM.put(1.0, 1500.0);   // 1.0 meters
     launcherRPM.put(1.5, 1700.0);   // 1.5 meters
-    launcherRPM.put(2.0, 1900.0);   // 2.0 meters
+    launcherRPM.put(2.0, 3000.0);   // 2.0 meters
     launcherRPM.put(2.5, 2100.0);   // 2.5 meters
     launcherRPM.put(3.0, 2300.0);   // 3.0 meters - mid range
     launcherRPM.put(3.5, 2500.0);   // 3.5 meters - mid range

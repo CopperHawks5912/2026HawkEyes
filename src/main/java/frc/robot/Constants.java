@@ -31,12 +31,12 @@ public final class Constants {
     public static final int kGyroID                             = 9;
 
     // Fuel subsystem motors
-    public static final int kLeftIntakeLauncherMotorID          = 1;
-    public static final int kRightIntakeLauncherMotorID         = 2;
-    public static final int kFeederMotorID                      = 3;
+    public static final int kLeftIntakeLauncherMotorID          = 8;
+    public static final int kRightIntakeLauncherMotorID         = 3;
+    public static final int kFeederMotorID                      = 2;
 
     // Climber subsystem motor
-    public static final int kClimberMotorID                     = 8;
+    public static final int kClimberMotorID                     = 1;
 
     // Differential drive subsystem motors
     public static final int kLeftDifferentialLeaderMotorID      = 5;

@@ -135,8 +135,8 @@ public class DifferentialSubsystem extends SubsystemBase {
     configureMotors();
 
     // Get the alternate encoders - Rev throughbore (after motor configuration)
-    leftEncoder = leftLeaderMotor.getAlternateEncoder();
-    rightEncoder = rightLeaderMotor.getAlternateEncoder();
+    leftEncoder = leftLeaderMotor.getEncoder();
+    rightEncoder = rightLeaderMotor.getEncoder();
 
     // set up differential drive class
     drive = new DifferentialDrive(leftLeaderMotor, rightLeaderMotor);
@@ -253,7 +253,7 @@ public class DifferentialSubsystem extends SubsystemBase {
     // Set the position and velocity conversion factors for the encoders
     // This converts encoder ticks to meters and meters/second, which 
     // allows us to work in real-world units for control and odometry
-    motorConfig.alternateEncoder
+    motorConfig.encoder
       .countsPerRevolution(DifferentialConstants.kEncoderTicksPerRevolution)
       .positionConversionFactor(DifferentialConstants.kPositionConversionFactor)
       .velocityConversionFactor(DifferentialConstants.kVelocityConversionFactor);
@@ -292,10 +292,10 @@ public class DifferentialSubsystem extends SubsystemBase {
     // Leaders need faster updates for position and velocity for odometry and closed-loop control, 
     // while followers can be slower since they are just mirroring the leaders
     motorConfig.signals
-      .externalOrAltEncoderPosition(20)     // Position: 100Hz (was Status2)
-      .externalOrAltEncoderVelocity(20)     // Velocity: 100Hz (was Status2)
-      .primaryEncoderPositionPeriodMs(500)  // Position: 100Hz (was Status2)
-      .primaryEncoderVelocityPeriodMs(500)  // Velocity: 100Hz (was Status2)
+      .externalOrAltEncoderPosition(500)     // Position: 100Hz (was Status2)
+      .externalOrAltEncoderVelocity(500)     // Velocity: 100Hz (was Status2)
+      .primaryEncoderPositionPeriodMs(20)  // Position: 100Hz (was Status2)
+      .primaryEncoderVelocityPeriodMs(20)  // Velocity: 100Hz (was Status2)
       .appliedOutputPeriodMs(100)           // Applied output: 10Hz (was Status0)
       .faultsPeriodMs(200)                  // Faults: 5Hz (was Status1)
       .analogVoltagePeriodMs(500);          // Analog: unused (was Status3)

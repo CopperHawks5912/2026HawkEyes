@@ -189,10 +189,10 @@ public class RobotContainer {
     );
 
     // show various feedbacks for fun
-    driverXbox.povUp().onTrue(feedbackSubsystem.teamColorsCommand());
-    driverXbox.povRight().onTrue(feedbackSubsystem.candyCaneCommand());
-    driverXbox.povDown().onTrue(feedbackSubsystem.funkyDiscoCommand());
-    driverXbox.povLeft().onTrue(feedbackSubsystem.idleCommand());
+    driverXbox.pov(0).onTrue(feedbackSubsystem.teamColorsCommand());
+    driverXbox.pov(90).onTrue(feedbackSubsystem.candyCaneCommand());
+    driverXbox.pov(180).onTrue(feedbackSubsystem.funkyDiscoCommand());
+    driverXbox.pov(270).onTrue(feedbackSubsystem.idleCommand());
 
     // Override above bindings with bindings to run SysId commands
     if (DriverStation.isTest()) {

@@ -8,24 +8,11 @@
         "layouts": [],
         "containers": [
           {
-            "title": "Drive Camera",
-            "x": 0.0,
-            "y": 0.0,
-            "width": 350.0,
-            "height": 325.0,
-            "type": "Camera Stream",
-            "properties": {
-              "topic": "/CameraPublisher/USB Camera 0",
-              "period": 0.06,
-              "rotation_turns": 0
-            }
-          },
-          {
             "title": "Field",
-            "x": 350.0,
+            "x": 175.0,
             "y": 0.0,
-            "width": 1000.0,
-            "height": 450.0,
+            "width": 1250.0,
+            "height": 550.0,
             "type": "Field",
             "properties": {
               "topic": "/SmartDashboard/Drive/Field",
@@ -43,8 +30,8 @@
           },
           {
             "title": "Distance To Hub (m)",
-            "x": 950.0,
-            "y": 450.0,
+            "x": 850.0,
+            "y": 550.0,
             "width": 250.0,
             "height": 125.0,
             "type": "Large Text Display",
@@ -56,8 +43,8 @@
           },
           {
             "title": "Best Target ID",
-            "x": 175.0,
-            "y": 325.0,
+            "x": 0.0,
+            "y": 125.0,
             "width": 175.0,
             "height": 125.0,
             "type": "Large Text Display",
@@ -69,8 +56,8 @@
           },
           {
             "title": "Joystick Inverted",
-            "x": 1200.0,
-            "y": 450.0,
+            "x": 1100.0,
+            "y": 550.0,
             "width": 150.0,
             "height": 125.0,
             "type": "Boolean Box",
@@ -87,7 +74,7 @@
           {
             "title": "Total Targets",
             "x": 0.0,
-            "y": 325.0,
+            "y": 0.0,
             "width": 175.0,
             "height": 125.0,
             "type": "Large Text Display",
@@ -99,8 +86,8 @@
           },
           {
             "title": "Climber (degrees)",
-            "x": 800.0,
-            "y": 450.0,
+            "x": 700.0,
+            "y": 550.0,
             "width": 150.0,
             "height": 125.0,
             "type": "Large Text Display",
@@ -113,8 +100,8 @@
           {
             "title": "Climber At Home",
             "x": 350.0,
-            "y": 450.0,
-            "width": 150.0,
+            "y": 550.0,
+            "width": 175.0,
             "height": 125.0,
             "type": "Boolean Box",
             "properties": {
@@ -129,9 +116,9 @@
           },
           {
             "title": "At Lower Limit",
-            "x": 650.0,
-            "y": 450.0,
-            "width": 150.0,
+            "x": 525.0,
+            "y": 550.0,
+            "width": 175.0,
             "height": 125.0,
             "type": "Boolean Box",
             "properties": {
@@ -146,9 +133,9 @@
           },
           {
             "title": "At Upper Limit",
-            "x": 500.0,
-            "y": 450.0,
-            "width": 150.0,
+            "x": 175.0,
+            "y": 550.0,
+            "width": 175.0,
             "height": 125.0,
             "type": "Boolean Box",
             "properties": {
@@ -159,22 +146,6 @@
               "false_color": 4289374890,
               "true_icon": "None",
               "false_icon": "None"
-            }
-          },
-          {
-            "title": "Match Time",
-            "x": 0.0,
-            "y": 450.0,
-            "width": 350.0,
-            "height": 125.0,
-            "type": "Match Time",
-            "properties": {
-              "topic": "/SmartDashboard/Match Time",
-              "period": 0.06,
-              "data_type": "double",
-              "time_display_mode": "Minutes and Seconds",
-              "red_start_time": 20,
-              "yellow_start_time": 30
             }
           }
         ]

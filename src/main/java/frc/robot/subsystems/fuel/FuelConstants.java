@@ -25,7 +25,7 @@ public final class FuelConstants {
   public static final double kLauncherEjectingPercent       = -0.80;
 
   // Launcher RPM velocity values (for shooting mode - velocity PID control)
-  public static final double kLauncherPassingRPM            = 1000.0; // Passing RPM
+  public static final double kLauncherPassingRPM            = 3000.0; // Passing RPM
   
   // Launcher velocity control PID constants
   public static final double kLauncherP                     = 0.0002;
