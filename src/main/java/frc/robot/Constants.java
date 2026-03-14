@@ -28,21 +28,22 @@ public final class Constants {
    */
   public static final class CANConstants {
     // NavX 3 gyro (recommended to be on ID 0 for better stability)
-    public static final int kGyroID = 0;
+    public static final int kGyroID                             = 9;
 
     // Fuel subsystem motors
-    public static final int kLeftIntakeLauncherMotorID = 1;
-    public static final int kRightIntakeLauncherMotorID = 2;
-    public static final int kFeederMotorID = 3;
+    public static final int kLeftIntakeLauncherMotorID          = 1;
+    public static final int kRightIntakeLauncherMotorID         = 2;
+    public static final int kFeederMotorID                      = 3;
 
     // Climber subsystem motor
-    public static final int kClimberMotorID = 4;
+    public static final int kClimberMotorID                     = 8;
 
     // Differential drive subsystem motors
-    public static final int kLeftDifferentialLeaderMotorID = 5;
-    public static final int kLeftDifferentialFollowerMotorID = 6;
-    public static final int kRightDifferentialLeaderMotorID = 7;
-    public static final int kRightDifferentialFollowerMotorID = 8;
+    public static final int kLeftDifferentialLeaderMotorID      = 5;
+    public static final int kLeftDifferentialFollowerMotorID    = 7;
+    public static final int kRightDifferentialLeaderMotorID     = 6;
+    public static final int kRightDifferentialFollowerMotorID   = 4;
+    public static final int kPowerDistributionHubID             = 10;
   }
   
   /**
