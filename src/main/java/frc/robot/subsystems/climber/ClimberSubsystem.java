@@ -72,7 +72,7 @@ public class ClimberSubsystem extends SubsystemBase {
     // Optimize CAN status frames for reduced lag
     climbConfig.signals
       .primaryEncoderPositionPeriodMs(20)    // ensure motor is in ALTNERATE_ENCODER mode
-      .primaryEncoderVelocityPeriodMs(500)   // Not used
+      .primaryEncoderVelocityPeriodMs(20)    // Not used
       .externalOrAltEncoderPosition(500)     // Not used
       .externalOrAltEncoderVelocity(500)     // Not used
       .appliedOutputPeriodMs(500)            // Not needed for open-loop control
@@ -138,6 +138,14 @@ public class ClimberSubsystem extends SubsystemBase {
     return climberEncoder.getPosition();
   }
   
+  /**
+   * Get the current speed of the climber
+   * @return Speed in degrees per second
+   */
+  private double getSpeed() {
+    return climberEncoder.getVelocity();
+  }
+
   /**
    * Get the current draw of the climber motor
    * @return Current in amps
@@ -221,27 +229,32 @@ public class ClimberSubsystem extends SubsystemBase {
   /**
    * Fires when climber reaches upper limit
    */
-  public final Trigger isAtUpperLimit = new Trigger(this::isAtUpperLimit).debounce(0.5, Debouncer.DebounceType.kFalling);
+  public final Trigger isAtUpperLimit = new Trigger(() -> isAtUpperLimit() && getSpeed() > 0)
+    .debounce(0.1, Debouncer.DebounceType.kRising);
 
   /**
    * Fires when climber reaches lower limit
    */
-  public final Trigger isAtLowerLimit = new Trigger(this::isAtLowerLimit).debounce(0.5, Debouncer.DebounceType.kFalling);
+  public final Trigger isAtLowerLimit = new Trigger(() -> isAtLowerLimit() && getSpeed() < 0)
+    .debounce(0.1, Debouncer.DebounceType.kRising);
   
   /**
    * Fires when climber is at level 1 climb position
    */
-  public final Trigger isAtLevelOneClimbPosition = new Trigger(this::isAtLevelOneClimbPosition).debounce(0.5, Debouncer.DebounceType.kFalling);
+  public final Trigger isAtLevelOneClimbPosition = new Trigger(this::isAtLevelOneClimbPosition)
+    .debounce(0.1, Debouncer.DebounceType.kRising);
   
   /**
    * Fires when climber is at level 2 climb position
    */
-  public final Trigger isAtLevelTwoClimbPosition = new Trigger(this::isAtLevelTwoClimbPosition).debounce(0.5, Debouncer.DebounceType.kFalling);
+  public final Trigger isAtLevelTwoClimbPosition = new Trigger(this::isAtLevelTwoClimbPosition)
+    .debounce(0.1, Debouncer.DebounceType.kRising);
   
   /**
    * Fires when climber is stalled
    */
-  public final Trigger isStalled = new Trigger(this::isStalled).debounce(0.5, Debouncer.DebounceType.kFalling);
+  public final Trigger isStalled = new Trigger(this::isStalled)
+    .debounce(0.1, Debouncer.DebounceType.kRising);
   
   // ==================== Command Factories ====================  
   
@@ -330,9 +343,10 @@ public class ClimberSubsystem extends SubsystemBase {
   @Override
   public void initSendable(SendableBuilder builder) {
     builder.setSmartDashboardType("ClimberSubsystem");
-    builder.addDoubleProperty("Position (degrees)", this::getPosition, null);
-    builder.addDoubleProperty("Current (A)", this::getCurrent, null);
-    builder.addDoubleProperty("Temperature (C)", this::getTemperature, null);
+    builder.addDoubleProperty("Position (deg)", () -> Utils.showDouble(getPosition()), null);
+    builder.addDoubleProperty("Velocity (deg per sec)", () -> Utils.showDouble(getSpeed()), null);
+    builder.addDoubleProperty("Current (A)", () -> Utils.showDouble(getCurrent()), null);
+    builder.addDoubleProperty("Temperature (C)", () -> Utils.showDouble(getTemperature()), null);
     builder.addBooleanProperty("At Upper Limit", this::isAtUpperLimit, null);
     builder.addBooleanProperty("At Lower Limit", this::isAtLowerLimit, null);
     builder.addBooleanProperty("At Home Position", this::isAtHomePosition, null);
