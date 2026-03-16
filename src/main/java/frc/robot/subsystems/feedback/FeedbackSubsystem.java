@@ -48,6 +48,7 @@ public class FeedbackSubsystem extends SubsystemBase {
   
   // Display state
   private DisplayMode currentMode = DisplayMode.OFF;
+  private DisplayMode previousMode = DisplayMode.OFF; // For reverting after temporary displays
   private double animationTimer = 0;
   private int animationOffset = 0;
   private char gameData = '?';
@@ -463,12 +464,16 @@ public class FeedbackSubsystem extends SubsystemBase {
    * @return Command with LED and rumble feedback
    */
   public Command errorCommand() {
-    DisplayMode previousMode = currentMode;
-    return setDisplayCommand(DisplayMode.ERROR)
-      .andThen(rumbleCommand(1.0, 0.5))
-      .andThen(Commands.waitSeconds(0.5))
-      .andThen(setDisplayCommand(previousMode))
-      .withName("ErrorFeedback");
+    return runOnce(() -> {
+      if (currentMode != DisplayMode.ERROR) {
+        previousMode = currentMode;
+      }
+      setDisplayMode(DisplayMode.ERROR);
+    })
+    .andThen(rumbleCommand(1.0, 0.5))
+    .andThen(Commands.waitSeconds(0.5))
+    .andThen(setDisplayCommand(previousMode))
+    .withName("ErrorFeedback");
   }
   
   /**
@@ -477,12 +482,16 @@ public class FeedbackSubsystem extends SubsystemBase {
    * @return Command with LED and rumble feedback
    */
   public Command warningCommand() {
-    DisplayMode previousMode = currentMode;
-    return setDisplayCommand(DisplayMode.WARNING)
-      .andThen(rumbleCommand(0.4, 0.3))
-      .andThen(Commands.waitSeconds(0.7))
-      .andThen(setDisplayCommand(previousMode))
-      .withName("WarningFeedback");
+    return runOnce(() -> {
+      if (currentMode != DisplayMode.WARNING) {
+        previousMode = currentMode;
+      }
+      setDisplayMode(DisplayMode.WARNING);
+    })
+    .andThen(rumbleCommand(0.4, 0.3))
+    .andThen(Commands.waitSeconds(0.7))
+    .andThen(setDisplayCommand(previousMode))
+    .withName("WarningFeedback");
   }
   
   /**
@@ -491,12 +500,16 @@ public class FeedbackSubsystem extends SubsystemBase {
    * @return Command with LED and rumble feedback
    */
   public Command infoCommand() {
-    DisplayMode previousMode = currentMode;
-    return setDisplayCommand(DisplayMode.INFO)
-      .andThen(rumbleCommand(0.4, 0.3))
-      .andThen(Commands.waitSeconds(0.7))
-      .andThen(setDisplayCommand(previousMode))
-      .withName("InfoFeedback");
+    return runOnce(() -> {
+      if (currentMode != DisplayMode.INFO) {
+        previousMode = currentMode;
+      }
+      setDisplayMode(DisplayMode.INFO);
+    })
+    .andThen(rumbleCommand(0.4, 0.3))
+    .andThen(Commands.waitSeconds(0.7))
+    .andThen(setDisplayCommand(previousMode))
+    .withName("InfoFeedback");
   }
   
   /**
@@ -549,12 +562,16 @@ public class FeedbackSubsystem extends SubsystemBase {
    * @return Command that shows aimed at hub LED display and rumble
    */
   public Command aimedAtHubCommand() {
-    DisplayMode previousMode = currentMode;
-    return setDisplayCommand(DisplayMode.AIMED_AT_HUB)
-      .andThen(doubleRumbleCommand())
-      .andThen(Commands.waitSeconds(0.6))
-      .andThen(setDisplayCommand(previousMode))
-      .withName("AimedAtHubFeedback");
+    return runOnce(() -> {
+      if (currentMode != DisplayMode.AIMED_AT_HUB) {
+        previousMode = currentMode;
+      }
+      setDisplayMode(DisplayMode.AIMED_AT_HUB);
+    })
+    .andThen(doubleRumbleCommand())
+    .andThen(Commands.waitSeconds(0.6))
+    .andThen(setDisplayCommand(previousMode))
+    .withName("AimedAtHubFeedback");
   }
   
   /**

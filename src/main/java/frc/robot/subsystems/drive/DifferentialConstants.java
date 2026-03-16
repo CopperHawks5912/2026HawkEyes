@@ -15,49 +15,48 @@ import edu.wpi.first.math.util.Units;
  */
 public final class DifferentialConstants {
   // ==================== Drive Control Parameters ====================
-  
+
   /**
    * Translation scaling factor (0.0 to 1.0) - used by driveArcadeCommand
-   * Reduces max speed for finer control
+   * Use this to set the robot's max forward/backward speed when 
+   * controlling with joysticks for safety or driver preference.
    */
-  public static final double kTranslationScaling = 0.8;
-  public static final double kTranslationScalingSlowMode = 0.4;
+  public static final double kMaxTranslationalSpeed = 0.8;
   
   /**
    * Rotation scaling factor (0.0 to 1.0) - used by driveArcadeCommand
-   * Reduces max rotation for finer control
+   * Use this to set the robot's max rotation speed when controlling 
+   * with joysticks for safety or driver preference.
    */
-  public static final double kRotationScaling = 0.6;
-  public static final double kRotationScalingSlowMode = 0.3;
+  public static final double kMaxRotationalSpeed = 0.6;
   
   /**
-   * Maximum speed in meters per second
-   * Used by Pathplanner & driveArcadeByPIDCommand
+   * The slow mode speed (0.0 to 1.0) - used by driveArcadeCommand
+   * This must be greater than the joystick deadband but less
+   * than the max speed and rotation speeds set above.
+   */
+  public static final double kMaxSlowModeSpeed = 0.3;
+  
+  /**
+   * Maximum speed in meters per second - used by Pathplanner
    * Typical values: 2-4 m/s for FRC drivetrains
    */
   public static final double kMaxSpeedMetersPerSecond = 4.0;
-  public static final double kMaxSpeedMetersPerSecondSlowMode = 2.0;
   
   /**
-   * Maximum acceleration in meters per second squared 
-   * Used by Pathplanner
+   * Maximum acceleration in meters per second squared - used by Pathplanner
    */
   public static final double kMaxAccelMetersPerSecondSq = 2.0;
-  public static final double kMaxAccelMetersPerSecondSqSlowMode = 1.0;
   
   /**
-   * Maximum angular speed (rotation) in radians per second
-   * Used by Pathplanner & driveArcadeByPIDCommand
+   * Maximum angular speed (rotation) in radians per second - used by Pathplanner
    */
   public static final double kMaxAngularSpeedRadsPerSecond = 2.0 * Math.PI;
-  public static final double kMaxAngularSpeedRadsPerSecondSlowMode = Math.PI;
   
   /**
-   * Maximum angular acceleration (rotation) in radians per second squared
-   * Used by Pathplanner
+   * Maximum angular acceleration (rotation) in radians per second squared - used by Pathplanner
    */
   public static final double kMaxAngularAccelRadsPerSecondSq = Math.PI;
-  public static final double kMaxAngularAccelRadsPerSecondSqSlowMode = Math.PI / 2.0;
   
   // ==================== Joystick Control Parameters ====================
   
@@ -70,7 +69,7 @@ public final class DifferentialConstants {
    * Translational slew rate limit (units per second)
    * Limits how quickly forward/backward speed can change
    */
-  public static final double kTranslationalSlewRateLimit = 4.0;
+  public static final double kTranslationalSlewRateLimit = 3.0;
   
   /**
    * Rotational slew rate limit (units per second)
@@ -84,25 +83,25 @@ public final class DifferentialConstants {
    * Track width (distance between left and right wheels) in meters
    * Measure from the center of one wheel to the center of the other
    */
-  public static final double kTrackWidthMeters = Units.inchesToMeters(21.625); // TODO: Measure your robot
+  public static final double kTrackWidthMeters = Units.inchesToMeters(21.625); 
 
   /**
    * Track length (distance between center of front wheel to back wheel) in meters
    * Measure from the center of one wheel to the center of the other
    */
-  public static final double kTrackLengthMeters = Units.inchesToMeters(18); // TODO: Measure your robot
+  public static final double kTrackLengthMeters = Units.inchesToMeters(18);
   
   /**
    * The robot's mass in kilograms with the bumpers attached and battery installed
    * 2026 Rebuilt max 52.16 kg / 115 lbs without the battery or bumpers
    */
-  public static final double kWheelCOF = 1.19; // TODO: Measure your robot
+  public static final double kWheelCOF = 1.19;
   
   /**
    * The robot's mass in kilograms with the bumpers attached and battery installed
    * 2026 Rebuilt max 52.16 kg / 115 lbs without the battery or bumpers
    */
-  public static final double kRobotMassKg = Units.lbsToKilograms(110.0); // TODO: Measure your robot
+  public static final double kRobotMassKg = Units.lbsToKilograms(110.0);
 
   /**
    * Calculate the robot's moment of inertia - MOI (kg*m²)
@@ -113,7 +112,7 @@ public final class DifferentialConstants {
   /**
    * Wheel diameter in meters
    */
-  public static final double kWheelDiameterMeters = Units.inchesToMeters(6); // 6 inches = 0.1524 meters
+  public static final double kWheelDiameterMeters = Units.inchesToMeters(6);
   
   /**
    * Wheel circumference in meters
@@ -131,7 +130,7 @@ public final class DifferentialConstants {
    * If motor spins X times, wheel spins 1 time
    * Example: 10.71:1 gearbox means motor spins 10.71 times per wheel rotation
    */
-  public static final double kGearRatio = 8.45; // TODO: Check your gearbox
+  public static final double kGearRatio = 8.45;
   
   /**
    * Position conversion factor: converts encoder ticks to meters

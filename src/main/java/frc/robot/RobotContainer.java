@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import frc.robot.subsystems.climber.ClimberSubsystem;
+import frc.robot.subsystems.drive.DifferentialConstants;
 import frc.robot.subsystems.drive.DifferentialSubsystem;
 import frc.robot.subsystems.feedback.FeedbackSubsystem;
 import frc.robot.subsystems.fuel.FuelSubsystem;
@@ -95,7 +96,8 @@ public class RobotContainer {
    * Do this before configuring autos. These named commands can be used by exact name in the PathPlanner GUI.
    */
   public void registerNamedCommands() {
-    NamedCommands.registerCommand("LAUNCH_FUEL", fuelSubsystem.launchCommand(driveSubsystem::getDistanceToAllianceHub));
+    NamedCommands.registerCommand("LAUNCH_FUEL", fuelSubsystem.launchCommand());
+    // NamedCommands.registerCommand("LAUNCH_FUEL", fuelSubsystem.launchDistanceCommand(driveSubsystem::getDistanceToAllianceHub));
     NamedCommands.registerCommand("PASS_FUEL", fuelSubsystem.passCommand());
     NamedCommands.registerCommand("INTAKE_FUEL", fuelSubsystem.intakeCommand());
     NamedCommands.registerCommand("EJECT_FUEL", fuelSubsystem.ejectCommand());
@@ -173,26 +175,55 @@ public class RobotContainer {
     driverXbox.leftTrigger().whileTrue(fuelSubsystem.intakeCommand());
 
     // Pass fuel while holding left bumper
-    // Automatically spins up, then feeds when ready
     driverXbox.leftBumper().whileTrue(fuelSubsystem.passCommand());
 
-    // Auto-aim at hub when pressing right trigger
-    driverXbox.rightTrigger().whileTrue(
+    // drive in slow mode while holding the left bumper down
+    // driverXbox.leftBumper()
+    //   .onTrue(driveSubsystem.setSlowModeCommand(true))
+    //   .onFalse(driveSubsystem.setSlowModeCommand(false));
+
+    // launch fuel based on dynamically calculated distance from hub (requires vision)
+    driverXbox.rightTrigger().and(visionSubsystem::isEnabled).whileTrue(
+      fuelSubsystem.launchDistanceCommand(driveSubsystem::getDistanceToAllianceHub)
+    );
+    
+    // auto-aim at hub when holding right trigger (requires vision)
+    driverXbox.rightBumper().and(visionSubsystem::isEnabled).whileTrue(
       driveSubsystem.aimAtHubCommand().andThen(feedbackSubsystem.aimedAtHubCommand())
     );
+    
+    // launch fuel based on how far the trigger is pressed (non-vision version)
+    driverXbox.rightTrigger(0.25).and(() -> !visionSubsystem.isEnabled()).whileTrue(
+      fuelSubsystem.launchPowerCommand(driverXbox::getRightTriggerAxis)
+    );
 
-    // Launch fuel while holding right bumper
-    // Automatically calculates distance, spins up, feeds when ready
-    driverXbox.rightBumper().whileTrue(
-      fuelSubsystem.launchCommand(driveSubsystem::getDistanceToAllianceHub)
+    // launch fuel at a fixed power/distance while holding right bumper (non-vision version)
+    driverXbox.rightBumper().and(() -> !visionSubsystem.isEnabled()).whileTrue(
+      fuelSubsystem.launchCommand()
     );
 
     // toggle slow mode with any pov button when in teleop
-    driverXbox.povUp().and(RobotModeTriggers.teleop()).onTrue(driveSubsystem.toggleSlowModeCommand());
-    driverXbox.povRight().and(RobotModeTriggers.teleop()).onTrue(driveSubsystem.toggleSlowModeCommand());
-    driverXbox.povDown().and(RobotModeTriggers.teleop()).onTrue(driveSubsystem.toggleSlowModeCommand());
-    driverXbox.povLeft().and(RobotModeTriggers.teleop()).onTrue(driveSubsystem.toggleSlowModeCommand());
+    // driverXbox.povUp().and(RobotModeTriggers.teleop()).onTrue(driveSubsystem.toggleSlowModeCommand());
+    // driverXbox.povRight().and(RobotModeTriggers.teleop()).onTrue(driveSubsystem.toggleSlowModeCommand());
+    // driverXbox.povDown().and(RobotModeTriggers.teleop()).onTrue(driveSubsystem.toggleSlowModeCommand());
+    // driverXbox.povLeft().and(RobotModeTriggers.teleop()).onTrue(driveSubsystem.toggleSlowModeCommand());
     
+    // drive in slow mode when in teleop and driver is pressing the POV pad 
+    RobotModeTriggers.teleop().and(() -> driverXbox.getHID().getPOV() != -1).whileTrue(
+      driveSubsystem.driveArcadeCommand(
+        () -> {
+          int pov = driverXbox.getHID().getPOV();
+          if (pov == -1) return 0.0;
+          return Math.cos(Math.toRadians(pov)) * DifferentialConstants.kMaxSlowModeSpeed;
+        },
+        () -> {
+          int pov = driverXbox.getHID().getPOV();
+          if (pov == -1) return 0.0;
+          return -Math.sin(Math.toRadians(pov)) * DifferentialConstants.kMaxSlowModeSpeed;
+        }
+      )
+    );
+
     // show various feedbacks for fun
     driverXbox.povUp().and(RobotModeTriggers.disabled()).onTrue(feedbackSubsystem.teamColorsCommand());
     driverXbox.povRight().and(RobotModeTriggers.disabled()).onTrue(feedbackSubsystem.candyCaneCommand());

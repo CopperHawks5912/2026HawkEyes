@@ -381,7 +381,7 @@ public class DifferentialSubsystem extends SubsystemBase {
   }
 
   /**
-   * Drive the differential in arcade mode (used in teleop)
+   * Drive the differential in arcade mode (used by driver in teleop)
    * @param xSpeed    The forward/backward speed (-1.0 to 1.0)
    * @param zRotation The rotation rate (-1.0 to 1.0)
    */
@@ -666,6 +666,16 @@ public class DifferentialSubsystem extends SubsystemBase {
     return runOnce(() -> this.slowMode = !this.slowMode)
       .withName("ToggleSlowModeDifferential");
   }
+  
+  /**
+   * Command to set the drive controls slow mode on/off
+   * @param slowMode Whether to enable slow mode true = on, false = off
+   * @return Command that sets the drive controls slow mode
+   */
+  public Command setSlowModeCommand(boolean slowMode) {
+    return runOnce(() -> this.slowMode = slowMode)
+      .withName("SetSlowModeDifferential");
+  }
 
   /**
    * Command to aim at the alliance hub using the gyro and pose estimation. 
@@ -738,7 +748,7 @@ public class DifferentialSubsystem extends SubsystemBase {
   }
 
   /**
-   * Command to drive the differential in arcade mode using power percentages.
+   * Command to drive the differential in arcade mode using power percentages (-1 to 1 range).
    * @param xSupplier The forward/backward speed supplier
    * @param rSupplier The rotation rate supplier
    * @return Command that drives the differential in arcade mode
@@ -754,15 +764,15 @@ public class DifferentialSubsystem extends SubsystemBase {
       xSpeed = xSpeedLimiter.calculate(xSpeed);
       rSpeed = rSpeedLimiter.calculate(rSpeed);
 
-      // 3. Scale the inputs to the maximum speeds of the robot
-      if (slowMode) {
-        xSpeed *= DifferentialConstants.kTranslationScalingSlowMode;
-        rSpeed *= DifferentialConstants.kRotationScalingSlowMode;
+      // 3. Clamp the inputs to the maximum speeds of the robot
+      if (isSlowMode()) {
+        xSpeed = MathUtil.clamp(xSpeed, -DifferentialConstants.kMaxSlowModeSpeed, DifferentialConstants.kMaxSlowModeSpeed);
+        rSpeed = MathUtil.clamp(rSpeed, -DifferentialConstants.kMaxSlowModeSpeed, DifferentialConstants.kMaxSlowModeSpeed);
       } else {
-        xSpeed *= DifferentialConstants.kTranslationScaling;
-        rSpeed *= DifferentialConstants.kRotationScaling;
+        xSpeed = MathUtil.clamp(xSpeed, -DifferentialConstants.kMaxTranslationalSpeed, DifferentialConstants.kMaxTranslationalSpeed);
+        rSpeed = MathUtil.clamp(rSpeed, -DifferentialConstants.kMaxRotationalSpeed, DifferentialConstants.kMaxRotationalSpeed);
       }
-
+    
       // 4. Invert controls if the inverted flag is set
       if (inverted) {
         xSpeed = -xSpeed;
@@ -773,48 +783,6 @@ public class DifferentialSubsystem extends SubsystemBase {
       //    arcadeDrive automatically squares inputs for finer control at low speeds
       driveArcade(xSpeed, rSpeed);
     }).withName("DriveArcadeDifferential");
-  }
-
-  /**
-   * Command to drive the differential in arcade mode using PID control.
-   * @param xSupplier The forward/backward speed supplier
-   * @param rSupplier The rotation rate supplier
-   * @return Command that drives the differential in arcade mode using PID control
-   */
-  public Command driveArcadeByPIDCommand(DoubleSupplier xSupplier, DoubleSupplier rSupplier) {
-    return run(() -> {
-      // 1. Apply deadband
-      double xSpeed = MathUtil.applyDeadband(xSupplier.getAsDouble(), DifferentialConstants.kJoystickDeadband);
-      double rSpeed = MathUtil.applyDeadband(rSupplier.getAsDouble(), DifferentialConstants.kJoystickDeadband);
-
-      // 2. Square inputs for finer low-speed control while preserving sign
-      xSpeed = Math.copySign(xSpeed * xSpeed, xSpeed);
-      rSpeed = Math.copySign(rSpeed * rSpeed, rSpeed);
-
-      // 3. Apply slew rate limiters
-      xSpeed = xSpeedLimiter.calculate(xSpeed);
-      rSpeed = rSpeedLimiter.calculate(rSpeed);
-
-      // 4. Scale to real-world units using our constants
-      double xSpeedMps = 0;
-      double rSpeedRadPerSecond = 0;
-      if (slowMode) {
-        xSpeedMps = xSpeed * DifferentialConstants.kMaxSpeedMetersPerSecondSlowMode;
-        rSpeedRadPerSecond = rSpeed * DifferentialConstants.kMaxAngularSpeedRadsPerSecondSlowMode;
-      } else {
-        xSpeedMps = xSpeed * DifferentialConstants.kMaxSpeedMetersPerSecond;
-        rSpeedRadPerSecond = rSpeed * DifferentialConstants.kMaxAngularSpeedRadsPerSecond;
-      }
-
-      // 5. Invert if needed
-      if (inverted) {
-        xSpeedMps = -xSpeedMps;
-        rSpeedRadPerSecond = -rSpeedRadPerSecond;
-      }
-
-      // 6. Drive via ChassisSpeeds => feedforward + PID enforce the actual velocity
-      driveRobotRelative(new ChassisSpeeds(xSpeedMps, 0.0, rSpeedRadPerSecond));
-    }).withName("DriveArcadeByPIDDifferential");
   }
 
   // ==================== Telemetry Methods ====================
