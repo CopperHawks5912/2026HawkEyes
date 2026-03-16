@@ -147,34 +147,34 @@ public final class DifferentialConstants {
   // ==================== PID Constants for Velocity Control ====================
   
   /**
-   * PID proportional gain for velocity control
+   * PID proportional gain for velocity control - used by Pathplanner
    */
   public static final double kP = 1.5; // TODO: Tune this value
 
   /**
-   * PID integral gain for velocity control
+   * PID integral gain for velocity control - used by Pathplanner
    */
   public static final double kI = 0.0; // TODO: Tune this value
   
   /**
-   * PID derivative gain for velocity control
+   * PID derivative gain for velocity control - used by Pathplanner
    */
   public static final double kD = 0.0; // TODO: Tune this value
   
   /**
-   * Feedforward kS - voltage needed to overcome static friction
+   * Feedforward kS - voltage needed to overcome static friction - used by Pathplanner
    * Units: Volts
    */
   public static final double kS = 0.22; // TODO: Use SysId to characterize
   
   /**
-   * Feedforward kV - voltage needed per unit of velocity
+   * Feedforward kV - voltage needed per unit of velocity - used by Pathplanner
    * Units: Volt-seconds/meter
    */
   public static final double kV = 2.6; // TODO: Use SysId to characterize
   
   /**
-   * Feedforward kA - voltage needed per unit of acceleration
+   * Feedforward kA - voltage needed per unit of acceleration - used by Pathplanner
    * Units: Volt-seconds²/meter
    */
   public static final double kA = 0.4; // TODO: Use SysId to characterize
@@ -182,22 +182,22 @@ public final class DifferentialConstants {
   // ==================== PID Constants for Aiming ====================
   
   /**
-   * Aiming PID proportional gain
+   * Aiming PID proportional gain - used by the aimAtHubCommand
    */
   public static final double kAimP = 2.0; // TODO: Tune this value
   
   /**
-   * Aiming PID integral gain
+   * Aiming PID integral gain - used by the aimAtHubCommand
    */
   public static final double kAimI = 0.0;
   
   /**
-   * Aiming PID derivative gain
+   * Aiming PID derivative gain - used by the aimAtHubCommand
    */
   public static final double kAimD = 0.1; // TODO: Tune this value
   
   /**
-   * Aiming tolerance in radians (how close is "good enough")
+   * Aiming tolerance in radians (how close is "good enough") - used by the aimAtHubCommand
    */
   public static final double kAimToleranceRad = Units.degreesToRadians(2.0);
   
