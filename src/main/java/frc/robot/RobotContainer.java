@@ -174,9 +174,9 @@ public class RobotContainer {
     // intake fuel from the ground while holding left trigger
     driverXbox.leftTrigger().whileTrue(fuelSubsystem.intakeCommand());
 
-    // Pass fuel while holding left bumper
+    // pass fuel while holding left bumper
     driverXbox.leftBumper().whileTrue(fuelSubsystem.passCommand());
-
+    // OR
     // drive in slow mode while holding the left bumper down
     // driverXbox.leftBumper()
     //   .onTrue(driveSubsystem.setSlowModeCommand(true))
@@ -202,12 +202,6 @@ public class RobotContainer {
       fuelSubsystem.launchCommand()
     );
 
-    // toggle slow mode with any pov button when in teleop
-    // driverXbox.povUp().and(RobotModeTriggers.teleop()).onTrue(driveSubsystem.toggleSlowModeCommand());
-    // driverXbox.povRight().and(RobotModeTriggers.teleop()).onTrue(driveSubsystem.toggleSlowModeCommand());
-    // driverXbox.povDown().and(RobotModeTriggers.teleop()).onTrue(driveSubsystem.toggleSlowModeCommand());
-    // driverXbox.povLeft().and(RobotModeTriggers.teleop()).onTrue(driveSubsystem.toggleSlowModeCommand());
-    
     // drive in slow mode when in teleop and driver is pressing the POV pad 
     RobotModeTriggers.teleop().and(() -> driverXbox.getHID().getPOV() != -1).whileTrue(
       driveSubsystem.driveArcadeCommand(
