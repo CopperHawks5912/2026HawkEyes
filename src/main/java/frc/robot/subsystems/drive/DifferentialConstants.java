@@ -33,7 +33,7 @@ public final class DifferentialConstants {
   /**
    * The slow mode speed (0.0 to 1.0) - used by driveArcadeCommand
    * This must be greater than the joystick deadband but less
-   * than the max speed and rotation speeds set above.
+   * than the max translational speed and rotation speeds.
    */
   public static final double kMaxSlowModeSpeed = 0.3;
   
