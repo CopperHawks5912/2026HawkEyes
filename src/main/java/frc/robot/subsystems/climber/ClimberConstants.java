@@ -22,7 +22,7 @@ public final class ClimberConstants {
    * Our encoder is attached to the outer gear after the gearbox, so we can set
    * gear ratio to 1.0 since it is measuring the movement of this gear directly.
    */
-  public static final double kGearRatio = 1.0; // TODO: Check your gearbox
+  public static final double kGearRatio = 1.0; // gear ratio = driven gear teeth / driving gear teeth
 
   /**
    * Position conversion factor: converts encoder ticks to degrees
