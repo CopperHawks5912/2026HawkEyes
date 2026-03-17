@@ -78,7 +78,7 @@ public class FuelSubsystem extends SubsystemBase {
 
     // configure intake/launcher motors
     launcherConfig
-      .smartCurrentLimit(60) // amps
+      .smartCurrentLimit(30) // amps
       .voltageCompensation(12)
       .idleMode(IdleMode.kCoast);
 
@@ -118,7 +118,7 @@ public class FuelSubsystem extends SubsystemBase {
 
     // motor output
     feederConfig
-      .smartCurrentLimit(40) // amps
+      .smartCurrentLimit(30) // amps
       .voltageCompensation(12)
       .idleMode(IdleMode.kBrake);
 

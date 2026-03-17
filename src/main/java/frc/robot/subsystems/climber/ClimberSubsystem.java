@@ -60,7 +60,7 @@ public class ClimberSubsystem extends SubsystemBase {
 
     // configure the climber motor
     climbConfig
-      .smartCurrentLimit(40) // amps
+      .smartCurrentLimit(30) // amps
       .voltageCompensation(12) // Consistent behavior across battery voltage
       .idleMode(IdleMode.kBrake); // CRITICAL: Brake mode prevents falling
       
@@ -230,31 +230,31 @@ public class ClimberSubsystem extends SubsystemBase {
    * Fires when climber reaches upper limit
    */
   public final Trigger isAtUpperLimit = new Trigger(() -> isAtUpperLimit() && getSpeed() > 0)
-    .debounce(0.1, Debouncer.DebounceType.kRising);
+    .debounce(0.1, Debouncer.DebounceType.kFalling);
 
   /**
    * Fires when climber reaches lower limit
    */
   public final Trigger isAtLowerLimit = new Trigger(() -> isAtLowerLimit() && getSpeed() < 0)
-    .debounce(0.1, Debouncer.DebounceType.kRising);
+    .debounce(0.1, Debouncer.DebounceType.kFalling);
   
   /**
    * Fires when climber is at level 1 climb position
    */
   public final Trigger isAtLevelOneClimbPosition = new Trigger(this::isAtLevelOneClimbPosition)
-    .debounce(0.1, Debouncer.DebounceType.kRising);
+    .debounce(0.1, Debouncer.DebounceType.kFalling);
   
   /**
    * Fires when climber is at level 2 climb position
    */
   public final Trigger isAtLevelTwoClimbPosition = new Trigger(this::isAtLevelTwoClimbPosition)
-    .debounce(0.1, Debouncer.DebounceType.kRising);
+    .debounce(0.1, Debouncer.DebounceType.kFalling);
   
   /**
    * Fires when climber is stalled
    */
   public final Trigger isStalled = new Trigger(this::isStalled)
-    .debounce(0.1, Debouncer.DebounceType.kRising);
+    .debounce(0.1, Debouncer.DebounceType.kFalling);
   
   // ==================== Command Factories ====================  
   
