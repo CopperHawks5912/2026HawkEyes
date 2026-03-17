@@ -46,7 +46,6 @@ public class RobotContainer {
   private final FeedbackSubsystem feedbackSubsystem = new FeedbackSubsystem(driverXbox);
   private final FuelSubsystem fuelSubsystem = new FuelSubsystem();
   private final DifferentialSubsystem driveSubsystem = new DifferentialSubsystem();
-  @SuppressWarnings("unused")
   private final VisionSubsystem visionSubsystem = new VisionSubsystem(driveSubsystem::addVisionMeasurement);
 
   // Auto choosers
@@ -64,8 +63,9 @@ public class RobotContainer {
    * Initializes all the things... 
    */
   public RobotContainer() {
-    // set our default driving method (arcade - differential drive)
-    driveSubsystem.setDefaultCommand(driveSubsystem.driveArcadeCommand(
+    // set our default driving method
+    // if we want to switch to arcade drive mode, also update line 207
+    driveSubsystem.setDefaultCommand(driveSubsystem.driveCurvatureCommand(
       () -> -1 * driverXbox.getLeftY(),
       () -> -1 * driverXbox.getRightX()
     ));
@@ -204,7 +204,7 @@ public class RobotContainer {
 
     // drive in slow mode when in teleop and driver is pressing the POV pad 
     RobotModeTriggers.teleop().and(() -> driverXbox.getHID().getPOV() != -1).whileTrue(
-      driveSubsystem.driveArcadeCommand(
+      driveSubsystem.driveCurvatureCommand(
         () -> {
           int pov = driverXbox.getHID().getPOV();
           if (pov == -1) return 0.0;

@@ -393,6 +393,19 @@ public class DifferentialSubsystem extends SubsystemBase {
   }
 
   /**
+   * Drive the differential in curvature mode (used by driver for finer control at low speeds)
+   * @param xSpeed The forward/backward speed (-1.0 to 1.0)
+   * @param zRotation The rotation rate (-1.0 to 1.0)
+   */
+  private void driveCurvature(double xSpeed, double zRotation) {
+    drive.curvatureDrive(
+      MathUtil.clamp(xSpeed, -1.0, 1.0),
+      MathUtil.clamp(zRotation, -1.0, 1.0),
+      Math.abs(xSpeed) < DifferentialConstants.kQuickTurnThreshold
+    );
+  }
+
+  /**
    * Drive the robot using robot-relative chassis speeds with feedforward and PID control.
    * @param speeds The desired robot-relative chassis speeds
    */
@@ -706,7 +719,14 @@ public class DifferentialSubsystem extends SubsystemBase {
       //  3. and takes the shortest path to the target angle
       double rotationSpeed = aimPIDController.calculate(
         currentPose.getRotation().getRadians(),
-        targetAngle.getRadians() + Math.PI
+        MathUtil.angleModulus(targetAngle.getRadians() + Math.PI)
+      );
+
+      // Clamp the rotation speed to the maximum rotational speed of the robot
+      rotationSpeed = MathUtil.clamp(
+        rotationSpeed, 
+        -DifferentialConstants.kMaxAngularSpeedRadsPerSecond, 
+        DifferentialConstants.kMaxAngularSpeedRadsPerSecond
       );
 
       // Drive the robot with the calculated rotation speed only
@@ -783,6 +803,47 @@ public class DifferentialSubsystem extends SubsystemBase {
       //    arcadeDrive automatically squares inputs for finer control at low speeds
       driveArcade(xSpeed, rSpeed);
     }).withName("DriveArcadeDifferential");
+  }
+
+  /**
+   * Command to drive the differential in curvature mode using power percentages (-1 to 1 range).
+   * @param xSupplier The forward/backward speed supplier
+   * @param rSupplier The rotation rate supplier
+   * @return Command that drives the differential in curvature mode
+   */
+  public Command driveCurvatureCommand(DoubleSupplier xSupplier, DoubleSupplier rSupplier) {
+    return run(() -> {
+      // 1. Apply deadband to the raw joystick inputs.
+      //    This ignores noise from the joystick when it's in the neutral position.
+      double xSpeed = MathUtil.applyDeadband(xSupplier.getAsDouble(), DifferentialConstants.kJoystickDeadband);
+      double rSpeed = MathUtil.applyDeadband(rSupplier.getAsDouble(), DifferentialConstants.kJoystickDeadband);
+
+      // 2. Square inputs for finer low-speed control while preserving sign
+      xSpeed = Math.copySign(xSpeed * xSpeed, xSpeed);
+      rSpeed = Math.copySign(rSpeed * rSpeed, rSpeed);
+
+      // 3. Apply slew rate limiters for a smoother acceleration ramp 
+      xSpeed = xSpeedLimiter.calculate(xSpeed);
+      rSpeed = rSpeedLimiter.calculate(rSpeed);
+
+      // 4. Clamp the inputs to the maximum speeds of the robot
+      if (isSlowMode()) {
+        xSpeed = MathUtil.clamp(xSpeed, -DifferentialConstants.kMaxSlowModeSpeed, DifferentialConstants.kMaxSlowModeSpeed);
+        rSpeed = MathUtil.clamp(rSpeed, -DifferentialConstants.kMaxSlowModeSpeed, DifferentialConstants.kMaxSlowModeSpeed);
+      } else {
+        xSpeed = MathUtil.clamp(xSpeed, -DifferentialConstants.kMaxTranslationalSpeed, DifferentialConstants.kMaxTranslationalSpeed);
+        rSpeed = MathUtil.clamp(rSpeed, -DifferentialConstants.kMaxRotationalSpeed, DifferentialConstants.kMaxRotationalSpeed);
+      }
+    
+      // 5. Invert controls if the inverted flag is set
+      if (inverted) {
+        xSpeed = -xSpeed;
+        rSpeed = -rSpeed;
+      }
+
+      // 6. Drive the robot using the processed inputs (-1 to 1 range),
+      driveCurvature(xSpeed, rSpeed);
+    }).withName("DriveCurvatureDifferential");
   }
 
   // ==================== Telemetry Methods ====================

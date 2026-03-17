@@ -29,6 +29,11 @@ public final class DifferentialConstants {
    * with joysticks for safety or driver preference.
    */
   public static final double kMaxRotationalSpeed = 0.6;
+
+  /**
+   * Quick turn threshold (0.0 to 1.0) - used by driveCurvatureCommand
+   */
+  public static final double kQuickTurnThreshold = 0.2;
   
   /**
    * The slow mode speed (0.0 to 1.0) - used by driveArcadeCommand
