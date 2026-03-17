@@ -40,14 +40,16 @@ public final class ClimberConstants {
   public static final double kUpPercent                 =  0.80;  // Power for climbing up
   public static final double kDownPercent               = -0.80;  // Power for climbing down (negative)
   
-  // Soft limits (in encoder rotations)
-  // Set these based on your climber's physical range of motion
+  // It is crucial to set these limits correctly to prevent mechanical damage. 
+  // Limits should be based on zero being when the climber is straight up.
+  // If the climber is zeroed in a different position, then the chain 
+  // tensioner may contact the climber gears and cause damage.
   public static final double kUpperLimitDegrees         = -258.0; // Maximum extension
   public static final double kLowerLimitDegrees         =  258.0; // Fully retracted
   public static final double kHomeDegrees               =   0.0;  // Home position
   public static final double kLevelOneClimbDegrees      =  38.0;  // Level 1 climb position
   public static final double kLevelTwoClimbDegrees      =  60.0;  // Level 2 climb position
-  public static final double kPositionToleranceDegrees  =   5.0;  // Tolerance for position control (in degrees)
+  public static final double kPositionToleranceDegrees  =   2.0;  // Tolerance for position control (in degrees)
   
   // Stall detection thresholds
   public static final double kStallCurrentThreshold     = 38.0;   // Amps - indicates motor is working hard
