@@ -325,8 +325,41 @@ public class ClimberSubsystem extends SubsystemBase {
   }
   
   /**
-   * Command to reset encoder to zero at current position
-   * Use this when climber is at a known position (e.g., at home position)
+   * Command the climber to move to the level one climb position
+   * @return Command that moves to the level one climb position then stops
+   */
+  public Command levelOneClimbCommand() {
+    return run(() -> {
+      if (getPosition() < ClimberConstants.kLevelOneClimbDegrees) {
+        setPower(ClimberConstants.kDownPercent);
+      } else {
+        setPower(ClimberConstants.kUpPercent);
+      }
+    })
+    .until(this::isAtLevelOneClimbPosition)
+    .finallyDo(this::stop)
+    .withName("LevelOneClimbClimber");
+  }
+  
+  /**
+   * Command the climber to move to the level two climb position
+   * @return Command that moves to the level two climb position then stops
+   */
+  public Command levelTwoClimbCommand() {
+    return run(() -> {
+      if (getPosition() < ClimberConstants.kLevelTwoClimbDegrees) {
+        setPower(ClimberConstants.kDownPercent);
+      } else {
+        setPower(ClimberConstants.kUpPercent);
+      }
+    })
+    .until(this::isAtLevelTwoClimbPosition)
+    .finallyDo(this::stop)
+    .withName("LevelTwoClimbClimber");
+  }
+  
+  /**
+   * Command to reset the encoder to zero at the current position
    * @return Command that resets the encoder
    */
   public Command setHomePositionCommand() {
