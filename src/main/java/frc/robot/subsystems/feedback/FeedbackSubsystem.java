@@ -315,7 +315,7 @@ public class FeedbackSubsystem extends SubsystemBase {
       }
       else {
         // default to off
-        setAllLEDs(Color.kBlack);
+        setAllLEDs(allianceColor);
       }
     }
 
