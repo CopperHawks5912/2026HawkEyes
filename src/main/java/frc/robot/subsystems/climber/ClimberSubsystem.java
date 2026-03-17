@@ -163,7 +163,7 @@ public class ClimberSubsystem extends SubsystemBase {
   }
   
   /**
-   * Check if climber is at upper soft limit
+   * Check if climber is at or above upper position limit
    * @return true if at or past upper limit
    */
   private boolean isAtUpperLimit() {
@@ -171,7 +171,7 @@ public class ClimberSubsystem extends SubsystemBase {
   }
   
   /**
-   * Check if climber is at lower soft limit
+   * Check if climber is at or below lower position limit
    * @return true if at or past lower limit
    */
   private boolean isAtLowerLimit() {
