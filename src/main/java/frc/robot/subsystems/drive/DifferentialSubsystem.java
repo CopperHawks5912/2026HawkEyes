@@ -396,12 +396,13 @@ public class DifferentialSubsystem extends SubsystemBase {
    * Drive the differential in curvature mode (used by driver for finer control at low speeds)
    * @param xSpeed The forward/backward speed (-1.0 to 1.0)
    * @param zRotation The rotation rate (-1.0 to 1.0)
+   * @param quickTurn Whether to enable quick turn mode
    */
-  private void driveCurvature(double xSpeed, double zRotation) {
+  private void driveCurvature(double xSpeed, double zRotation, boolean quickTurn) {
     drive.curvatureDrive(
       MathUtil.clamp(xSpeed, -1.0, 1.0),
       MathUtil.clamp(zRotation, -1.0, 1.0),
-      Math.abs(xSpeed) < DifferentialConstants.kQuickTurnThreshold
+      quickTurn
     );
   }
 
@@ -818,6 +819,9 @@ public class DifferentialSubsystem extends SubsystemBase {
       double xSpeed = MathUtil.applyDeadband(xSupplier.getAsDouble(), DifferentialConstants.kJoystickDeadband);
       double rSpeed = MathUtil.applyDeadband(rSupplier.getAsDouble(), DifferentialConstants.kJoystickDeadband);
 
+      // Determine if we should be in quick turn mode (allows for sharper turns at low speeds)
+      boolean quickTurn = Math.abs(xSupplier.getAsDouble()) < DifferentialConstants.kQuickTurnThreshold;
+
       // 2. Square inputs for finer low-speed control while preserving sign
       xSpeed = Math.copySign(xSpeed * xSpeed, xSpeed);
       rSpeed = Math.copySign(rSpeed * rSpeed, rSpeed);
@@ -842,7 +846,7 @@ public class DifferentialSubsystem extends SubsystemBase {
       }
 
       // 6. Drive the robot using the processed inputs (-1 to 1 range),
-      driveCurvature(xSpeed, rSpeed);
+      driveCurvature(xSpeed, rSpeed, quickTurn);
     }).withName("DriveCurvatureDifferential");
   }
 
