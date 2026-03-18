@@ -44,7 +44,7 @@ public final class ClimberConstants {
   // Limits should be based on zero being when the climber is straight up.
   // If the climber is zeroed in a different position, then the chain 
   // tensioner may contact the climber gears and cause damage.
-  public static final double kUpperLimitDegrees         =  -80.0; // Maximum up was -250
+  public static final double kUpperLimitDegrees         =  -75.0; // Maximum up was -250
   public static final double kLowerLimitDegrees         =   95.0; // Maximum down was 200
   public static final double kHomeDegrees               =    0.0; // Home position
   public static final double kLevelOneClimbDegrees      =   45.0; // Level 1 climb position was 34

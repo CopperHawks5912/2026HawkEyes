@@ -230,31 +230,31 @@ public class ClimberSubsystem extends SubsystemBase {
    * Fires when climber reaches upper limit
    */
   public final Trigger isAtUpperLimit = new Trigger(this::isAtUpperLimit)
-    .debounce(0.1, Debouncer.DebounceType.kFalling);
+    .debounce(0.1, Debouncer.DebounceType.kRising);
 
   /**
    * Fires when climber reaches lower limit
    */
   public final Trigger isAtLowerLimit = new Trigger(this::isAtLowerLimit)
-    .debounce(0.1, Debouncer.DebounceType.kFalling);
+    .debounce(0.1, Debouncer.DebounceType.kRising);
   
   /**
    * Fires when climber is at level 1 climb position
    */
   public final Trigger isAtLevelOneClimbPosition = new Trigger(this::isAtLevelOneClimbPosition)
-    .debounce(0.1, Debouncer.DebounceType.kFalling);
+    .debounce(0.1, Debouncer.DebounceType.kRising);
   
   /**
    * Fires when climber is at level 2 climb position
    */
   public final Trigger isAtLevelTwoClimbPosition = new Trigger(this::isAtLevelTwoClimbPosition)
-    .debounce(0.1, Debouncer.DebounceType.kFalling);
+    .debounce(0.1, Debouncer.DebounceType.kRising);
   
   /**
    * Fires when climber is stalled
    */
   public final Trigger isStalled = new Trigger(this::isStalled)
-    .debounce(0.1, Debouncer.DebounceType.kFalling);
+    .debounce(0.1, Debouncer.DebounceType.kRising);
   
   // ==================== Command Factories ====================  
   
