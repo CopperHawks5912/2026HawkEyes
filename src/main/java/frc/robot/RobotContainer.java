@@ -14,6 +14,7 @@ import com.pathplanner.lib.commands.PathfindingCommand;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -285,10 +286,10 @@ public class RobotContainer {
     ));
 
     // show feedback when climber is at upper limit
-    climberSubsystem.isAtUpperLimit.onTrue(feedbackSubsystem.warningCommand());
+    climberSubsystem.isAtUpperLimit.and(driverXbox.y()).onTrue(feedbackSubsystem.warningCommand());
 
     // show feedback when climber is at lower limit
-    climberSubsystem.isAtLowerLimit.onTrue(feedbackSubsystem.warningCommand());
+    climberSubsystem.isAtLowerLimit.and(driverXbox.b()).onTrue(feedbackSubsystem.warningCommand());
 
     // show feedback when climber is at level 1 climb position
     climberSubsystem.isAtLevelOneClimbPosition.onTrue(feedbackSubsystem.infoCommand());
