@@ -34,7 +34,7 @@ public final class FeedbackConstants {
   public static final Color ErrorColor = Color.kRed;
       
   /** Team color - Green */
-  public static final Color TeamGreen = new Color(0.0, 0.8, 0.2);
+  public static final Color TeamGreen = new Color(0.0, 1.0, 0.0);
 
   /** Team color - Copper */
   public static final Color TeamCopper = new Color(0.72, 0.45, 0.20);

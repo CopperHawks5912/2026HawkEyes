@@ -176,12 +176,12 @@ public class RobotContainer {
     driverXbox.leftTrigger().whileTrue(fuelSubsystem.intakeCommand());
 
     // pass fuel while holding left bumper
-    driverXbox.leftBumper().whileTrue(fuelSubsystem.passCommand());
+    // driverXbox.leftBumper().whileTrue(fuelSubsystem.passCommand());
     // OR
     // drive in slow mode while holding the left bumper down
-    // driverXbox.leftBumper()
-    //   .onTrue(driveSubsystem.setSlowModeCommand(true))
-    //   .onFalse(driveSubsystem.setSlowModeCommand(false));
+    driverXbox.leftBumper()
+      .onTrue(driveSubsystem.setSlowModeCommand(true))
+      .onFalse(driveSubsystem.setSlowModeCommand(false));
 
     // launch fuel based on dynamically calculated distance from hub (requires vision)
     driverXbox.rightTrigger().and(visionSubsystem::isEnabled).whileTrue(
@@ -204,20 +204,20 @@ public class RobotContainer {
     );
 
     // drive in slow mode when in teleop and driver is pressing the POV pad 
-    RobotModeTriggers.teleop().and(() -> driverXbox.getHID().getPOV() != -1).whileTrue(
-      driveSubsystem.driveCurvatureCommand(
-        () -> {
-          int pov = driverXbox.getHID().getPOV();
-          if (pov == -1) return 0.0;
-          return Math.cos(Math.toRadians(pov)) * DifferentialConstants.kMaxSlowModeSpeed;
-        },
-        () -> {
-          int pov = driverXbox.getHID().getPOV();
-          if (pov == -1) return 0.0;
-          return -Math.sin(Math.toRadians(pov)) * DifferentialConstants.kMaxSlowModeSpeed;
-        }
-      )
-    );
+    // RobotModeTriggers.teleop().and(() -> driverXbox.getHID().getPOV() != -1).whileTrue(
+    //   driveSubsystem.driveCurvatureCommand(
+    //     () -> {
+    //       int pov = driverXbox.getHID().getPOV();
+    //       if (pov == -1) return 0.0;
+    //       return Math.cos(Math.toRadians(pov)) * DifferentialConstants.kMaxSlowModeSpeed;
+    //     },
+    //     () -> {
+    //       int pov = driverXbox.getHID().getPOV();
+    //       if (pov == -1) return 0.0;
+    //       return -Math.sin(Math.toRadians(pov)) * DifferentialConstants.kMaxSlowModeSpeed;
+    //     }
+    //   )
+    // );
 
     // show various feedbacks for fun
     driverXbox.povUp().and(RobotModeTriggers.disabled()).onTrue(feedbackSubsystem.teamColorsCommand());
