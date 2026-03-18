@@ -382,26 +382,26 @@ public class DifferentialSubsystem extends SubsystemBase {
 
   /**
    * Drive the differential in arcade mode (used by driver in teleop)
-   * @param xSpeed    The forward/backward speed (-1.0 to 1.0)
-   * @param zRotation The rotation rate (-1.0 to 1.0)
+   * @param xSpeed The forward/backward speed (-1.0 to 1.0)
+   * @param rSpeed The rotation rate (-1.0 to 1.0)
    */
-  private void driveArcade(double xSpeed, double zRotation) {
+  private void driveArcade(double xSpeed, double rSpeed) {
     drive.arcadeDrive(
       MathUtil.clamp(xSpeed, -1.0, 1.0), 
-      MathUtil.clamp(zRotation, -1.0, 1.0)
+      MathUtil.clamp(rSpeed, -1.0, 1.0)
     );
   }
 
   /**
    * Drive the differential in curvature mode (used by driver for finer control at low speeds)
    * @param xSpeed The forward/backward speed (-1.0 to 1.0)
-   * @param zRotation The rotation rate (-1.0 to 1.0)
+   * @param rSpeed The rotation rate (-1.0 to 1.0)
    * @param quickTurn Whether to enable quick turn mode
    */
-  private void driveCurvature(double xSpeed, double zRotation, boolean quickTurn) {
+  private void driveCurvature(double xSpeed, double rSpeed, boolean quickTurn) {
     drive.curvatureDrive(
       MathUtil.clamp(xSpeed, -1.0, 1.0),
-      MathUtil.clamp(zRotation, -1.0, 1.0),
+      MathUtil.clamp(rSpeed, -1.0, 1.0),
       quickTurn
     );
   }
