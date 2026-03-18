@@ -22,7 +22,7 @@ public final class ClimberConstants {
    * Our encoder is attached to the outer gear after the gearbox, so we can set
    * gear ratio to 1.0 since it is measuring the movement of this gear directly.
    */
-  public static final double kGearRatio = 1.0; // gear ratio = driven gear teeth / driving gear teeth
+  public static final double kGearRatio = 28 / 10; // 1.0; // gear ratio = driven gear teeth / driving gear teeth
 
   /**
    * Position conversion factor: converts encoder ticks to degrees
@@ -44,14 +44,14 @@ public final class ClimberConstants {
   // Limits should be based on zero being when the climber is straight up.
   // If the climber is zeroed in a different position, then the chain 
   // tensioner may contact the climber gears and cause damage.
-  public static final double kUpperLimitDegrees         = -250.0; // Maximum up
-  public static final double kLowerLimitDegrees         =  300.0; // Maximum down
+  public static final double kUpperLimitDegrees         =  -80.0; // Maximum up was -250
+  public static final double kLowerLimitDegrees         =   95.0; // Maximum down was 200
   public static final double kHomeDegrees               =    0.0; // Home position
-  public static final double kLevelOneClimbDegrees      =   34.0; // Level 1 climb position
+  public static final double kLevelOneClimbDegrees      =   45.0; // Level 1 climb position was 34
   public static final double kLevelTwoClimbDegrees      =   60.0; // Level 2 climb position
   public static final double kPositionToleranceDegrees  =    2.0; // Tolerance for climber positions (in degrees)
 
   // Stall detection thresholds
-  public static final double kStallCurrentThreshold     = 38.0;   // Amps - indicates motor is working hard
+  public static final double kStallCurrentThreshold     = 28.0;   // Amps - indicates motor is working hard
   public static final double kStallVelocityThreshold    = 1.0;    // Degrees/sec - indicates motor not moving
 }
