@@ -393,7 +393,7 @@ public class DifferentialSubsystem extends SubsystemBase {
   }
 
   /**
-   * Drive the differential in curvature mode (used by driver for finer control at low speeds)
+   * Drive the differential in curvature mode (used by driver in teleop)
    * @param xSpeed The forward/backward speed (-1.0 to 1.0)
    * @param rSpeed The rotation rate (-1.0 to 1.0)
    * @param quickTurn Whether to enable quick turn mode
