@@ -28,7 +28,7 @@ public final class Constants {
    */
   public static final class CANConstants {
     // NavX 3 gyro (recommended to be on ID 0 for better stability)
-    public static final int kGyroID                             = 9;
+    public static final int kGyroID                             = 0;
 
     // Fuel subsystem motors
     public static final int kLeftIntakeLauncherMotorID          = 8;
