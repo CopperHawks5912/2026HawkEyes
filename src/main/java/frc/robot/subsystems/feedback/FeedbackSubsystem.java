@@ -67,10 +67,6 @@ public class FeedbackSubsystem extends SubsystemBase {
     ledStrip.setLength(ledBuffer.getLength());
     ledStrip.setData(ledBuffer);
     ledStrip.start();
-
-    // Set default command to display
-    // I think this is causing issues with animated patterns not displaying
-    // setDefaultCommand(scoringShiftCommand());
     
     // Output initialization progress
     Utils.logInfo("Feedback subsystem initialized");
