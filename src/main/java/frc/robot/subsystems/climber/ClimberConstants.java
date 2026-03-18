@@ -47,8 +47,8 @@ public final class ClimberConstants {
   public static final double kUpperLimitDegrees         =  -75.0; // Maximum up was -250
   public static final double kLowerLimitDegrees         =   95.0; // Maximum down was 200
   public static final double kHomeDegrees               =    0.0; // Home position
-  public static final double kLevelOneClimbDegrees      =   45.0; // Level 1 climb position was 34
-  public static final double kLevelTwoClimbDegrees      =   60.0; // Level 2 climb position
+  public static final double kLevelOneClimbDegrees      =  -34.0; // Level 1 climb position was 34
+  public static final double kLevelTwoClimbDegrees      =  -60.0; // Level 2 climb position
   public static final double kPositionToleranceDegrees  =    2.0; // Tolerance for climber positions (in degrees)
 
   // Stall detection thresholds
