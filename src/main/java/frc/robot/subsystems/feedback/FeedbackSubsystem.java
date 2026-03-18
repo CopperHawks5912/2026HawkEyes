@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -289,14 +290,22 @@ public class FeedbackSubsystem extends SubsystemBase {
    * Sets LEDs to yellow (collect fuel) when it is not our turn to score.
    */
   private void scoringShiftPattern() {
-    // current remaining match time
-    double time = DriverStation.getMatchTime();
+    // Use real match time if FMS attached, otherwise simulate from FPGA timestamp
+    double time = DriverStation.isFMSAttached() 
+      ? DriverStation.getMatchTime()
+      : 140.0 - (Timer.getFPGATimestamp() % 140.0); // counts down from 140 seconds
 
     // set our alliance color
     Color allianceColor = Utils.isRedAlliance() ? Color.kRed : Color.kBlue;
 
     // color to indicate inactive hub (collect fuel)
     Color inactiveColor = Color.kYellow;
+
+    // if no game data, just show alliance color solid
+    if (gameData == '?') {
+      setAllLEDs(allianceColor);
+      return;
+    }
 
     // autonomous period 20 seconds (both alliances can score)
     if (gameData == 'A') {
