@@ -435,9 +435,18 @@ public class FeedbackSubsystem extends SubsystemBase {
   }
   
   /**
+   * Command to set off feedback
+   * @return Command that sets LED display off
+   */
+  public Command offCommand() {
+    return setDisplayCommand(DisplayMode.OFF)
+      .withName("OffFeedback");
+  }
+  
+  /**
    * Command to indicate error state for a short duration and
    * then revert to the previous display mode.
-   * @return Command with LED and rumble feedback
+   * @return Command with error LED and rumble feedback
    */
   public Command errorCommand() {
     return runOnce(() -> {
@@ -455,7 +464,7 @@ public class FeedbackSubsystem extends SubsystemBase {
   /**
    * Command to indicate warning state for a short duration and
    * then revert to the previous display mode.
-   * @return Command with LED and rumble feedback
+   * @return Command with warning LED and rumble feedback
    */
   public Command warningCommand() {
     return runOnce(() -> {
@@ -473,7 +482,7 @@ public class FeedbackSubsystem extends SubsystemBase {
   /**
    * Command to indicate info state for a short duration and
    * then revert to the previous display mode.
-   * @return Command with LED and rumble feedback
+   * @return Command with info LED and rumble feedback
    */
   public Command infoCommand() {
     return runOnce(() -> {
@@ -499,7 +508,7 @@ public class FeedbackSubsystem extends SubsystemBase {
   
   /**
    * Command to display team colors gradient
-   * @return Command that shows green-to-copper gradient chase
+   * @return Command that pulses between green & copper
    */
   public Command teamColorsCommand() {
     return setDisplayCommand(DisplayMode.TEAM_COLORS)

@@ -206,7 +206,7 @@ public class RobotContainer {
     driverXbox.povUp().and(RobotModeTriggers.disabled()).onTrue(feedbackSubsystem.teamColorsCommand());
     driverXbox.povRight().and(RobotModeTriggers.disabled()).onTrue(feedbackSubsystem.candyCaneCommand());
     driverXbox.povDown().and(RobotModeTriggers.disabled()).onTrue(feedbackSubsystem.funkyDiscoCommand());
-    driverXbox.povLeft().and(RobotModeTriggers.disabled()).onTrue(feedbackSubsystem.idleCommand());
+    driverXbox.povLeft().and(RobotModeTriggers.disabled()).onTrue(feedbackSubsystem.offCommand());
   }
 
   /**

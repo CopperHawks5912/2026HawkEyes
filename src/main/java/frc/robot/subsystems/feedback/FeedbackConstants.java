@@ -37,7 +37,7 @@ public final class FeedbackConstants {
   public static final Color TeamGreen = new Color(0.0, 1.0, 0.0);
 
   /** Team color - Copper */
-  public static final Color TeamCopper = new Color(255.0, 68.0, 0.0);
+  public static final Color TeamCopper = new Color(255.0, 38.0, 0.0);
       
   /**
    * Enum representing different LED display modes
