@@ -194,7 +194,7 @@ public class FeedbackSubsystem extends SubsystemBase {
   }
   
   /**
-   * Team colors pattern that fades orange in/out then green in/out repeatedly
+   * Team colors pattern that fades between green & orange repeatedly
    */
   private void teamColorsPattern() {
     double phaseDuration = 1.5; // seconds per full pulse
