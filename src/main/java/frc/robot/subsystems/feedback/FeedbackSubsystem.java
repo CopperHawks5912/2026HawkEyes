@@ -474,8 +474,8 @@ public class FeedbackSubsystem extends SubsystemBase {
       }
       setDisplayMode(DisplayMode.ERROR);
     })
-    .andThen(rumbleCommand(1.0, 0.5))
-    .andThen(Commands.waitSeconds(0.5))
+    .andThen(strongRumbleCommand())
+    .andThen(Commands.waitSeconds(0.6))
     .andThen(setDisplayCommand(previousMode))
     .withName("ErrorFeedback");
   }
@@ -510,8 +510,8 @@ public class FeedbackSubsystem extends SubsystemBase {
       }
       setDisplayMode(DisplayMode.INFO);
     })
-    .andThen(rumbleCommand(0.4, 0.3))
-    .andThen(Commands.waitSeconds(0.7))
+    .andThen(quickRumbleCommand())
+    .andThen(Commands.waitSeconds(0.8))
     .andThen(setDisplayCommand(previousMode))
     .withName("InfoFeedback");
   }
