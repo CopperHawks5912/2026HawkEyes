@@ -149,28 +149,14 @@ public class FeedbackSubsystem extends SubsystemBase {
       ledBuffer.setLED(i, color);
     }
   }
-    
-  /**
-   * Interpolate between two colors
-   * @param color1 Starting color
-   * @param color2 Ending color
-   * @param t Position in gradient (0.0 to 1.0)
-   * @return Interpolated color
-   */
-  private Color interpolateColor(Color color1, Color color2, double t) {
-    double r = color1.red + (color2.red - color1.red) * t;
-    double g = color1.green + (color2.green - color1.green) * t;
-    double b = color1.blue + (color2.blue - color1.blue) * t;
-    return new Color(r, g, b);
-  }
   
   /**
    * Pulse pattern that fades in and out
    * @param color Base color
    * @param period Time for one complete pulse cycle in seconds
    */
-  private void pulsePattern(Color color, double period) {
-    double brightness = (Math.sin(animationTimer * 2 * Math.PI / period) + 1) / 2;
+  private void pulsePattern(Color color, double period, double timeOffset) {
+    double brightness = (Math.sin((animationTimer - timeOffset) * 2 * Math.PI / period) + 1) / 2;
     Color scaledColor = new Color(
       color.red * brightness,
       color.green * brightness,
@@ -208,30 +194,16 @@ public class FeedbackSubsystem extends SubsystemBase {
   }
   
   /**
-   * Team colors gradient pattern that chases across the strip
-   * Creates a smooth green-to-copper gradient that moves along the LEDs
+   * Team colors pattern that fades orange in/out then green in/out repeatedly
    */
   private void teamColorsPattern() {
-    // Calculate offset directly from time
-    animationOffset = (int)(animationTimer * 10) % ledBuffer.getLength(); // 10 pixels/second
-      
-    // Length of one complete gradient cycle (in LEDs)
-    int gradientLength = ledBuffer.getLength() / 2;
-    
-    for (int i = 0; i < ledBuffer.getLength(); i++) {
-      // Calculate position in gradient with offset for chase effect
-      int position = (i + animationOffset) % gradientLength;
-      double gradientPosition = (double)position / gradientLength;
-      
-      // Interpolate between green and copper
-      Color interpolatedColor = interpolateColor(
-        FeedbackConstants.TeamGreen,
-        FeedbackConstants.TeamCopper,
-        gradientPosition
-      );
-      
-      // Set the LED color
-      ledBuffer.setLED(i, interpolatedColor);
+    double phaseDuration = 1.5; // seconds per full pulse
+    double cycleTime = animationTimer % (phaseDuration * 2);
+
+    if (cycleTime < phaseDuration) {
+      pulsePattern(FeedbackConstants.TeamCopper, phaseDuration, 0);
+    } else {
+      pulsePattern(FeedbackConstants.TeamGreen, phaseDuration, phaseDuration);
     }
   }
   
@@ -315,7 +287,7 @@ public class FeedbackSubsystem extends SubsystemBase {
       }
       else if (time <= 5 && time > 0) {
         // autonomous - last 5 seconds (both alliances can score)
-        pulsePattern(allianceColor, 0.35);
+        pulsePattern(allianceColor, 0.35, 0);
       }
       else {
         // default to off
@@ -338,7 +310,7 @@ public class FeedbackSubsystem extends SubsystemBase {
       }
       else if (time <= 135 && time > 130) {
         // transition shift - last 5 seconds (both alliances can score)
-        pulsePattern(allianceColor, 0.35);
+        pulsePattern(allianceColor, 0.35, 0);
       }
       else if (time <= 130 && time > 110) {
         // shift 1
@@ -346,7 +318,7 @@ public class FeedbackSubsystem extends SubsystemBase {
       }
       else if (time <= 110 && time > 105) {
         // shift 1 - last 5 seconds
-        pulsePattern(isInactiveFirst ? inactiveColor : allianceColor, 0.35);
+        pulsePattern(isInactiveFirst ? inactiveColor : allianceColor, 0.35, 0);
       }
       else if (time <= 105 && time > 85) {
         // shift 2
@@ -354,7 +326,7 @@ public class FeedbackSubsystem extends SubsystemBase {
       }
       else if (time <= 85 && time > 80) {
         // shift 2 - last 5 seconds
-        pulsePattern(isInactiveFirst ? allianceColor : inactiveColor, 0.35);
+        pulsePattern(isInactiveFirst ? allianceColor : inactiveColor, 0.35, 0);
       }
       else if (time <= 80 && time > 60) {
         // shift 3
@@ -362,7 +334,7 @@ public class FeedbackSubsystem extends SubsystemBase {
       }
       else if (time <= 60 && time > 55) {
         // shift 3 - last 5 seconds
-        pulsePattern(isInactiveFirst ? inactiveColor : allianceColor, 0.35);
+        pulsePattern(isInactiveFirst ? inactiveColor : allianceColor, 0.35, 0);
       }
       else if (time <= 55 && time > 35) {
         // shift 4
@@ -370,7 +342,7 @@ public class FeedbackSubsystem extends SubsystemBase {
       }
       else if (time <= 35 && time > 30) {
         // shift 4 - last 5 seconds
-        pulsePattern(isInactiveFirst ? allianceColor : inactiveColor, 0.35);
+        pulsePattern(isInactiveFirst ? allianceColor : inactiveColor, 0.35, 0);
       }
       else if (time <= 30 && time > 5) {
         // end game (both alliances can score)
@@ -378,7 +350,7 @@ public class FeedbackSubsystem extends SubsystemBase {
       }
       else if (time <= 5 && time > 0) {
         // end game - last 5 seconds (both alliances can score)
-        pulsePattern(allianceColor, 0.35);
+        pulsePattern(allianceColor, 0.35, 0);
       }
       else {
         // default to off
