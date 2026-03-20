@@ -585,6 +585,37 @@ public class DifferentialSubsystem extends SubsystemBase {
   }
 
   /**
+   * Initialize the drive for autonomous mode. This resets odometry, sets motor brake mode, 
+   * and ensures controls are not inverted. This should be called at the start of 
+   * autonomous to ensure the drive is in a known state.
+   */
+  public void autonomousInit() {
+    resetOdometry();
+    setMotorBrake(true);
+    inverted = false;
+  }
+
+  /**
+   * Initialize the drive for teleop mode. This resets motor brake mode, and ensures 
+   * controls are not inverted. This should be called at the start of teleop to 
+   * ensure the drive is in a known state.
+   */
+  public void teleopInit() {
+    setMotorBrake(true);
+    inverted = false;
+  }
+
+  /**
+   * Initialize the drive for post-match mode. This resets motor brake mode, and ensures 
+   * controls are not inverted. This should be called at the end of the match to 
+   * ensure the drive is in a known state.
+   */
+  public void postMatchInit() {
+    setMotorBrake(false);
+    inverted = false;
+  }
+
+  /**
    * Get the distance to the current alliance hub
    * @return Distance in meters to the alliance hub
    */
@@ -604,42 +635,6 @@ public class DifferentialSubsystem extends SubsystemBase {
   public Command stopCommand() {
     return runOnce(this::stop)
       .withName("StopDifferential");
-  }
-
-  /**
-   * Command factory for binding to initAutonomous
-   */
-  public Command autonomousInitCommand() {
-    return runOnce(() -> {
-      resetOdometry();
-      setMotorBrake(true);
-      inverted = false;
-    })
-    .withName("AutonomousInitDifferential");
-  }
-
-  /**
-   * Command factory for binding to initTeleop
-   */
-  public Command teleopInitCommand() {
-    return runOnce(() -> {
-      setMotorBrake(true);
-      inverted = false;
-    })
-    .withName("TeleopInitDifferential");
-  }
-
-  /**
-   * Command factory for binding to end of match
-   */
-  public Command postMatchCommand() {
-    return Commands.waitSeconds(5.0)
-      .andThen(runOnce(() -> {
-        setMotorBrake(false);
-        inverted = false;
-      }))
-      .ignoringDisable(true)
-      .withName("EndOfMatchDifferential");
   }
 
   /**

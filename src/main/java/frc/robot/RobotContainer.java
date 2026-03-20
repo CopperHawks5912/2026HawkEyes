@@ -5,9 +5,7 @@
 package frc.robot;
 
 import java.util.HashMap;
-import java.util.List;
 
-import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.commands.PathfindingCommand;
@@ -28,7 +26,6 @@ import frc.robot.subsystems.drive.DifferentialSubsystem;
 import frc.robot.subsystems.feedback.FeedbackSubsystem;
 import frc.robot.subsystems.fuel.FuelSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
-import frc.robot.util.Elastic;
 import frc.robot.util.Utils;
 
 /**
@@ -50,12 +47,7 @@ public class RobotContainer {
   // Auto choosers
   private final SendableChooser<String> autoChooser = new SendableChooser<>();
   private final SendableChooser<Command> delayChooser = new SendableChooser<>();
-  private final HashMap<String, PathPlannerAuto> loadedAutos = new HashMap<>();
-
-  // Track match state
-  private boolean wasInAuto = false;
-  private boolean wasInTeleop = false;
-  private char gameData = '?';
+  private final HashMap<String, PathPlannerAuto> cachedAutos = new HashMap<>();  
 
   /** 
    * The main container constructor for the robot. 
@@ -108,19 +100,24 @@ public class RobotContainer {
 
   /**
    * Configure the autonomous command chooser and delay chooser and add them to the dashboard.
-   * This reads and warms up all the autos found in the /deploy/pathplanner/autos folder.
+   * This reads and warms up all the autos specified in the local array.
    */
   private void configureAutos() {
+    // Replace with actual auto names that we want to show on the dashboard.
+    // These should match the names of the autos in PathPlanner.
+    String[] autoNames = new String[] {
+      "FWD_1M"
+    };
+    
     // Build the auto chooser and add it to the dashboard
     autoChooser.setDefaultOption("No auto", "");
-    List<String> autoNames = AutoBuilder.getAllAutoNames();
     for (String autoName : autoNames) {
-      // add each auto to the chooser
+      // Add each auto to the chooser
       autoChooser.addOption(autoName, autoName);
 
-      // pre-load each auto to catch any errors and cache the paths
-      Utils.logInfo("Pre-loading auto: " + autoName);
-      loadedAutos.put(autoName, new PathPlannerAuto(autoName));
+      // Pre-load & cache each auto to catch any errors and avoid lag when calling
+      Utils.logInfo("Caching auto: " + autoName);
+      cachedAutos.put(autoName, new PathPlannerAuto(autoName));
     }
     
     // Add auto chooser to dashboard
@@ -210,63 +207,9 @@ public class RobotContainer {
   }
 
   /**
-   * Use this to configure triggers that should respond to
-   * match phases or other robot/subsystem state changes.
+   * Use this to configure triggers that should respond to robot/subsystem state changes.
    */
   private void configureEventTriggers() {
-    // pre-match init trigger
-    RobotModeTriggers.disabled().and(() -> !wasInAuto && !wasInTeleop).onTrue(
-      driveSubsystem.setMotorBrakeCommand(false)
-    );
-
-    // pre-match periodic trigger
-    RobotModeTriggers.disabled().and(() -> !wasInAuto && !wasInTeleop).whileTrue(
-      Commands.run(() -> driveSubsystem.updateAutoReadiness(getStartingPose()))
-    );
-
-    // autonomous init trigger
-    RobotModeTriggers.autonomous().onTrue(Commands.parallel(
-      driveSubsystem.autonomousInitCommand(),
-      feedbackSubsystem.setGameDataCommand('A'),
-      Commands.runOnce(() -> {
-        wasInAuto = true;
-      })
-    ));
-
-    // teleop init trigger
-    RobotModeTriggers.teleop().onTrue(Commands.parallel(
-      driveSubsystem.teleopInitCommand(),
-      Commands.runOnce(() -> {
-        wasInTeleop = true;
-        Elastic.selectTab("Teleop");
-      })
-    ));
-
-    // teleop periodic trigger - poll for game data until received
-    RobotModeTriggers.teleop().and(() -> gameData == '?').whileTrue(Commands.run(() -> {
-      String data = DriverStation.getGameSpecificMessage();
-      if (data.length() > 0) {
-        char inactiveAlliance = data.charAt(0);
-        if (inactiveAlliance == 'R' || inactiveAlliance == 'B') {
-          gameData = inactiveAlliance;
-        }
-      }
-    }));
-
-    // set scoring shift based on game data once it's received in teleop
-    new Trigger(() -> gameData != '?').onTrue(feedbackSubsystem.setGameDataCommand(gameData));
-
-    // post-match trigger
-    RobotModeTriggers.disabled().and(() -> wasInTeleop).onTrue(Commands.parallel(
-      driveSubsystem.postMatchCommand(),
-      feedbackSubsystem.teamColorsCommand(),
-      Commands.runOnce(() -> {
-        wasInAuto = false;
-        wasInTeleop = false;
-        gameData = '?';
-      })
-    ));
-
     // show feedback when climber is at upper limit
     climberSubsystem.isAtUpperLimit.and(driverXbox.y()).onTrue(feedbackSubsystem.warningCommand());
 
@@ -297,7 +240,7 @@ public class RobotContainer {
     }
 
     // if an auto is selected, then get it from the cached autos
-    PathPlannerAuto auto = loadedAutos.get(autoName);
+    PathPlannerAuto auto = cachedAutos.get(autoName);
     if (auto == null) {
       return new Pose2d();
     }
@@ -319,13 +262,31 @@ public class RobotContainer {
       return Commands.none();
     }
 
-    // if an auto is selected, then get it from the cached autos
-    PathPlannerAuto auto = loadedAutos.get(autoName);
+    // if an auto is selected, then get it from the loaded autos
+    PathPlannerAuto auto = cachedAutos.get(autoName);
     if (auto == null) {
       return Commands.none();
     }
 
     // return the selected auto, with the selected delay prepended
     return delayChooser.getSelected().andThen(auto);
+  }
+
+  /**
+   * Use this to pass the drive subsystem to the main {@link Robot} class 
+   * for use in the autonomousInit method.
+   * @return the drive subsystem
+   */
+  public DifferentialSubsystem getDriveSubsystem() {
+    return driveSubsystem;
+  }
+
+  /**
+   * Use this to pass the feedback subsystem to the main {@link Robot} class 
+   * for use in teleopPeriodic for setting the game data when available.
+   * @return the feedback subsystem
+   */
+  public FeedbackSubsystem getFeedbackSubsystem() {
+    return feedbackSubsystem;
   }
 }

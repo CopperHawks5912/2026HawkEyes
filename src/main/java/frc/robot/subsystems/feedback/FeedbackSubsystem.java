@@ -359,6 +359,16 @@ public class FeedbackSubsystem extends SubsystemBase {
     }
   }
 
+  /**
+   * Set the game data for scoring shift display mode.
+   * This should be called once when game data becomes available (e.g. at the start of teleop).
+   * @param data Character indicating which alliance will be inactive at the start of teleop ('R' for red, 'B' for blue, 'A' for autonomous, '?' for unknown)
+   */
+  public void setGameData(char data) {
+    gameData = data;
+    setDisplayMode(DisplayMode.SCORING_SHIFT);
+  }
+
   // ==================== Rumble Control Methods ====================
   
   /**
@@ -557,16 +567,5 @@ public class FeedbackSubsystem extends SubsystemBase {
     .andThen(Commands.waitSeconds(0.6))
     .andThen(setDisplayCommand(previousMode))
     .withName("AimedAtHubFeedback");
-  }
-  
-  /**
-   * Command to set game data and then start scoring shift feedback
-   * @param gameData Character indicating which alliance will be inactive at the start of teleop
-   * @return Command that sets the scoring shift display mode
-   */
-  public Command setGameDataCommand(char gameData) {
-    return runOnce(() -> { this.gameData = gameData; })
-      .andThen(scoringShiftCommand())
-      .withName("SetGameDataFeedback");
   }
 }

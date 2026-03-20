@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -16,6 +17,11 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 public class Robot extends TimedRobot {
   private final RobotContainer m_robotContainer;
   private Command m_autonomousCommand;
+
+  // Track match state
+  private boolean wasInAuto = false;
+  private boolean wasInTeleop = false;
+  private char gameData = '?';
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -56,7 +62,16 @@ public class Robot extends TimedRobot {
    * This function is called once each time the robot enters Disabled mode.
    */
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    // run post-match code
+    if (wasInAuto && wasInTeleop) {
+      m_robotContainer.getDriveSubsystem().postMatchInit();
+      m_robotContainer.getFeedbackSubsystem().setGameData('?');
+      wasInAuto = false;
+      wasInTeleop = false;
+      gameData = '?';
+    }
+  }
 
   /**
    * This function is called periodically while the robot is disabled.
@@ -69,6 +84,15 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
+    // track that we entered autonomous mode
+    wasInAuto = true;
+
+    // initialize the drive subsystem for autonomous mode (resets sensors, sets brake mode, etc)
+    m_robotContainer.getDriveSubsystem().autonomousInit();
+
+    // set game data to 'A' for autonomous mode until we get the real data at the start of teleop
+    m_robotContainer.getFeedbackSubsystem().setGameData('A');
+
     // get the selected autonomous command
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
@@ -89,6 +113,12 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopInit() {
+    // track that we entered teleop mode
+    wasInTeleop = true;
+
+    // initialize the drive subsystem for teleop mode (sets brake mode, etc)
+    m_robotContainer.getDriveSubsystem().teleopInit();
+
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
@@ -102,7 +132,19 @@ public class Robot extends TimedRobot {
    * This function is called periodically during operator control.
    */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    // get game data from the driver station / FMS
+    if (gameData == '?') {
+      String data = DriverStation.getGameSpecificMessage();
+      if (data.length() > 0) {
+        char inactiveAlliance = data.charAt(0);
+        if (inactiveAlliance == 'R' || inactiveAlliance == 'B') {
+          gameData = inactiveAlliance;
+          m_robotContainer.getFeedbackSubsystem().setGameData(gameData);
+        }
+      }
+    }
+  }
 
   /**
    * This function is called once each time the robot enters test mode.
