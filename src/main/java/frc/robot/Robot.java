@@ -19,7 +19,6 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   // Track match state
-  private boolean wasInAuto = false;
   private boolean wasInTeleop = false;
   private char gameData = '?';
 
@@ -64,10 +63,9 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledInit() {
     // run post-match code
-    if (wasInAuto && wasInTeleop) {
+    if (wasInTeleop) {
       m_robotContainer.getDriveSubsystem().postMatchInit();
       m_robotContainer.getFeedbackSubsystem().setGameData('?');
-      wasInAuto = false;
       wasInTeleop = false;
       gameData = '?';
     }
@@ -84,8 +82,9 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
-    // track that we entered autonomous mode
-    wasInAuto = true;
+    // ensure tracking flags are reset
+    wasInTeleop = false;
+    gameData = '?';
 
     // initialize the drive subsystem for autonomous mode (resets sensors, sets brake mode, etc)
     m_robotContainer.getDriveSubsystem().autonomousInit();
