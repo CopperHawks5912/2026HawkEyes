@@ -133,7 +133,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
-    // get game data from the driver station / FMS
+    // get game data from the driver station / FMS (if we don't have it already)
     if (gameData == '?') {
       String data = DriverStation.getGameSpecificMessage();
       if (data.length() > 0) {
