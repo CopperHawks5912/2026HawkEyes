@@ -438,6 +438,34 @@ public class DifferentialSubsystem extends SubsystemBase {
   }
 
   /**
+   * Drive the robot using robot-relative chassis speeds using the arcade method.
+   * @param speeds The desired robot-relative chassis speeds
+   */
+  private void driveArcadeRobotRelative(ChassisSpeeds speeds) {
+    // Convert chassis speeds to wheel speeds
+    DifferentialDriveWheelSpeeds targetSpeeds = kinematics.toWheelSpeeds(speeds);
+    
+    // Calculate feedforward
+    double leftFF = feedForward.calculate(targetSpeeds.leftMetersPerSecond);
+    double rightFF = feedForward.calculate(targetSpeeds.rightMetersPerSecond);
+    
+    // Calculate PID correction
+    double leftPID = leftPIDController.calculate(leftEncoder.getVelocity(), targetSpeeds.leftMetersPerSecond);
+    double rightPID = rightPIDController.calculate(rightEncoder.getVelocity(), targetSpeeds.rightMetersPerSecond);
+    
+    // Combine and set voltages
+    double leftVoltage = MathUtil.clamp(leftFF + leftPID, -12.0, 12.0);
+    double rightVoltage = MathUtil.clamp(rightFF + rightPID, -12.0, 12.0);
+    
+    // set the motor voltages directly for more precise control (feedforward + PID)
+    leftLeaderMotor.setVoltage(leftVoltage);
+    rightLeaderMotor.setVoltage(rightVoltage);
+
+    // CRITICAL - Feed the motor safety watchdog
+    drive.feed();
+  }
+
+  /**
    * Get the robot's current robot-relative chassis speeds
    * @return The current robot-relative chassis speeds
    */
