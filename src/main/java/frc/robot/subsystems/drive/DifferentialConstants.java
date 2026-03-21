@@ -42,7 +42,7 @@ public final class DifferentialConstants {
    * This must be greater than the joystick deadband but less
    * than the max translational speed and rotation speeds.
    */
-  public static final double kMaxSlowModeSpeed = 0.19;
+  public static final double kMaxSlowModeSpeed = 0.2;
   
   /**
    * Maximum speed in meters per second - used by Pathplanner
