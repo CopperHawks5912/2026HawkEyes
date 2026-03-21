@@ -265,7 +265,7 @@ public class FeedbackSubsystem extends SubsystemBase {
     // Use real match time if FMS attached, otherwise simulate from FPGA timestamp
     double time = DriverStation.isFMSAttached() 
       ? DriverStation.getMatchTime()
-      : 140.0 - (Timer.getFPGATimestamp() % 140.0); // counts down from 140 seconds
+      : 160.0 - (Timer.getFPGATimestamp() % 160.0); // counts down from 160 seconds
 
     // set our alliance color
     Color allianceColor = Utils.isRedAlliance() ? Color.kRed : Color.kBlue;
@@ -281,16 +281,16 @@ public class FeedbackSubsystem extends SubsystemBase {
 
     // autonomous period 20 seconds (both alliances can score)
     if (gameData == 'A') {
-      if (time <= 20 && time > 5) {
+      if (time <= 160 && time > 145) {
         // autonomous (both alliances can score)
         setAllLEDs(allianceColor);
       }
-      else if (time <= 5 && time > 0) {
+      else if (time <= 145 && time > 140) {
         // autonomous - last 5 seconds (both alliances can score)
         pulsePattern(allianceColor, 0.35, 0);
       }
       else {
-        // default to off
+        // default
         setAllLEDs(allianceColor);
       }
     }
