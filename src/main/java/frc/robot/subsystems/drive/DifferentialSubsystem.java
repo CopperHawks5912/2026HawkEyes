@@ -169,7 +169,7 @@ public class DifferentialSubsystem extends SubsystemBase {
       this::getPose, // Robot pose supplier
       this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
       this::getRobotRelativeSpeeds, // ChassisSpeeds supplier
-      this::driveRobotRelative, // Method that will drive the robot given ChassisSpeeds
+      (speeds, feedforwards) -> driveRobotRelative(speeds), // Method that will drive the robot given ChassisSpeeds
       new PPLTVController(0.02), // 20ms periodic cycle
       DifferentialConstants.kRobotConfig, // Robot configuration
       Utils::isRedAlliance, // Method to flip path based on alliance color
@@ -284,7 +284,7 @@ public class DifferentialSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // CRITICAL - Feed the motor safety watchdog
-    drive.feed();
+    // drive.feed();
 
     // Update the pose estimator with the latest readings
     poseEstimator.updateWithTime(

@@ -7,6 +7,7 @@ package frc.robot.subsystems.fuel;
 import java.util.function.DoubleSupplier;
 
 import com.revrobotics.PersistMode;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
@@ -31,6 +32,8 @@ public class FuelSubsystem extends SubsystemBase {
   private final SparkMax leftIntakeLauncherMotor;
   private final SparkMax rightIntakeLauncherMotor;
   private final SparkMax feederMotor;
+  private final RelativeEncoder leftIntakeLauncherEncoder;
+  private final RelativeEncoder rightIntakeLauncherEncoder;
   
   // NetworkTables for tuning (works with Elastic Dashboard)
   private NetworkTable tuningTable;
@@ -51,7 +54,11 @@ public class FuelSubsystem extends SubsystemBase {
     
     // Configure motors
     configureFeederMotor();
-    configureIntakeLauncherMotors();  
+    configureIntakeLauncherMotors();
+
+    // Get the NEO builtin encoders (after motor configuration)
+    leftIntakeLauncherEncoder = leftIntakeLauncherMotor.getEncoder();
+    rightIntakeLauncherEncoder = rightIntakeLauncherMotor.getEncoder();
 
     // set the default command for this subsystem
     setDefaultCommand(stopCommand());
@@ -367,6 +374,15 @@ public class FuelSubsystem extends SubsystemBase {
   // ==================== Telemetry Methods ====================
 
   /**
+   * Get the average velocity of both launcher motors
+   * @return Average velocity of the launcher motors in native RPM
+   */
+  private double getVelocity() {
+    return (leftIntakeLauncherEncoder.getVelocity() + 
+            rightIntakeLauncherEncoder.getVelocity()) / 2.0;
+  }
+
+  /**
    * Get the average voltage applied to both launcher motors
    * @return Average voltage applied to the launcher motors
    */
@@ -399,6 +415,7 @@ public class FuelSubsystem extends SubsystemBase {
   @Override
   public void initSendable(SendableBuilder builder) {
     builder.setSmartDashboardType("FuelSubsystem");
+    builder.addDoubleProperty("Velocity (rpm)", () -> Utils.showDouble(getVelocity()), null);
     builder.addDoubleProperty("Voltage (V)", () -> Utils.showDouble(getVoltage()), null);
     builder.addDoubleProperty("Current (A)", () -> Utils.showDouble(getCurrent()), null);
     builder.addDoubleProperty("Temperature (C)", () -> Utils.showDouble(getTemperature()), null);

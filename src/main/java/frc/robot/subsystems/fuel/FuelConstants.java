@@ -14,19 +14,19 @@ package frc.robot.subsystems.fuel;
  */
 public final class FuelConstants {
   // Feeder motor percentages
-  public static final double kFeederLaunchingPercent        =  0.40; // Feed fuel into the launcher for launcher
-  public static final double kFeederPassingPercent          =  0.40; // Feed fuel into the launcher for passing
-  public static final double kFeederIntakingPercent         = -0.40; // A strong reverse power to pull fuel into the hopper quickly
-  public static final double kFeederEjectingPercent         =  0.40; // Feed fuel towards the intake to eject fuel
+  public static final double kFeederLaunchingPercent        =  0.60; // Feed fuel into the launcher for launcher
+  public static final double kFeederPassingPercent          =  0.60; // Feed fuel into the launcher for passing
+  public static final double kFeederIntakingPercent         = -0.60; // A reverse power to pull fuel into the hopper
+  public static final double kFeederEjectingPercent         =  0.60; // Feed fuel towards the intake to eject fuel
 
   // Launcher & intake percentages (physically same motors)
-  public static final double kLauncherLaunchingPercent      =  0.75; // Power for launching
+  public static final double kLauncherLaunchingPercent      =  0.80; // Power for launching
   public static final double kLauncherPassingPercent        =  0.60; // Power for passing
   public static final double kLauncherIntakingPercent       =  0.60; // Power for intaking
   public static final double kLauncherEjectingPercent       = -0.80; // Power for ejecting
   
   // hold back fuel during launcher spinup
-  public static final double kFeederSpinUpPreLaunchPercent  = -0.40;
+  public static final double kFeederSpinUpPreLaunchPercent  =  0.0; // was -0.25
   
   // Wait a short time for the launcher to spin up before feeding fuel
   public static final double kLauncherSpinUpTimeoutSeconds  =  0.75;
