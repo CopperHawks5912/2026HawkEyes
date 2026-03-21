@@ -853,7 +853,7 @@ public class DifferentialSubsystem extends SubsystemBase {
    * Team members then move the robot left/right/back/forward/rotate until the all the errors are zero.
    * @param expectedStart The expected starting pose for the selected autonomous mode
    */
-  public void updateAutoReadiness(Pose2d expectedStart) {
+  public void displayAutoReadiness(Pose2d expectedStart) {
     if (expectedStart == null) {
       return;
     }

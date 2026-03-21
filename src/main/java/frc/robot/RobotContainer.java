@@ -47,7 +47,12 @@ public class RobotContainer {
   // Auto choosers
   private final SendableChooser<String> autoChooser = new SendableChooser<>();
   private final SendableChooser<Command> delayChooser = new SendableChooser<>();
-  private final HashMap<String, PathPlannerAuto> cachedAutos = new HashMap<>();  
+  private final HashMap<String, PathPlannerAuto> cachedAutos = new HashMap<>();
+
+  // Track match state
+  private boolean wasInAuto = false;
+  private boolean wasInTeleop = false;
+  private char gameData = '?';
 
   /** 
    * The main container constructor for the robot. 
@@ -227,37 +232,12 @@ public class RobotContainer {
   }
 
   /**
-   * Use this to get the starting pose of the currently selected autonomous command
-   * @return the starting pose of the selected autonomous command
-   */
-  private Pose2d getStartingPose() {
-    // get the name of the selected auto
-    String autoName = autoChooser.getSelected();
-
-    // if no auto is selected, return a default pose (e.g. origin)
-    if (autoName == null || autoName.isEmpty()) {
-      return new Pose2d();
-    }
-
-    // if an auto is selected, then get it from the cached autos
-    PathPlannerAuto auto = cachedAutos.get(autoName);
-    if (auto == null) {
-      return new Pose2d();
-    }
-
-    // return the starting pose of the selected auto
-    return auto.getStartingPose();
-  }
-
-  /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // get the name of the selected auto
+    // get the name of the selected auto (return a do-nothing command if nothing is selected)
     String autoName = autoChooser.getSelected();
-
-    // if no auto is selected, return an empty command
     if (autoName == null || autoName.isEmpty()) {
       return Commands.none();
     }
@@ -273,20 +253,92 @@ public class RobotContainer {
   }
 
   /**
-   * Use this to pass the drive subsystem to the main {@link Robot} class 
-   * for use in the autonomousInit method.
-   * @return the drive subsystem
+   * Use this to initialize any subsystems or state for autonomous mode. 
+   * This is called once from the main {@link Robot} class before the
+   * selected autonomous command is scheduled.
    */
-  public DifferentialSubsystem getDriveSubsystem() {
-    return driveSubsystem;
+  public void autonomousInit() {
+    // ensure tracking flags are reset
+    wasInAuto = true;
+    wasInTeleop = false;
+    gameData = '?';
+
+    // initialize the drive subsystem for autonomous mode (resets sensors, sets brake mode, etc)
+    driveSubsystem.autonomousInit();
+
+    // set game data to 'A' for autonomous mode until we get the real data at the start of teleop
+    feedbackSubsystem.setGameData('A');
   }
 
   /**
-   * Use this to pass the feedback subsystem to the main {@link Robot} class 
-   * for use in teleopPeriodic for setting the game data when available.
-   * @return the feedback subsystem
+   * Use this to initialize any subsystems or state for teleop mode. 
+   * This is called once from the main {@link Robot} class when teleop starts.
    */
-  public FeedbackSubsystem getFeedbackSubsystem() {
-    return feedbackSubsystem;
+  public void teleopInit() {
+    // track that we entered teleop mode
+    wasInTeleop = true;
+
+    // initialize the drive subsystem for teleop mode (sets brake mode, etc)
+    driveSubsystem.teleopInit();
+  }
+
+  /**
+   * Use this to run any code that should execute once after a match ends (e.g. to clean up subsystems, reset state, etc).
+   * This is called once from the main {@link Robot} class when the robot is disabled after being in teleop mode. 
+   * If the robot is disabled after being in autonomous mode, this will not be called.
+   */
+  public void postMatchReset() {
+    // run post-match code
+    if (wasInTeleop) {
+      driveSubsystem.postMatchInit();
+      feedbackSubsystem.setGameData('?');
+      wasInAuto = false;
+      wasInTeleop = false;
+      gameData = '?';
+    }
+  }
+
+  /**
+   * Displays the robot's autonomous readiness status on the dashboard. This can be used for 
+   * pre-match checks to ensure that the robot is in the correct position and orientation 
+   * before starting the autonomous routine. Called periodically from the main 
+   * {@link Robot} class while the robot is disabled. 
+   */
+  public void displayAutoReadiness() {
+    // only update the auto readiness display if we are pre-match
+    if (!wasInAuto && visionSubsystem.isEnabled()) {
+      // get the name of the selected auto (show origin if nothing is selected)
+      String autoName = autoChooser.getSelected();
+      if (autoName == null || autoName.isEmpty()) {
+        driveSubsystem.displayAutoReadiness(new Pose2d());
+      }
+
+      // if an auto is selected, then get it from the cached autos
+      PathPlannerAuto auto = cachedAutos.get(autoName);
+      if (auto == null) {
+        driveSubsystem.displayAutoReadiness(new Pose2d());
+      }
+
+      // show the starting pose of the selected auto on the dashboard
+      driveSubsystem.displayAutoReadiness(auto.getStartingPose());
+    }
+  }
+
+  /**
+   * Use this to check for game data from the driver station and update subsystems accordingly (e.g. for alliance color).
+   * This is called periodically from the main {@link Robot} class while the robot is enabled during teleop mode. 
+   */
+  public void checkForGameData() {
+    // get game data from the driver station / FMS (if we don't already have it)
+    if (gameData == '?') {
+      String data = DriverStation.getGameSpecificMessage();
+      if (data.length() > 0) {
+        char inactiveAlliance = data.charAt(0);
+        if (inactiveAlliance == 'R' || inactiveAlliance == 'B') {
+          gameData = inactiveAlliance;
+          feedbackSubsystem.setGameData(gameData);
+        }
+      }
+    }
   }
 }
