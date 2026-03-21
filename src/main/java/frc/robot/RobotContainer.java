@@ -294,7 +294,7 @@ public class RobotContainer {
   public void postMatchReset() {
     // run post-match code
     if (wasInTeleop) {
-      driveSubsystem.postMatchInit();
+      driveSubsystem.postMatchReset();
       feedbackSubsystem.setGameData('?');
       wasInAuto = false;
       wasInTeleop = false;

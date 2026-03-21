@@ -610,7 +610,7 @@ public class DifferentialSubsystem extends SubsystemBase {
    * controls are not inverted. This should be called at the end of the match to 
    * ensure the drive is in a known state.
    */
-  public void postMatchInit() {
+  public void postMatchReset() {
     setMotorBrake(false);
     inverted = false;
   }
