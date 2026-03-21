@@ -283,6 +283,9 @@ public class DifferentialSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
+    // CRITICAL - Feed the motor safety watchdog
+    drive.feed();
+
     // Update the pose estimator with the latest readings
     poseEstimator.updateWithTime(
       Timer.getFPGATimestamp(), 

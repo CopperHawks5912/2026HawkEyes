@@ -162,10 +162,10 @@ public class RobotContainer {
     driverXbox.back().onTrue(driveSubsystem.toggleInvertControlsCommand());
 
     // climb up while holding Y button
-    driverXbox.y().whileTrue(climberSubsystem.upCommand());
+    driverXbox.y().onTrue(climberSubsystem.levelOneClimbCommand());
 
     // climb down while holding B button
-    driverXbox.b().whileTrue(climberSubsystem.downCommand());
+    driverXbox.b().onTrue(climberSubsystem.downToLimitCommand());
 
     // move the climber to the home position
     driverXbox.a().onTrue(climberSubsystem.homeCommand());
@@ -207,6 +207,10 @@ public class RobotContainer {
     driverXbox.rightBumper().and(() -> !visionSubsystem.isEnabled()).whileTrue(
       fuelSubsystem.launchCommand()
     );
+
+    // manual climber control with DPAD
+    driverXbox.povUp().and(RobotModeTriggers.teleop()).whileTrue(climberSubsystem.upCommand());
+    driverXbox.povDown().and(RobotModeTriggers.teleop()).whileTrue(climberSubsystem.downCommand());
 
     // show various feedbacks for fun
     driverXbox.povUp().and(RobotModeTriggers.disabled()).onTrue(feedbackSubsystem.teamColorsCommand());

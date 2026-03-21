@@ -38,7 +38,7 @@ public final class ClimberConstants {
 
   // Motor power percentages
   public static final double kUpPercent                 =  0.80;  // Power for climbing up
-  public static final double kDownPercent               = -0.95;  // Power for climbing down (negative)
+  public static final double kDownPercent               = -0.80;  // Power for climbing down (negative)
   
   // It is crucial to set these limits correctly to prevent mechanical damage. 
   // Limits should be based on zero being when the climber is straight up.
@@ -47,8 +47,8 @@ public final class ClimberConstants {
   public static final double kUpperLimitDegrees         =  -75.0; // Maximum up was -250
   public static final double kLowerLimitDegrees         =  140.0; // Maximum down was 200
   public static final double kHomeDegrees               =    0.0; // Home position
-  public static final double kLevelOneClimbDegrees      =  -35.0; // Level 1 climb position was 34
-  public static final double kLevelTwoClimbDegrees      =  -60.0; // Level 2 climb position
+  public static final double kLevelOneClimbDegrees      =  120.0; // Level 1 climb position was 34
+  public static final double kLevelTwoClimbDegrees      =   90.0; // Level 2 climb position
   public static final double kPositionToleranceDegrees  =    2.0; // Tolerance for climber positions (in degrees)
 
   // Stall detection thresholds
