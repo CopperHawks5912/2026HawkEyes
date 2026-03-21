@@ -17,12 +17,9 @@ public final class ClimberConstants {
   /**
    * Gear ratio from motor to wheel
    * If motor spins X times, wheel spins 1 time
-   * Example: 10.71:1 gearbox means motor spins 10.71 times per wheel rotation
-   * 
-   * Our encoder is attached to the outer gear after the gearbox, so we can set
-   * gear ratio to 1.0 since it is measuring the movement of this gear directly.
+   * Formula: gear ratio = driven gear teeth / driving gear teeth
    */
-  public static final double kGearRatio = 28 / 10; // 1.0; // gear ratio = driven gear teeth / driving gear teeth
+  public static final double kGearRatio = 28 / 10;
 
   /**
    * Position conversion factor: converts encoder ticks to degrees
@@ -47,7 +44,7 @@ public final class ClimberConstants {
   public static final double kUpperLimitDegrees         =  -75.0; // Maximum up was -250
   public static final double kLowerLimitDegrees         =  140.0; // Maximum down was 200
   public static final double kHomeDegrees               =    0.0; // Home position
-  public static final double kLevelOneClimbDegrees      =  120.0; // Level 1 climb position was 34
+  public static final double kLevelOneClimbDegrees      =  120.0; // Level 1 climb position
   public static final double kLevelTwoClimbDegrees      =   90.0; // Level 2 climb position
   public static final double kPositionToleranceDegrees  =    2.0; // Tolerance for climber positions (in degrees)
 
