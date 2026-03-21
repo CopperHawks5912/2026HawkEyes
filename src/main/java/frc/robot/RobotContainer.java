@@ -319,12 +319,14 @@ public class RobotContainer {
       String autoName = autoChooser.getSelected();
       if (autoName == null || autoName.isEmpty()) {
         driveSubsystem.displayAutoReadiness(new Pose2d());
+        return;
       }
 
       // if an auto is selected, then get it from the cached autos
       PathPlannerAuto auto = cachedAutos.get(autoName);
       if (auto == null) {
         driveSubsystem.displayAutoReadiness(new Pose2d());
+        return;
       }
 
       // show the starting pose of the selected auto on the dashboard

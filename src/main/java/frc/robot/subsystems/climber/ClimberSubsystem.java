@@ -263,7 +263,7 @@ public class ClimberSubsystem extends SubsystemBase {
    * @return Command that stops the climber motor
    */
   public Command stopCommand() {
-    return runOnce(this::stop)
+    return run(this::stop)
       .withName("StopClimber");
   }
 

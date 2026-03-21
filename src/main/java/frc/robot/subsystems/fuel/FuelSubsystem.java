@@ -265,7 +265,7 @@ public class FuelSubsystem extends SubsystemBase {
    * @return Command that stops the roller motors
    */
   public Command stopCommand() {
-    return runOnce(this::stop)
+    return run(this::stop)
       .withName("StopFuel");
   }
   

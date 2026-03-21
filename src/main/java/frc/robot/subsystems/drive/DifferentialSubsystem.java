@@ -12,7 +12,7 @@ import java.util.function.DoubleSupplier;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.controllers.PPLTVController;
 import com.pathplanner.lib.path.PathConstraints;
-
+import com.pathplanner.lib.util.DriveFeedforwards;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
@@ -119,7 +119,7 @@ public class DifferentialSubsystem extends SubsystemBase {
     // Configure motors (do this before creating DifferentialDrive and getting encoders)
     configureMotors();
 
-    // Get the alternate encoders - Rev throughbore (after motor configuration)
+    // Get the encoders - Rev throughbore (after motor configuration)
     leftEncoder = leftLeaderMotor.getEncoder();
     rightEncoder = rightLeaderMotor.getEncoder();
 
@@ -169,7 +169,7 @@ public class DifferentialSubsystem extends SubsystemBase {
       this::getPose, // Robot pose supplier
       this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
       this::getRobotRelativeSpeeds, // ChassisSpeeds supplier
-      (speeds, feedforwards) -> driveRobotRelative(speeds), // Method that will drive the robot given ChassisSpeeds
+      (speeds, feedforwards) -> driveRobotRelativeWithoutPID(speeds), // Method that will drive the robot given ChassisSpeeds
       new PPLTVController(0.02), // 20ms periodic cycle
       DifferentialConstants.kRobotConfig, // Robot configuration
       Utils::isRedAlliance, // Method to flip path based on alliance color
@@ -178,9 +178,6 @@ public class DifferentialSubsystem extends SubsystemBase {
 
     // Reset odometry to starting pose
     resetOdometry();
-
-    // set the default command for this subsystem
-    setDefaultCommand(stopCommand());
     
     // Initialize field visualization
     field2d.setRobotPose(getPose());
@@ -217,7 +214,7 @@ public class DifferentialSubsystem extends SubsystemBase {
     // This converts encoder ticks to meters and meters/second, which 
     // allows us to work in real-world units for control and odometry
     motorConfig.encoder
-      .countsPerRevolution(DifferentialConstants.kEncoderTicksPerRevolution)
+      // .countsPerRevolution(DifferentialConstants.kEncoderTicksPerRevolution)
       .positionConversionFactor(DifferentialConstants.kPositionConversionFactor)
       .velocityConversionFactor(DifferentialConstants.kVelocityConversionFactor);
 
@@ -283,9 +280,6 @@ public class DifferentialSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // CRITICAL - Feed the motor safety watchdog
-    // drive.feed();
-
     // Update the pose estimator with the latest readings
     poseEstimator.updateWithTime(
       Timer.getFPGATimestamp(), 
@@ -441,25 +435,21 @@ public class DifferentialSubsystem extends SubsystemBase {
    * Drive the robot using robot-relative chassis speeds using the arcade method.
    * @param speeds The desired robot-relative chassis speeds
    */
-  private void driveArcadeRobotRelative(ChassisSpeeds speeds) {
+  private void driveRobotRelativeWithoutPID(ChassisSpeeds speeds) {
     // Convert chassis speeds to wheel speeds
-    DifferentialDriveWheelSpeeds targetSpeeds = kinematics.toWheelSpeeds(speeds);
+    DifferentialDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(speeds);
     
-    // Calculate feedforward
-    double leftFF = feedForward.calculate(targetSpeeds.leftMetersPerSecond);
-    double rightFF = feedForward.calculate(targetSpeeds.rightMetersPerSecond);
-    
-    // Calculate PID correction
-    double leftPID = leftPIDController.calculate(leftEncoder.getVelocity(), targetSpeeds.leftMetersPerSecond);
-    double rightPID = rightPIDController.calculate(rightEncoder.getVelocity(), targetSpeeds.rightMetersPerSecond);
-    
-    // Combine and set voltages
-    double leftVoltage = MathUtil.clamp(leftFF + leftPID, -12.0, 12.0);
-    double rightVoltage = MathUtil.clamp(rightFF + rightPID, -12.0, 12.0);
-    
-    // set the motor voltages directly for more precise control (feedforward + PID)
-    leftLeaderMotor.setVoltage(leftVoltage);
-    rightLeaderMotor.setVoltage(rightVoltage);
+    // Normalize wheel speeds to -1 to 1 range for arcadeDrive
+    double leftSpeed = wheelSpeeds.leftMetersPerSecond / DifferentialConstants.kMaxSpeedMetersPerSecond;
+    double rightSpeed = wheelSpeeds.rightMetersPerSecond / DifferentialConstants.kMaxSpeedMetersPerSecond;
+
+    // Clamp to valid range
+    leftSpeed = MathUtil.clamp(leftSpeed, -1.0, 1.0);
+    rightSpeed = MathUtil.clamp(rightSpeed, -1.0, 1.0);
+
+    // Drive using the normalized wheel speeds
+    leftLeaderMotor.set(leftSpeed);
+    rightLeaderMotor.set(rightSpeed);
 
     // CRITICAL - Feed the motor safety watchdog
     drive.feed();
@@ -664,7 +654,7 @@ public class DifferentialSubsystem extends SubsystemBase {
    * @return Command that stops the differential drive
    */
   public Command stopCommand() {
-    return runOnce(this::stop)
+    return run(this::stop)
       .withName("StopDifferential");
   }
 
