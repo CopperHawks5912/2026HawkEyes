@@ -48,7 +48,7 @@ public final class DifferentialConstants {
    * Maximum speed in meters per second - used by Pathplanner
    * Typical values: 2-4 m/s for FRC drivetrains
    */
-  public static final double kMaxSpeedMetersPerSecond = 4.0;
+  public static final double kMaxSpeedMetersPerSecond = 3.87;
   
   /**
    * Maximum acceleration in meters per second squared - used by Pathplanner
@@ -137,7 +137,7 @@ public final class DifferentialConstants {
    * If motor spins X times, wheel spins 1 time
    * Example: 10.71:1 gearbox means motor spins 10.71 times per wheel rotation
    */
-  public static final double kGearRatio = 8.45;
+  public static final double kGearRatio = 8.45; // either 8.45 or 10.71
   
   /**
    * Position conversion factor: converts encoder ticks to meters
