@@ -32,6 +32,8 @@ public final class DifferentialConstants {
 
   /**
    * Quick turn threshold (0.0 to 1.0) - used by driveCurvatureCommand
+   * When the absolute value of the forward speed is below this threshold, the 
+   * robot will be in "quick turn" mode, allowing it to rotate in place more easily.
    */
   public static final double kQuickTurnThreshold = 0.2;
   
@@ -40,7 +42,7 @@ public final class DifferentialConstants {
    * This must be greater than the joystick deadband but less
    * than the max translational speed and rotation speeds.
    */
-  public static final double kMaxSlowModeSpeed = 0.25;
+  public static final double kMaxSlowModeSpeed = 0.19;
   
   /**
    * Maximum speed in meters per second - used by Pathplanner
