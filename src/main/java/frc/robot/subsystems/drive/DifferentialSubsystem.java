@@ -213,7 +213,7 @@ public class DifferentialSubsystem extends SubsystemBase {
     // This converts encoder ticks to meters and meters/second, which 
     // allows us to work in real-world units for control and odometry
     motorConfig.encoder
-      // .countsPerRevolution(DifferentialConstants.kEncoderTicksPerRevolution)
+      .countsPerRevolution(DifferentialConstants.kEncoderTicksPerRevolution)
       .positionConversionFactor(DifferentialConstants.kPositionConversionFactor)
       .velocityConversionFactor(DifferentialConstants.kVelocityConversionFactor);
 
