@@ -142,9 +142,17 @@ public final class DifferentialConstants {
   /**
    * Position conversion factor: converts encoder ticks to meters
    * Formula: wheel circumference / gear ratio
+   * 
+   * If the encoder is on the motor shaft, we need to divide by the gear ratio 
+   * to get wheel rotations.
+   * 
+   * If the encoder is on the output shaft (wheel side), then the position 
+   * conversion factor is just the wheel circumference since 1 encoder 
+   * revolution = 1 wheel revolution.
    */
-  public static final double kPositionConversionFactor = kWheelCircumferenceMeters / kGearRatio;
-  
+  // public static final double kPositionConversionFactor = kWheelCircumferenceMeters / kGearRatio;
+  public static final double kPositionConversionFactor = kWheelCircumferenceMeters;
+
   /**
    * Velocity conversion factor: converts encoder ticks/minute to meters/second
    * Formula: position conversion factor / 60 (to convert minutes to seconds)
