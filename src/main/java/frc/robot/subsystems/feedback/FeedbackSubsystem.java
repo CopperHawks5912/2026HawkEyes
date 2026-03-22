@@ -271,7 +271,7 @@ public class FeedbackSubsystem extends SubsystemBase {
     Color allianceColor = Utils.isRedAlliance() ? Color.kRed : Color.kBlue;
 
     // color to indicate inactive hub (collect fuel)
-    Color inactiveColor = Color.kYellow;
+    Color inactiveColor = Color.kWhiteSmoke;
 
     // if no game data, just show alliance color solid
     if (gameData == '?') {

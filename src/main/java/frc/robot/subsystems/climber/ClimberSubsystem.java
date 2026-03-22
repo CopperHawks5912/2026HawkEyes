@@ -128,7 +128,7 @@ public class ClimberSubsystem extends SubsystemBase {
     climberMotor.stopMotor();
   }
   
-  // ==================== State Queries ====================
+  // ==================== State Methods ====================
   
   /**
    * Get the current position of the climber
@@ -222,6 +222,16 @@ public class ClimberSubsystem extends SubsystemBase {
   private boolean isStalled() {
     return Math.abs(getCurrent()) > ClimberConstants.kStallCurrentThreshold &&
            Math.abs(climberEncoder.getVelocity()) < ClimberConstants.kStallVelocityThreshold;
+  }
+
+  /**
+   * Initialize the climber for autonomous mode. This resets the encoder zero position.
+   * This should be called at the start of autonomous to ensure the drive is in a known state.
+   * The climber should be physically positioned at the home position before this is called, 
+   * as it does not have limit switches and relies on the encoder zero for accurate positioning.
+   */
+  public void autonomousInit() {
+    resetEncoder();
   }
 
   // ==================== State Triggers ====================

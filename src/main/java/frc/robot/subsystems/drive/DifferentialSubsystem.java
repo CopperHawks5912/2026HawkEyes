@@ -408,15 +408,15 @@ public class DifferentialSubsystem extends SubsystemBase {
    */
   private void driveRobotRelative(ChassisSpeeds speeds) {
     // Convert chassis speeds to wheel speeds
-    DifferentialDriveWheelSpeeds targetSpeeds = kinematics.toWheelSpeeds(speeds);
+    DifferentialDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(speeds);
     
     // Calculate feedforward
-    double leftFF = feedForward.calculate(targetSpeeds.leftMetersPerSecond);
-    double rightFF = feedForward.calculate(targetSpeeds.rightMetersPerSecond);
+    double leftFF = feedForward.calculate(wheelSpeeds.leftMetersPerSecond);
+    double rightFF = feedForward.calculate(wheelSpeeds.rightMetersPerSecond);
     
     // Calculate PID correction
-    double leftPID = leftPIDController.calculate(leftEncoder.getVelocity(), targetSpeeds.leftMetersPerSecond);
-    double rightPID = rightPIDController.calculate(rightEncoder.getVelocity(), targetSpeeds.rightMetersPerSecond);
+    double leftPID = leftPIDController.calculate(leftEncoder.getVelocity(), wheelSpeeds.leftMetersPerSecond);
+    double rightPID = rightPIDController.calculate(rightEncoder.getVelocity(), wheelSpeeds.rightMetersPerSecond);
     
     // Combine and set voltages
     double leftVoltage = MathUtil.clamp(leftFF + leftPID, -12.0, 12.0);
@@ -477,8 +477,7 @@ public class DifferentialSubsystem extends SubsystemBase {
   private void resetPose(Pose2d pose) {
     // Validate pose
     if (pose == null) {
-      Utils.logError("Cannot reset to null pose");
-      return;
+      pose = new Pose2d();
     }
     
     // reset encoders
@@ -613,6 +612,7 @@ public class DifferentialSubsystem extends SubsystemBase {
     resetOdometry();
     setMotorBrake(true);
     inverted = false;
+    slowMode = false;
   }
 
   /**
@@ -623,6 +623,7 @@ public class DifferentialSubsystem extends SubsystemBase {
   public void teleopInit() {
     setMotorBrake(true);
     inverted = false;
+    slowMode = false;
   }
 
   /**
@@ -633,6 +634,7 @@ public class DifferentialSubsystem extends SubsystemBase {
   public void postMatchReset() {
     setMotorBrake(false);
     inverted = false;
+    slowMode = false;
   }
 
   /**
@@ -665,6 +667,17 @@ public class DifferentialSubsystem extends SubsystemBase {
     return runOnce(this::resetOdometry)
       .ignoringDisable(true)
       .withName("ResetOdometryDifferential");
+  }
+
+  /**
+   * Reset the robot's current pose to a specified pose
+   * @param pose The pose to reset to
+   * @return Command that resets the pose estimator's current pose
+   */
+  public Command resetPoseCommand(Pose2d pose) {
+    return runOnce(() -> resetPose(pose))
+      .ignoringDisable(true)
+      .withName("ResetPoseDifferential");
   }
 
   /**
@@ -755,6 +768,65 @@ public class DifferentialSubsystem extends SubsystemBase {
   }
 
   /**
+   * Command to turn the robot to face a specified heading
+   * Uses the gyro to determine when the target heading has been reached
+   * WARNING: This method does not avoid obstacles! Ensure the path is clear before using.
+   *          Use driveToPose(Pose2d pose) for pathfinding with obstacle avoidance.
+   * @param degrees The target heading in degrees (0 = forward, positive = counterclockwise)
+   * @return Command that turns the robot to the specified heading then stops
+   */
+  public Command turnToHeadingCommand(double degrees) {
+    return runOnce(() -> aimPIDController.reset(gyro.getRotation2d().getRadians()))
+      .andThen(run(() -> {
+          double rotationSpeed = aimPIDController.calculate(
+            gyro.getRotation2d().getRadians(),
+            Math.toRadians(degrees)
+          );
+          driveRobotRelative(new ChassisSpeeds(0.0, 0.0, rotationSpeed));
+        })
+        .until(() -> aimPIDController.atSetpoint())
+      )
+      .withTimeout(3.0)
+      .finallyDo(this::stop)
+      .withName("TurnToHeadingDifferential");
+  }
+
+  /**
+   * Drive a specified distance in meters using the encoders. This command will reset the 
+   * encoders, then drive forward or backward until the average distance traveled by the
+   * encoders reaches the target distance. The command will timeout after 10 seconds 
+   * to prevent a runaway robot.
+   * WARNING: This method does not avoid obstacles! Ensure the path is clear before using.
+   *          Use driveToPose(Pose2d pose) for pathfinding with obstacle avoidance.
+   * @param distance The distance to drive in meters (+ forward, - reverse)
+   * @return Command to drive the specified distance
+   */
+  public Command driveDistanceCommand(double distance) {
+    return driveDistanceCommand(distance, 0.3);
+  }
+
+  /**
+   * Drive a specified distance in meters using the encoders. This command will reset the 
+   * encoders, then drive forward or backward until the average distance traveled by the
+   * encoders reaches the target distance. The command will timeout after 10 seconds 
+   * to prevent a runaway robot.
+   * WARNING: This method does not avoid obstacles! Ensure the path is clear before using.
+   *          Use driveToPose(Pose2d pose) for pathfinding with obstacle avoidance.
+   * @param distance The distance to drive in meters (+ forward, - reverse)
+   * @param power The power to apply to the motors (0 to 1)
+   * @return Command to drive the specified distance
+   */
+  public Command driveDistanceCommand(double distance, double power) {
+    return runOnce(() -> resetEncoders())
+      .andThen(run(() -> driveArcade(Math.copySign(MathUtil.clamp(power, 0.0, 1.0), distance), 0.0))
+        .until(() -> Math.abs((leftEncoder.getPosition() + rightEncoder.getPosition()) / 2.0) >= Math.abs(distance))
+      )
+      .withTimeout(10.0)
+      .finallyDo(this::stop)
+      .withName("DriveDistanceDifferential");
+  }
+
+  /**
    * Creates a command to drive to a specified pose using PathPlanner
    * @param targetPose The Pose2d to drive to
    * @return Command to drive via PathPlanner to the target pose
@@ -762,7 +834,7 @@ public class DifferentialSubsystem extends SubsystemBase {
   public Command driveToPoseCommand(Pose2d targetPose) {
     // Deferred command to get latest pose when scheduled
     // Set.of(this) ensures driveSubsystem is required
-    return Commands.defer(() -> {
+    return Commands.defer(() -> {      
       // Check for null target pose
       if (targetPose == null) {
         Utils.logError("Cannot drive to null pose");

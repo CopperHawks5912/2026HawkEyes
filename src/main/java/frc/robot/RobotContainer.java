@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
+import frc.robot.commands.Autos;
 import frc.robot.subsystems.climber.ClimberSubsystem;
 import frc.robot.subsystems.drive.DifferentialSubsystem;
 import frc.robot.subsystems.feedback.FeedbackSubsystem;
@@ -44,6 +45,9 @@ public class RobotContainer {
   private final DifferentialSubsystem driveSubsystem = new DifferentialSubsystem();
   private final VisionSubsystem visionSubsystem = new VisionSubsystem(driveSubsystem::addVisionMeasurement);
 
+  // Import our autos, passing in any subsystems they require
+  private final Autos autos = new Autos(driveSubsystem, fuelSubsystem, climberSubsystem, feedbackSubsystem);
+  
   // Auto choosers
   private final SendableChooser<String> autoChooser = new SendableChooser<>();
   private final SendableChooser<Command> delayChooser = new SendableChooser<>();
@@ -244,20 +248,22 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // get the name of the selected auto (return a do-nothing command if nothing is selected)
-    String autoName = autoChooser.getSelected();
-    if (autoName == null || autoName.isEmpty()) {
-      return Commands.none();
-    }
+    return autos.forwardOneMeter();
 
-    // if an auto is selected, then get it from the loaded autos
-    PathPlannerAuto auto = cachedAutos.get(autoName);
-    if (auto == null) {
-      return Commands.none();
-    }
+    // // get the name of the selected auto (return a do-nothing command if nothing is selected)
+    // String autoName = autoChooser.getSelected();
+    // if (autoName == null || autoName.isEmpty()) {
+    //   return Commands.none();
+    // }
 
-    // return the selected auto, with the selected delay prepended
-    return delayChooser.getSelected().andThen(auto);
+    // // if an auto is selected, then get it from the loaded autos
+    // PathPlannerAuto auto = cachedAutos.get(autoName);
+    // if (auto == null) {
+    //   return Commands.none();
+    // }
+
+    // // return the selected auto, with the selected delay prepended
+    // return delayChooser.getSelected().andThen(auto);
   }
 
   /**
@@ -273,6 +279,7 @@ public class RobotContainer {
 
     // initialize the drive subsystem for autonomous mode (resets sensors, sets brake mode, etc)
     driveSubsystem.autonomousInit();
+    climberSubsystem.autonomousInit();
 
     // set game data to 'A' for autonomous mode until we get the real data at the start of teleop
     feedbackSubsystem.setGameData('A');
