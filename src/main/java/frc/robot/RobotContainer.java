@@ -10,7 +10,6 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.commands.PathfindingCommand;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -49,8 +48,8 @@ public class RobotContainer {
   private final Autos autos = new Autos(driveSubsystem, fuelSubsystem, climberSubsystem, feedbackSubsystem);
   
   // Auto choosers
-  private final SendableChooser<String> autoChooser = new SendableChooser<>();
   private final SendableChooser<Command> delayChooser = new SendableChooser<>();
+  private final SendableChooser<String> autoChooser = new SendableChooser<>();
   private final HashMap<String, PathPlannerAuto> cachedAutos = new HashMap<>();
 
   // Track match state
@@ -95,9 +94,8 @@ public class RobotContainer {
    * Register named commands to be used in PathPlanner autos.
    * Do this before configuring autos. These named commands can be used by exact name in the PathPlanner GUI.
    */
-  public void registerNamedCommands() {
+  private void registerNamedCommands() {
     NamedCommands.registerCommand("LAUNCH_FUEL", fuelSubsystem.launchCommand());
-    // NamedCommands.registerCommand("LAUNCH_FUEL", fuelSubsystem.launchDistanceCommand(driveSubsystem::getDistanceToAllianceHub));
     NamedCommands.registerCommand("PASS_FUEL", fuelSubsystem.passCommand());
     NamedCommands.registerCommand("INTAKE_FUEL", fuelSubsystem.intakeCommand());
     NamedCommands.registerCommand("EJECT_FUEL", fuelSubsystem.ejectCommand());
@@ -115,7 +113,9 @@ public class RobotContainer {
     // Replace with actual auto names that we want to show on the dashboard.
     // These should match the names of the autos in PathPlanner.
     String[] autoNames = new String[] {
-      "FWD_1M"
+      "BWD_1M",
+      "FWD_1M",
+      "BACKWARD_LAUNCH_RETURN_CLIMB",
     };
     
     // Build the auto chooser and add it to the dashboard
@@ -147,6 +147,21 @@ public class RobotContainer {
     // Add delay chooser to dashboard
     SmartDashboard.putData("Auto Delay", delayChooser);
   }
+
+  /**
+   * Configure the autonomous command chooser and delay chooser and add them to the dashboard.
+   * This reads and warms up all the autos specified in the local array.
+   */
+  // private void configureAutos2() {   
+  //   // Build the auto chooser and add it to the dashboard
+  //   autoChooser2.setDefaultOption("No auto", Commands.none());
+  //   autoChooser2.addOption("FWD_1M", autos.forwardOneMeter());
+  //   autoChooser2.addOption("BACKWARD_LAUNCH_RETURN_CLIMB", autos.backwardsLaunchReturnClimb());
+  //   autoChooser2.addOption("BACKWARD_LAUNCH_RETURN_CLIMB_2", autos.backwardsLaunchReturnClimb2());
+    
+  //   // Add auto chooser to dashboard
+  //   SmartDashboard.putData("Auto Command 2", autoChooser2);
+  // }
 
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
@@ -248,22 +263,20 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return autos.forwardOneMeter();
+    // get the name of the selected auto (return a do-nothing command if nothing is selected)
+    String autoName = autoChooser.getSelected();
+    if (autoName == null || autoName.isEmpty()) {
+      return Commands.none();
+    }
 
-    // // get the name of the selected auto (return a do-nothing command if nothing is selected)
-    // String autoName = autoChooser.getSelected();
-    // if (autoName == null || autoName.isEmpty()) {
-    //   return Commands.none();
-    // }
+    // if an auto is selected, then get it from the loaded autos
+    PathPlannerAuto auto = cachedAutos.get(autoName);
+    if (auto == null) {
+      return Commands.none();
+    }
 
-    // // if an auto is selected, then get it from the loaded autos
-    // PathPlannerAuto auto = cachedAutos.get(autoName);
-    // if (auto == null) {
-    //   return Commands.none();
-    // }
-
-    // // return the selected auto, with the selected delay prepended
-    // return delayChooser.getSelected().andThen(auto);
+    // return the selected auto, with the selected delay prepended
+    return delayChooser.getSelected().andThen(auto);
   }
 
   /**
@@ -310,34 +323,6 @@ public class RobotContainer {
       wasInAuto = false;
       wasInTeleop = false;
       gameData = '?';
-    }
-  }
-
-  /**
-   * Displays the robot's autonomous readiness status on the dashboard. This can be used for 
-   * pre-match checks to ensure that the robot is in the correct position and orientation 
-   * before starting the autonomous routine. Called periodically from the main 
-   * {@link Robot} class while the robot is disabled. 
-   */
-  public void displayAutoReadiness() {
-    // only update the auto readiness display if we are pre-match
-    if (!wasInAuto && visionSubsystem.isEnabled()) {
-      // get the name of the selected auto (show origin if nothing is selected)
-      String autoName = autoChooser.getSelected();
-      if (autoName == null || autoName.isEmpty()) {
-        driveSubsystem.displayAutoReadiness(new Pose2d());
-        return;
-      }
-
-      // if an auto is selected, then get it from the cached autos
-      PathPlannerAuto auto = cachedAutos.get(autoName);
-      if (auto == null) {
-        driveSubsystem.displayAutoReadiness(new Pose2d());
-        return;
-      }
-
-      // show the starting pose of the selected auto on the dashboard
-      driveSubsystem.displayAutoReadiness(auto.getStartingPose());
     }
   }
 
