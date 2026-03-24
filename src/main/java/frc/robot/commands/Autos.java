@@ -47,21 +47,91 @@ public class Autos {
   }
 
   /**
+   * Start:   The launcher of the robot facing the hub.
+   * Actions: 1. Launches fuel for 5 seconds
+   * @return Command to run the launchFiveSeconds routine
+   */
+  public Command launchFiveSeconds() {
+    return Commands.sequence(
+      // Launch fuel for 5.0 seconds
+      fuelSubsystem.launchCommand().withTimeout(5.0).finallyDo(fuelSubsystem::stopCommand),
+
+      // Celebrate with feedback
+      feedbackSubsystem.funkyDiscoCommand()
+    )    
+    .withName("launchFiveSeconds");
+  }
+
+  /**
    * Start:   The back of the robot centered on the left side of the tower.
    * Actions: 1. Drives forward 1m
    * @return Command to run the forwardOneMeter routine
    */
   public Command forwardOneMeter() {
     return Commands.sequence(
-      // Reset odometry to the starting pose
-      driveSubsystem.resetPoseCommand(new Pose2d(1.518, 4.056, Rotation2d.fromDegrees(0))),
-
-      // Drive backwards 1 meter
-      driveSubsystem.driveToPoseCommand(new Pose2d(2.518, 4.056, Rotation2d.fromDegrees(0))), 
+      // Drive forward 1 meter
+      driveSubsystem.driveDistanceCommand(1), 
       
       // Celebrate with feedback
       feedbackSubsystem.funkyDiscoCommand()
-    );
+    )
+    .withName("forwardOneMeter");
+  }
+
+  /**
+   * Start:   The back of the robot centered on the left side of the tower.
+   * Actions: 1. Drives backward 1m
+   * @return Command to run the backwardOneMeter routine
+   */
+  public Command backwardOneMeter() {
+    return Commands.sequence(
+      // Drive backward 1 meter
+      driveSubsystem.driveDistanceCommand(-1), 
+      
+      // Celebrate with feedback
+      feedbackSubsystem.funkyDiscoCommand()
+    )
+    .withName("backwardOneMeter");
+  }
+
+  /**
+   * Start:   The front of the robot facing & centered on the left side of the tower.
+   * Actions: 1. Turn on slow mode
+   *          2. Drives in reverse 18.5 inches
+   *          3. Launches fuel for 5 seconds
+   *          4. Lowers climber all the way
+   *          5. Drives forward 18.5 inches (back to starting position)
+   *          6. Raises climber to level 1 position
+   *          7. Turn off slow mode
+   * @return Command to run the backwardLaunchReturnClimb routine
+   */
+  public Command backwardLaunchReturnClimb() {
+    return Commands.sequence(
+      // // Turn on slow mode
+      driveSubsystem.setSlowModeCommand(true),
+
+      // Drive backwards 1 meter
+      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(-18.5)),
+
+      // Launch fuel for 5.0 seconds
+      fuelSubsystem.launchCommand().withTimeout(5.0).finallyDo(fuelSubsystem::stopCommand),
+
+      // Lower climber all the way
+      climberSubsystem.downToLimitCommand(), 
+
+      // Drive forward 1 meter (back to starting position)
+      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(18.0)), 
+      
+      // Raise climber to level 1 position
+      climberSubsystem.levelOneClimbCommand(),
+
+      // Turn off slow mode
+      driveSubsystem.setSlowModeCommand(false),
+
+      // Celebrate with feedback
+      feedbackSubsystem.funkyDiscoCommand()
+    )    
+    .withName("backwardLaunchReturnClimb");
   }
 
   /**
@@ -73,7 +143,7 @@ public class Autos {
    *          5. Raises climber to level 1 position
    * @return Command to run the backwardsLaunchReturnClimb routine
    */
-  public Command backwardsLaunchReturnClimb() {
+  public Command unused1() {
     return Commands.sequence(
       // Reset odometry to the starting pose
       driveSubsystem.resetPoseCommand(new Pose2d(1.518, 4.056, Rotation2d.fromDegrees(180))),
@@ -96,7 +166,7 @@ public class Autos {
       // Celebrate with feedback
       feedbackSubsystem.funkyDiscoCommand()
     )
-    .withName("backwardsLaunchReturnClimbAuto");
+    .withName("unused1");
   }
 
   /**
@@ -108,7 +178,7 @@ public class Autos {
    *          5. Raises climber to level 1 position
    * @return Command to run the backwardsLaunchReturnClimb routine
    */
-  public Command backwardsLaunchReturnClimb2() {
+  public Command unused2() {
     return Commands.sequence(
       // Reset odometry to the starting pose
       driveSubsystem.resetPoseCommand(new Pose2d(1.518, 4.056, Rotation2d.fromDegrees(180))),
@@ -131,32 +201,6 @@ public class Autos {
       // Celebrate with feedback
       feedbackSubsystem.funkyDiscoCommand()
     )    
-    .withName("backwardsLaunchReturnClimb2Auto");
-  }
-
-  public Command backwardsLaunchReturnClimb3() {
-    return Commands.sequence(
-      // Reset odometry to the starting pose
-      // driveSubsystem.resetPoseCommand(new Pose2d(1.518, 4.056, Rotation2d.fromDegrees(180))),
-
-      // Drive backwards 1 meter
-      // driveSubsystem.driveDistanceCommand(Units.inchesToMeters(-18.5)),
-
-      // Launch fuel for 5.0 seconds
-      // fuelSubsystem.launchCommand().withTimeout(6.0).finallyDo(fuelSubsystem::stopCommand),
-
-      // Lower climber all the way
-      climberSubsystem.downToLimitCommand(), 
-
-      // Drive forward 1 meter (back to starting position)
-      // driveSubsystem.driveDistanceCommand(Units.inchesToMeters(18.0)), 
-      
-      // Raise climber to level 1 position
-      // climberSubsystem.levelOneClimbCommand(),
-
-      // Celebrate with feedback
-      feedbackSubsystem.funkyDiscoCommand()
-    )    
-    .withName("backwardsLaunchReturnClimb3Auto");
+    .withName("unused2");
   }
 }

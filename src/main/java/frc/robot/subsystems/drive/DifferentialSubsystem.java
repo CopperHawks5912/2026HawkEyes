@@ -439,7 +439,8 @@ int counter = 0;
    */
   private void driveRobotRelativeWithoutPID(ChassisSpeeds speeds) {
 
-      SmartDashboard.putNumber("Drive/counter", counter++);
+    SmartDashboard.putNumber("Drive/counter", counter++);
+
     // Convert chassis speeds to wheel speeds
     DifferentialDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(speeds);
     
@@ -451,13 +452,8 @@ int counter = 0;
     leftSpeed = MathUtil.clamp(leftSpeed, -1.0, 1.0);
     rightSpeed = MathUtil.clamp(rightSpeed, -1.0, 1.0);
 
+    // Drive using arcade drive
     drive.arcadeDrive(leftSpeed, rightSpeed);
-    // // Drive using the normalized wheel speeds
-    // leftLeaderMotor.set(leftSpeed);
-    // rightLeaderMotor.set(rightSpeed);
-
-    // // CRITICAL - Feed the motor safety watchdog
-    // drive.feed();
   }
 
   /**
@@ -661,7 +657,7 @@ int counter = 0;
    * @return Command that stops the differential drive
    */
   public Command stopCommand() {
-    return run(this::stop)
+    return runOnce(this::stop)
       .withName("StopDifferential");
   }
 

@@ -243,19 +243,31 @@ public class RobotContainer {
    */
   private void configureEventTriggers() {
     // show feedback when climber is at upper limit
-    climberSubsystem.isAtUpperLimit.and(driverXbox.y()).onTrue(feedbackSubsystem.warningCommand());
+    climberSubsystem.isAtUpperLimit
+      .and(RobotModeTriggers.teleop())
+      .and(driverXbox.y())
+      .onTrue(feedbackSubsystem.warningCommand());
 
     // show feedback when climber is at lower limit
-    climberSubsystem.isAtLowerLimit.and(driverXbox.b()).onTrue(feedbackSubsystem.warningCommand());
+    climberSubsystem.isAtLowerLimit
+      .and(RobotModeTriggers.teleop())
+      .and(driverXbox.b())
+      .onTrue(feedbackSubsystem.warningCommand());
 
     // show feedback when climber is at level 1 climb position
-    // climberSubsystem.isAtLevelOneClimbPosition.onTrue(feedbackSubsystem.infoCommand());
+    climberSubsystem.isAtLevelOneClimbPosition
+      .and(RobotModeTriggers.teleop())
+      .onTrue(feedbackSubsystem.infoCommand());
 
     // show feedback when climber is at level 2 climb position
-    climberSubsystem.isAtLevelTwoClimbPosition.onTrue(feedbackSubsystem.infoCommand());
+    climberSubsystem.isAtLevelTwoClimbPosition
+      .and(RobotModeTriggers.teleop())
+      .onTrue(feedbackSubsystem.infoCommand());
 
     // show feedback when climber is stalled
-    climberSubsystem.isStalled.onTrue(feedbackSubsystem.errorCommand());
+    climberSubsystem.isStalled
+      .and(RobotModeTriggers.teleop())
+      .onTrue(feedbackSubsystem.errorCommand());
   }
 
   /**
@@ -275,16 +287,11 @@ public class RobotContainer {
       return Commands.none();
     }
 
-    // shoot for x seconds
-    // return fuelSubsystem.launchCommand().withTimeout(6.0).finallyDo(fuelSubsystem::stopCommand);
-    return autos.backwardsLaunchReturnClimb3();
-
-    // return new PathPlannerAuto("BWD_1M");
-    // return the selected auto, with the selected delay prepended
-    // return delayChooser.getSelected().andThen(auto);
-
-    // return driveSubsystem.driveCurvatureCommand(() -> -0.5, () -> 0.0);
-    // return autos.backwardsLaunchReturnClimb2();
+    // various auto routines
+    // return autos.launchFiveSeconds();
+    // return autos.forwardOneMeter();
+    // return autos.backwardOneMeter();
+    return autos.backwardLaunchReturnClimb();
   }
 
   /**
