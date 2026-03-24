@@ -115,7 +115,7 @@ public class RobotContainer {
     String[] autoNames = new String[] {
       "BWD_1M",
       "FWD_1M",
-      "BACKWARD_LAUNCH_RETURN_CLIMB",
+      "BWD_LAUNCH_RETURN_CLIMB",
     };
     
     // Build the auto chooser and add it to the dashboard
@@ -249,7 +249,7 @@ public class RobotContainer {
     climberSubsystem.isAtLowerLimit.and(driverXbox.b()).onTrue(feedbackSubsystem.warningCommand());
 
     // show feedback when climber is at level 1 climb position
-    climberSubsystem.isAtLevelOneClimbPosition.onTrue(feedbackSubsystem.infoCommand());
+    // climberSubsystem.isAtLevelOneClimbPosition.onTrue(feedbackSubsystem.infoCommand());
 
     // show feedback when climber is at level 2 climb position
     climberSubsystem.isAtLevelTwoClimbPosition.onTrue(feedbackSubsystem.infoCommand());
@@ -275,8 +275,16 @@ public class RobotContainer {
       return Commands.none();
     }
 
+    // shoot for x seconds
+    // return fuelSubsystem.launchCommand().withTimeout(6.0).finallyDo(fuelSubsystem::stopCommand);
+    return autos.backwardsLaunchReturnClimb3();
+
+    // return new PathPlannerAuto("BWD_1M");
     // return the selected auto, with the selected delay prepended
-    return delayChooser.getSelected().andThen(auto);
+    // return delayChooser.getSelected().andThen(auto);
+
+    // return driveSubsystem.driveCurvatureCommand(() -> -0.5, () -> 0.0);
+    // return autos.backwardsLaunchReturnClimb2();
   }
 
   /**

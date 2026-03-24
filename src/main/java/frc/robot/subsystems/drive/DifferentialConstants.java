@@ -164,7 +164,7 @@ public final class DifferentialConstants {
   /**
    * PID proportional gain for velocity control - used by Pathplanner
    */
-  public static final double kP = 1.5; // TODO: Tune this value
+  public static final double kP = 10.0; // TODO: Tune this value
 
   /**
    * PID integral gain for velocity control - used by Pathplanner
@@ -248,7 +248,7 @@ public final class DifferentialConstants {
       kWheelDiameterMeters / 2.0,   // wheel radius (m)
       kMaxSpeedMetersPerSecond,     // max wheel speed (m/s)
       kWheelCOF,                    // wheel COF
-      DCMotor.getCIM(2),  // drive motors: 2 CIMs per side but they act like 1 motor with 2x the torque and speed
+      DCMotor.getCIM(1),  // drive motors: 2 CIMs per side but they act like 1 motor with 2x the torque and speed
       30.0,       // current limit (A)
       2                   // number of motors per module
     ),

@@ -6,6 +6,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 
@@ -81,7 +82,7 @@ public class Autos {
       driveSubsystem.driveToPoseCommand(new Pose2d(2.518, 4.056, Rotation2d.fromDegrees(180))), 
       
       // Launch fuel for 7.5 seconds
-      fuelSubsystem.launchCommand().withTimeout(7.5), 
+      fuelSubsystem.launchCommand().withTimeout(7.5).finallyDo(fuelSubsystem::stopCommand), 
 
       // Lower climber all the way
       climberSubsystem.downToLimitCommand(), 
@@ -94,7 +95,8 @@ public class Autos {
 
       // Celebrate with feedback
       feedbackSubsystem.funkyDiscoCommand()
-    );
+    )
+    .withName("backwardsLaunchReturnClimbAuto");
   }
 
   /**
@@ -112,22 +114,49 @@ public class Autos {
       driveSubsystem.resetPoseCommand(new Pose2d(1.518, 4.056, Rotation2d.fromDegrees(180))),
 
       // Drive backwards 1 meter
-      driveSubsystem.driveDistanceCommand(-1.0),
+      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(-18.5)),
 
       // Launch fuel for 7.5 seconds
-      fuelSubsystem.launchCommand().withTimeout(7.5), 
+      fuelSubsystem.launchCommand().withTimeout(6.0).finallyDo(fuelSubsystem::stopCommand), 
 
       // Lower climber all the way
       climberSubsystem.downToLimitCommand(), 
 
       // Drive forward 1 meter (back to starting position)
-      driveSubsystem.driveDistanceCommand(1.0), 
+      driveSubsystem.driveDistanceCommand( Units.inchesToMeters(18.5)), 
       
       // Raise climber to level 1 position
       climberSubsystem.levelOneClimbCommand(),
 
       // Celebrate with feedback
       feedbackSubsystem.funkyDiscoCommand()
-    );
+    )    
+    .withName("backwardsLaunchReturnClimb2Auto");
+  }
+
+  public Command backwardsLaunchReturnClimb3() {
+    return Commands.sequence(
+      // Reset odometry to the starting pose
+      // driveSubsystem.resetPoseCommand(new Pose2d(1.518, 4.056, Rotation2d.fromDegrees(180))),
+
+      // Drive backwards 1 meter
+      // driveSubsystem.driveDistanceCommand(Units.inchesToMeters(-18.5)),
+
+      // Launch fuel for 5.0 seconds
+      // fuelSubsystem.launchCommand().withTimeout(6.0).finallyDo(fuelSubsystem::stopCommand),
+
+      // Lower climber all the way
+      climberSubsystem.downToLimitCommand(), 
+
+      // Drive forward 1 meter (back to starting position)
+      // driveSubsystem.driveDistanceCommand(Units.inchesToMeters(18.0)), 
+      
+      // Raise climber to level 1 position
+      // climberSubsystem.levelOneClimbCommand(),
+
+      // Celebrate with feedback
+      feedbackSubsystem.funkyDiscoCommand()
+    )    
+    .withName("backwardsLaunchReturnClimb3Auto");
   }
 }

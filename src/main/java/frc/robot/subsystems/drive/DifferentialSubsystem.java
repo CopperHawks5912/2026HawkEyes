@@ -83,7 +83,7 @@ public class DifferentialSubsystem extends SubsystemBase {
   private boolean inverted = false;
   private boolean slowMode = false;
   private int addedVisionMeasurementCount = 0;
-
+int counter = 0;
   /**
    * Creates a new DifferentialSubsystem.
    */
@@ -168,7 +168,7 @@ public class DifferentialSubsystem extends SubsystemBase {
       this::getPose, // Robot pose supplier
       this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
       this::getRobotRelativeSpeeds, // ChassisSpeeds supplier
-      (speeds, feedforwards) -> driveRobotRelative(speeds), // Method that will drive the robot given ChassisSpeeds
+      (speeds, feedforwards) -> driveRobotRelativeWithoutPID(speeds), // Method that will drive the robot given ChassisSpeeds
       new PPLTVController(0.02), // 20ms periodic cycle
       DifferentialConstants.kRobotConfig, // Robot configuration
       Utils::isRedAlliance, // Method to flip path based on alliance color
@@ -270,6 +270,7 @@ public class DifferentialSubsystem extends SubsystemBase {
     // Set config to inverted and then apply to left leader. Set Left side inverted
     // so that positive values drive both sides forward
     motorConfig.inverted(true);
+    motorConfig.encoder.inverted(true);
     leftLeaderMotor.configure(
       motorConfig, 
       ResetMode.kResetSafeParameters, 
@@ -407,6 +408,8 @@ public class DifferentialSubsystem extends SubsystemBase {
    * @param speeds The desired robot-relative chassis speeds
    */
   private void driveRobotRelative(ChassisSpeeds speeds) {
+
+      SmartDashboard.putNumber("Drive/counter", counter++);
     // Convert chassis speeds to wheel speeds
     DifferentialDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(speeds);
     
@@ -435,6 +438,8 @@ public class DifferentialSubsystem extends SubsystemBase {
    * @param speeds The desired robot-relative chassis speeds
    */
   private void driveRobotRelativeWithoutPID(ChassisSpeeds speeds) {
+
+      SmartDashboard.putNumber("Drive/counter", counter++);
     // Convert chassis speeds to wheel speeds
     DifferentialDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(speeds);
     
@@ -446,12 +451,13 @@ public class DifferentialSubsystem extends SubsystemBase {
     leftSpeed = MathUtil.clamp(leftSpeed, -1.0, 1.0);
     rightSpeed = MathUtil.clamp(rightSpeed, -1.0, 1.0);
 
-    // Drive using the normalized wheel speeds
-    leftLeaderMotor.set(leftSpeed);
-    rightLeaderMotor.set(rightSpeed);
+    drive.arcadeDrive(leftSpeed, rightSpeed);
+    // // Drive using the normalized wheel speeds
+    // leftLeaderMotor.set(leftSpeed);
+    // rightLeaderMotor.set(rightSpeed);
 
-    // CRITICAL - Feed the motor safety watchdog
-    drive.feed();
+    // // CRITICAL - Feed the motor safety watchdog
+    // drive.feed();
   }
 
   /**
@@ -609,7 +615,7 @@ public class DifferentialSubsystem extends SubsystemBase {
    * autonomous to ensure the drive is in a known state.
    */
   public void autonomousInit() {
-    resetOdometry();
+    // resetOdometry();
     setMotorBrake(true);
     inverted = false;
     slowMode = false;
@@ -802,7 +808,7 @@ public class DifferentialSubsystem extends SubsystemBase {
    * @return Command to drive the specified distance
    */
   public Command driveDistanceCommand(double distance) {
-    return driveDistanceCommand(distance, 0.3);
+    return driveDistanceCommand(distance, 0.5);
   }
 
   /**
@@ -861,7 +867,7 @@ public class DifferentialSubsystem extends SubsystemBase {
    * @param rSupplier The rotation rate supplier
    * @return Command that drives the differential in arcade mode
    */
-  public Command driveArcadeCommand(DoubleSupplier xSupplier, DoubleSupplier rSupplier) {
+  public Command driveArcadeCommand(DoubleSupplier xSupplier, DoubleSupplier rSupplier) {    
     return run(() -> {
       // 1. Apply deadband to the raw joystick inputs.
       //    This ignores noise from the joystick when it's in the neutral position.
@@ -886,6 +892,10 @@ public class DifferentialSubsystem extends SubsystemBase {
         xSpeed = -xSpeed;
         rSpeed = -rSpeed;
       }
+
+      SmartDashboard.putNumber("Drive/xSpeed", xSpeed);
+      SmartDashboard.putNumber("Drive/rSpeed", rSpeed);
+      SmartDashboard.putNumber("Drive/counter", counter++);
 
       // 5. Drive the robot using the processed inputs (-1 to 1 range),
       //    arcadeDrive automatically squares inputs for finer control at low speeds
@@ -931,6 +941,10 @@ public class DifferentialSubsystem extends SubsystemBase {
         xSpeed = -xSpeed;
         rSpeed = -rSpeed;
       }
+
+      SmartDashboard.putNumber("Drive/xSpeed", xSpeed);
+      SmartDashboard.putNumber("Drive/rSpeed", rSpeed);
+      SmartDashboard.putNumber("Drive/counter", counter++);
 
       // 6. Drive the robot using the processed inputs (-1 to 1 range),
       driveCurvature(xSpeed, rSpeed, quickTurn);
@@ -999,5 +1013,6 @@ public class DifferentialSubsystem extends SubsystemBase {
     builder.addIntegerProperty("Added Vision Measurements", () -> addedVisionMeasurementCount, null);
     builder.addBooleanProperty("Inverted", this::isInverted, null);
     builder.addBooleanProperty("Slow Mode", this::isSlowMode, null);
+    builder.addStringProperty("Current Command", () -> getCurrentCommand() != null ? getCurrentCommand().getName() : "", null);
   }
 }
