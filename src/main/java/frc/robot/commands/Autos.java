@@ -54,7 +54,7 @@ public class Autos {
   public Command launchFiveSeconds() {
     return Commands.sequence(
       // Launch fuel for 5.0 seconds
-      fuelSubsystem.launchCommand().withTimeout(5.0).finallyDo(fuelSubsystem::stopCommand),
+      fuelSubsystem.launchCommand().withTimeout(5.0).finallyDo(fuelSubsystem::stop),
 
       // Celebrate with feedback
       feedbackSubsystem.funkyDiscoCommand()
@@ -114,7 +114,7 @@ public class Autos {
       driveSubsystem.driveDistanceCommand(Units.inchesToMeters(-18.5)),
 
       // Launch fuel for 5.0 seconds
-      fuelSubsystem.launchCommand().withTimeout(5.0).finallyDo(fuelSubsystem::stopCommand),
+      fuelSubsystem.launchCommand().withTimeout(5.0).finallyDo(fuelSubsystem::stop),
 
       // Lower climber all the way
       climberSubsystem.downToLimitCommand(), 
@@ -152,7 +152,7 @@ public class Autos {
       driveSubsystem.driveToPoseCommand(new Pose2d(2.518, 4.056, Rotation2d.fromDegrees(180))), 
       
       // Launch fuel for 7.5 seconds
-      fuelSubsystem.launchCommand().withTimeout(7.5).finallyDo(fuelSubsystem::stopCommand), 
+      fuelSubsystem.launchCommand().withTimeout(7.5).finallyDo(fuelSubsystem::stop), 
 
       // Lower climber all the way
       climberSubsystem.downToLimitCommand(), 
@@ -187,7 +187,7 @@ public class Autos {
       driveSubsystem.driveDistanceCommand(Units.inchesToMeters(-18.5)),
 
       // Launch fuel for 7.5 seconds
-      fuelSubsystem.launchCommand().withTimeout(6.0).finallyDo(fuelSubsystem::stopCommand), 
+      fuelSubsystem.launchCommand().withTimeout(6.0).finallyDo(fuelSubsystem::stop), 
 
       // Lower climber all the way
       climberSubsystem.downToLimitCommand(), 

@@ -408,10 +408,14 @@ int counter = 0;
    * @param speeds The desired robot-relative chassis speeds
    */
   private void driveRobotRelative(ChassisSpeeds speeds) {
+    SmartDashboard.putNumber("Drive/counter", counter++);
 
-      SmartDashboard.putNumber("Drive/counter", counter++);
     // Convert chassis speeds to wheel speeds
     DifferentialDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(speeds);
+
+    // Desaturate wheel speeds to stay within maximum speed
+    // while preserving the ratio between left and right wheels
+    wheelSpeeds.desaturate(DifferentialConstants.kMaxSpeedMetersPerSecond);
     
     // Calculate feedforward
     double leftFF = feedForward.calculate(wheelSpeeds.leftMetersPerSecond);
@@ -438,22 +442,19 @@ int counter = 0;
    * @param speeds The desired robot-relative chassis speeds
    */
   private void driveRobotRelativeWithoutPID(ChassisSpeeds speeds) {
-
-    SmartDashboard.putNumber("Drive/counter", counter++);
-
     // Convert chassis speeds to wheel speeds
     DifferentialDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(speeds);
+
+    // Desaturate wheel speeds to stay within maximum speed
+    // while preserving the ratio between left and right wheels
+    wheelSpeeds.desaturate(DifferentialConstants.kMaxSpeedMetersPerSecond);
     
-    // Normalize wheel speeds to -1 to 1 range for arcadeDrive
+    // Normalize to -1 to 1 range for motor output
     double leftSpeed = wheelSpeeds.leftMetersPerSecond / DifferentialConstants.kMaxSpeedMetersPerSecond;
     double rightSpeed = wheelSpeeds.rightMetersPerSecond / DifferentialConstants.kMaxSpeedMetersPerSecond;
 
-    // Clamp to valid range
-    leftSpeed = MathUtil.clamp(leftSpeed, -1.0, 1.0);
-    rightSpeed = MathUtil.clamp(rightSpeed, -1.0, 1.0);
-
     // Drive using arcade drive
-    drive.arcadeDrive(leftSpeed, rightSpeed);
+    driveArcade(leftSpeed, rightSpeed);
   }
 
   /**
@@ -819,7 +820,7 @@ int counter = 0;
    * @return Command to drive the specified distance
    */
   public Command driveDistanceCommand(double distance, double power) {
-    return runOnce(() -> resetEncoders())
+    return runOnce(this::resetEncoders)
       .andThen(run(() -> driveArcade(Math.copySign(MathUtil.clamp(power, 0.0, 1.0), distance), 0.0))
         .until(() -> Math.abs((leftEncoder.getPosition() + rightEncoder.getPosition()) / 2.0) >= Math.abs(distance))
       )
