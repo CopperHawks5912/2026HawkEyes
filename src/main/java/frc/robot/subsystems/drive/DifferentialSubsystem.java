@@ -378,32 +378,6 @@ int counter = 0;
   }
 
   /**
-   * Drive the differential in arcade mode (used by driver in teleop)
-   * @param xSpeed The forward/backward speed (-1.0 to 1.0)
-   * @param rSpeed The rotation rate (-1.0 to 1.0)
-   */
-  private void driveArcade(double xSpeed, double rSpeed) {
-    drive.arcadeDrive(
-      MathUtil.clamp(xSpeed, -1.0, 1.0), 
-      MathUtil.clamp(rSpeed, -1.0, 1.0)
-    );
-  }
-
-  /**
-   * Drive the differential in curvature mode (used by driver in teleop)
-   * @param xSpeed The forward/backward speed (-1.0 to 1.0)
-   * @param rSpeed The rotation rate (-1.0 to 1.0)
-   * @param quickTurn Whether to enable quick turn mode
-   */
-  private void driveCurvature(double xSpeed, double rSpeed, boolean quickTurn) {
-    drive.curvatureDrive(
-      MathUtil.clamp(xSpeed, -1.0, 1.0),
-      MathUtil.clamp(rSpeed, -1.0, 1.0),
-      quickTurn
-    );
-  }
-
-  /**
    * Drive the robot using robot-relative chassis speeds with feedforward and PID control.
    * @param speeds The desired robot-relative chassis speeds
    */
@@ -453,8 +427,12 @@ int counter = 0;
     double leftSpeed = wheelSpeeds.leftMetersPerSecond / DifferentialConstants.kMaxSpeedMetersPerSecond;
     double rightSpeed = wheelSpeeds.rightMetersPerSecond / DifferentialConstants.kMaxSpeedMetersPerSecond;
 
-    // Drive using arcade drive
-    driveArcade(leftSpeed, rightSpeed);
+    // Clamp speeds to -1.0 to 1.0 just in case
+    leftSpeed = MathUtil.clamp(leftSpeed, -1.0, 1.0);
+    rightSpeed = MathUtil.clamp(rightSpeed, -1.0, 1.0);
+
+    // Drive using tank drive
+    drive.tankDrive(leftSpeed, rightSpeed);
   }
 
   /**
@@ -821,7 +799,7 @@ int counter = 0;
    */
   public Command driveDistanceCommand(double distance, double power) {
     return runOnce(this::resetEncoders)
-      .andThen(run(() -> driveArcade(Math.copySign(MathUtil.clamp(power, 0.0, 1.0), distance), 0.0))
+      .andThen(run(() -> drive.arcadeDrive(Math.copySign(MathUtil.clamp(power, 0.0, 1.0), distance), 0.0))
         .until(() -> Math.abs((leftEncoder.getPosition() + rightEncoder.getPosition()) / 2.0) >= Math.abs(distance))
       )
       .withTimeout(10.0)
@@ -896,7 +874,7 @@ int counter = 0;
 
       // 5. Drive the robot using the processed inputs (-1 to 1 range),
       //    arcadeDrive automatically squares inputs for finer control at low speeds
-      driveArcade(xSpeed, rSpeed);
+      drive.arcadeDrive(xSpeed, rSpeed);
     }).withName("DriveArcadeDifferential");
   }
 
@@ -943,8 +921,8 @@ int counter = 0;
       SmartDashboard.putNumber("Drive/rSpeed", rSpeed);
       SmartDashboard.putNumber("Drive/counter", counter++);
 
-      // 6. Drive the robot using the processed inputs (-1 to 1 range),
-      driveCurvature(xSpeed, rSpeed, quickTurn);
+      // 6. Drive the robot using the processed inputs (-1 to 1 range)
+      drive.curvatureDrive(xSpeed, rSpeed, quickTurn);
     }).withName("DriveCurvatureDifferential");
   }
 
