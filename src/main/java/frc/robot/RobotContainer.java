@@ -78,11 +78,10 @@ public class RobotContainer {
    * This reads and warms up all the autos specified in the local array.
    */
   private void configureAutos() {
-
     // Build the auto chooser and add it to the dashboard
     autoChooser.setDefaultOption("No auto", Commands.none());
     autoChooser.addOption("BACKWARD_LAUNCH_RETURN_CLIMB", autos.backwardLaunchReturnClimb());
-    autoChooser.addOption("LAUNCH_5_SECONDS", autos.launchFiveSeconds());;    
+    autoChooser.addOption("LAUNCH_5_SECONDS", autos.launchFiveSeconds());    
     
     // Add auto chooser to dashboard
     SmartDashboard.putData("Auto Command", autoChooser);
