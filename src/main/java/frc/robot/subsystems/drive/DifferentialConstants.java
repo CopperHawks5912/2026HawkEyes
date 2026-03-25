@@ -4,10 +4,6 @@
 
 package frc.robot.subsystems.drive;
 
-import com.pathplanner.lib.config.RobotConfig;
-import com.pathplanner.lib.config.ModuleConfig;
-
-import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 
 /**
@@ -241,17 +237,17 @@ public final class DifferentialConstants {
    * Robot configuration for PathPlanner
    * This is used by PathPlanner for trajectory generation
    */
-  public static final RobotConfig kRobotConfig = new RobotConfig(
-    kRobotMassKg,                   // mass (kg)
-    kRobotMOI,                      // MOI (kg*m²)
-    new ModuleConfig(
-      kWheelDiameterMeters / 2.0,   // wheel radius (m)
-      kMaxSpeedMetersPerSecond,     // max wheel speed (m/s)
-      kWheelCOF,                    // wheel COF
-      DCMotor.getCIM(1),  // drive motors: 2 CIMs per side but they act like 1 motor with 2x the torque and speed
-      30.0,       // current limit (A)
-      2                   // number of motors per module
-    ),
-    kTrackWidthMeters / 2.0         // module locations (just half track width for differential)
-  );
+  // public static final RobotConfig kRobotConfig = new RobotConfig(
+  //   kRobotMassKg,                   // mass (kg)
+  //   kRobotMOI,                      // MOI (kg*m²)
+  //   new ModuleConfig(
+  //     kWheelDiameterMeters / 2.0,   // wheel radius (m)
+  //     kMaxSpeedMetersPerSecond,     // max wheel speed (m/s)
+  //     kWheelCOF,                    // wheel COF
+  //     DCMotor.getCIM(1),  // drive motors: 2 CIMs per side but they act like 1 motor with 2x the torque and speed
+  //     30.0,       // current limit (A)
+  //     2                   // number of motors per module
+  //   ),
+  //   kTrackWidthMeters / 2.0         // module locations (just half track width for differential)
+  // );
 }
