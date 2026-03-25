@@ -185,13 +185,19 @@ public class RobotContainer {
     // show feedback when climber is at upper limit
     climberSubsystem.isAtUpperLimit
       .and(RobotModeTriggers.teleop())
-      .and(driverXbox.y())
+      .and(driverXbox.povUp())
       .onTrue(feedbackSubsystem.warningCommand());
 
     // show feedback when climber is at lower limit
     climberSubsystem.isAtLowerLimit
       .and(RobotModeTriggers.teleop())
       .and(driverXbox.b())
+      .onTrue(feedbackSubsystem.warningCommand());
+      
+    // show feedback when climber is at lower limit
+    climberSubsystem.isAtLowerLimit
+      .and(RobotModeTriggers.teleop())
+      .and(driverXbox.povDown())
       .onTrue(feedbackSubsystem.warningCommand());
 
     // show feedback when climber is at level 1 climb position
