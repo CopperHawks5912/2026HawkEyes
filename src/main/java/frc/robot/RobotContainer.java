@@ -4,14 +4,10 @@
 
 package frc.robot;
 
-import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.commands.PathfindingCommand;
-
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
@@ -64,9 +60,6 @@ public class RobotContainer {
       () -> -1 * driverXbox.getRightX()
     ));
 
-    // register named commands
-    registerNamedCommands();
-
     // configure auto routines
     configureAutos();
 
@@ -75,29 +68,9 @@ public class RobotContainer {
 
     // configure state event triggers
     configureEventTriggers();
-
-    // Warm up PathPlanner Path finding to avoid latency on the first path following.
-    // This schedule call is safe since it's only called once during initialization.
-    // Must be called after initializing the AutoBuilder in the drive subsystem.
-    CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
    
     // silence joystick warnings during testing
     DriverStation.silenceJoystickConnectionWarning(true);
-  }
-
-  /**
-   * Register named commands to be used in PathPlanner autos.
-   * Do this before configuring autos. These named commands can be used by exact name in the PathPlanner GUI.
-   */
-  private void registerNamedCommands() {
-    NamedCommands.registerCommand("LAUNCH_FUEL", fuelSubsystem.launchCommand());
-    NamedCommands.registerCommand("PASS_FUEL", fuelSubsystem.passCommand());
-    NamedCommands.registerCommand("INTAKE_FUEL", fuelSubsystem.intakeCommand());
-    NamedCommands.registerCommand("EJECT_FUEL", fuelSubsystem.ejectCommand());
-    NamedCommands.registerCommand("AIM_AT_HUB", driveSubsystem.aimAtHubCommand());
-    NamedCommands.registerCommand("CLIMB_TO_ONE", climberSubsystem.levelOneClimbCommand());
-    NamedCommands.registerCommand("CLIMB_TO_TWO", climberSubsystem.levelTwoClimbCommand());
-    NamedCommands.registerCommand("PREPARE_TO_CLIMB", climberSubsystem.downToLimitCommand());
   }
 
   /**
