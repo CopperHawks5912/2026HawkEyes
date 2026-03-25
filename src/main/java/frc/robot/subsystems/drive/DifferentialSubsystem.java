@@ -813,7 +813,7 @@ public class DifferentialSubsystem extends SubsystemBase {
         xSpeed = MathUtil.clamp(xSpeed, -DifferentialConstants.kMaxTranslationalSpeed, DifferentialConstants.kMaxTranslationalSpeed);
         rSpeed = MathUtil.clamp(rSpeed, -DifferentialConstants.kMaxRotationalSpeed, DifferentialConstants.kMaxRotationalSpeed);
       }
-    
+
       // 4. Invert controls if the inverted flag is set
       if (inverted) {
         xSpeed = -xSpeed;
