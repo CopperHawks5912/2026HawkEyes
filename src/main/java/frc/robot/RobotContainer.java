@@ -4,10 +4,7 @@
 
 package frc.robot;
 
-import java.util.HashMap;
-
 import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.commands.PathfindingCommand;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -26,7 +23,6 @@ import frc.robot.subsystems.drive.DifferentialSubsystem;
 import frc.robot.subsystems.feedback.FeedbackSubsystem;
 import frc.robot.subsystems.fuel.FuelSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
-import frc.robot.util.Utils;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a "declarative" paradigm, very
@@ -49,8 +45,7 @@ public class RobotContainer {
   
   // Auto choosers
   private final SendableChooser<Command> delayChooser = new SendableChooser<>();
-  private final SendableChooser<String> autoChooser = new SendableChooser<>();
-  private final HashMap<String, PathPlannerAuto> cachedAutos = new HashMap<>();
+  private final SendableChooser<Command> autoChooser = new SendableChooser<>();
 
   // Track match state
   private boolean wasInAuto = false;
@@ -110,24 +105,11 @@ public class RobotContainer {
    * This reads and warms up all the autos specified in the local array.
    */
   private void configureAutos() {
-    // Replace with actual auto names that we want to show on the dashboard.
-    // These should match the names of the autos in PathPlanner.
-    String[] autoNames = new String[] {
-      "BWD_1M",
-      "FWD_1M",
-      "BWD_LAUNCH_RETURN_CLIMB",
-    };
-    
-    // Build the auto chooser and add it to the dashboard
-    autoChooser.setDefaultOption("No auto", "");
-    for (String autoName : autoNames) {
-      // Add each auto to the chooser
-      autoChooser.addOption(autoName, autoName);
 
-      // Pre-load & cache each auto to catch any errors and avoid lag when calling
-      Utils.logInfo("Caching auto: " + autoName);
-      cachedAutos.put(autoName, new PathPlannerAuto(autoName));
-    }
+    // Build the auto chooser and add it to the dashboard
+    autoChooser.setDefaultOption("No auto", Commands.none());
+    autoChooser.addOption("BACKWARD_LAUNCH_RETURN_CLIMB", autos.backwardLaunchReturnClimb());
+    autoChooser.addOption("LAUNCH_5_SECONDS", autos.launchFiveSeconds());;    
     
     // Add auto chooser to dashboard
     SmartDashboard.putData("Auto Command", autoChooser);
@@ -147,21 +129,6 @@ public class RobotContainer {
     // Add delay chooser to dashboard
     SmartDashboard.putData("Auto Delay", delayChooser);
   }
-
-  /**
-   * Configure the autonomous command chooser and delay chooser and add them to the dashboard.
-   * This reads and warms up all the autos specified in the local array.
-   */
-  // private void configureAutos2() {   
-  //   // Build the auto chooser and add it to the dashboard
-  //   autoChooser2.setDefaultOption("No auto", Commands.none());
-  //   autoChooser2.addOption("FWD_1M", autos.forwardOneMeter());
-  //   autoChooser2.addOption("BACKWARD_LAUNCH_RETURN_CLIMB", autos.backwardsLaunchReturnClimb());
-  //   autoChooser2.addOption("BACKWARD_LAUNCH_RETURN_CLIMB_2", autos.backwardsLaunchReturnClimb2());
-    
-  //   // Add auto chooser to dashboard
-  //   SmartDashboard.putData("Auto Command 2", autoChooser2);
-  // }
 
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
@@ -275,23 +242,12 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // get the name of the selected auto (return a do-nothing command if nothing is selected)
-    String autoName = autoChooser.getSelected();
-    if (autoName == null || autoName.isEmpty()) {
-      return Commands.none();
-    }
-
-    // if an auto is selected, then get it from the loaded autos
-    PathPlannerAuto auto = cachedAutos.get(autoName);
-    if (auto == null) {
-      return Commands.none();
-    }
-
     // various auto routines
     // return autos.launchFiveSeconds();
     // return autos.forwardOneMeter();
     // return autos.backwardOneMeter();
-    return autos.backwardLaunchReturnClimb();
+    // return autos.backwardLaunchReturnClimb();
+    return delayChooser.getSelected().andThen(autoChooser.getSelected());
   }
 
   /**

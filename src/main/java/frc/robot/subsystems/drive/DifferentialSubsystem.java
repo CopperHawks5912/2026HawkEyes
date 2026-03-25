@@ -83,7 +83,7 @@ public class DifferentialSubsystem extends SubsystemBase {
   private boolean inverted = false;
   private boolean slowMode = false;
   private int addedVisionMeasurementCount = 0;
-int counter = 0;
+  
   /**
    * Creates a new DifferentialSubsystem.
    */
@@ -382,8 +382,6 @@ int counter = 0;
    * @param speeds The desired robot-relative chassis speeds
    */
   private void driveRobotRelative(ChassisSpeeds speeds) {
-    SmartDashboard.putNumber("Drive/counter", counter++);
-
     // Convert chassis speeds to wheel speeds
     DifferentialDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(speeds);
 
@@ -868,10 +866,6 @@ int counter = 0;
         rSpeed = -rSpeed;
       }
 
-      SmartDashboard.putNumber("Drive/xSpeed", xSpeed);
-      SmartDashboard.putNumber("Drive/rSpeed", rSpeed);
-      SmartDashboard.putNumber("Drive/counter", counter++);
-
       // 5. Drive the robot using the processed inputs (-1 to 1 range),
       //    arcadeDrive automatically squares inputs for finer control at low speeds
       drive.arcadeDrive(xSpeed, rSpeed);
@@ -916,10 +910,6 @@ int counter = 0;
         xSpeed = -xSpeed;
         rSpeed = -rSpeed;
       }
-
-      SmartDashboard.putNumber("Drive/xSpeed", xSpeed);
-      SmartDashboard.putNumber("Drive/rSpeed", rSpeed);
-      SmartDashboard.putNumber("Drive/counter", counter++);
 
       // 6. Drive the robot using the processed inputs (-1 to 1 range)
       drive.curvatureDrive(xSpeed, rSpeed, quickTurn);

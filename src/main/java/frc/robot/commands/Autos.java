@@ -4,8 +4,6 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -111,7 +109,7 @@ public class Autos {
       driveSubsystem.setSlowModeCommand(true),
 
       // Drive backwards 1 meter
-      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(-18.5)),
+      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(-18.5), 0.405),
 
       // Launch fuel for 5.0 seconds
       fuelSubsystem.launchCommand().withTimeout(5.0).finallyDo(fuelSubsystem::stop),
@@ -120,7 +118,7 @@ public class Autos {
       climberSubsystem.downToLimitCommand(), 
 
       // Drive forward 1 meter (back to starting position)
-      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(18.0)), 
+      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(18.5), 0.405),
       
       // Raise climber to level 1 position
       climberSubsystem.levelOneClimbCommand(),
@@ -132,75 +130,5 @@ public class Autos {
       feedbackSubsystem.funkyDiscoCommand()
     )    
     .withName("backwardLaunchReturnClimb");
-  }
-
-  /**
-   * Start:   The front of the robot facing & centered on the left side of the tower.
-   * Actions: 1. Drives in reverse 1m
-   *          2. Launches fuel for 5 seconds
-   *          3. Lowers climber all the way
-   *          4. Drives forward 1m (back to starting position)
-   *          5. Raises climber to level 1 position
-   * @return Command to run the backwardsLaunchReturnClimb routine
-   */
-  public Command unused1() {
-    return Commands.sequence(
-      // Reset odometry to the starting pose
-      driveSubsystem.resetPoseCommand(new Pose2d(1.518, 4.056, Rotation2d.fromDegrees(180))),
-
-      // Drive backwards 1 meter
-      driveSubsystem.driveToPoseCommand(new Pose2d(2.518, 4.056, Rotation2d.fromDegrees(180))), 
-      
-      // Launch fuel for 7.5 seconds
-      fuelSubsystem.launchCommand().withTimeout(7.5).finallyDo(fuelSubsystem::stop), 
-
-      // Lower climber all the way
-      climberSubsystem.downToLimitCommand(), 
-
-      // Drive forward 1 meter (back to starting position)
-      driveSubsystem.driveToPoseCommand(new Pose2d(1.518, 4.056, Rotation2d.fromDegrees(180))), 
-      
-      // Raise climber to level 1 position
-      climberSubsystem.levelOneClimbCommand(),
-
-      // Celebrate with feedback
-      feedbackSubsystem.funkyDiscoCommand()
-    )
-    .withName("unused1");
-  }
-
-  /**
-   * Start:   The front of the robot facing & centered on the left side of the tower.
-   * Actions: 1. Drives in reverse 1m
-   *          2. Launches fuel for 5 seconds
-   *          3. Lowers climber all the way
-   *          4. Drives forward 1m (back to starting position)
-   *          5. Raises climber to level 1 position
-   * @return Command to run the backwardsLaunchReturnClimb routine
-   */
-  public Command unused2() {
-    return Commands.sequence(
-      // Reset odometry to the starting pose
-      driveSubsystem.resetPoseCommand(new Pose2d(1.518, 4.056, Rotation2d.fromDegrees(180))),
-
-      // Drive backwards 1 meter
-      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(-18.5)),
-
-      // Launch fuel for 7.5 seconds
-      fuelSubsystem.launchCommand().withTimeout(6.0).finallyDo(fuelSubsystem::stop), 
-
-      // Lower climber all the way
-      climberSubsystem.downToLimitCommand(), 
-
-      // Drive forward 1 meter (back to starting position)
-      driveSubsystem.driveDistanceCommand( Units.inchesToMeters(18.5)), 
-      
-      // Raise climber to level 1 position
-      climberSubsystem.levelOneClimbCommand(),
-
-      // Celebrate with feedback
-      feedbackSubsystem.funkyDiscoCommand()
-    )    
-    .withName("unused2");
   }
 }

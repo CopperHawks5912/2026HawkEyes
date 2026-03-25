@@ -89,11 +89,7 @@ public class Robot extends TimedRobot {
    * This function is called periodically during autonomous.
    */
   @Override
-  public void autonomousPeriodic() {
-    if (m_autonomousCommand != null) {
-      System.out.println("Auto command: " + m_autonomousCommand.getName() + " isScheduled: " + m_autonomousCommand.isScheduled());
-    }
-  }
+  public void autonomousPeriodic() {}
 
   /**
    * This function is called once each time the robot enters Teleop mode.
