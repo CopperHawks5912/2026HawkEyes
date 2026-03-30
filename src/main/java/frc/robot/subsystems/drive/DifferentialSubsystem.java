@@ -740,14 +740,13 @@ public class DifferentialSubsystem extends SubsystemBase {
   public Command turnToHeadingCommand(double degrees) {
     return runOnce(() -> aimPIDController.reset(gyro.getRotation2d().getRadians()))
       .andThen(run(() -> {
-          double rotationSpeed = aimPIDController.calculate(
-            gyro.getRotation2d().getRadians(),
-            Math.toRadians(degrees)
-          );
-          driveRobotRelative(new ChassisSpeeds(0.0, 0.0, rotationSpeed));
-        })
-        .until(() -> aimPIDController.atSetpoint())
-      )
+        double rotationSpeed = aimPIDController.calculate(
+          gyro.getRotation2d().getRadians(),
+          Math.toRadians(degrees)
+        );
+        driveRobotRelative(new ChassisSpeeds(0.0, 0.0, rotationSpeed));
+      }))
+      .until(() -> aimPIDController.atSetpoint())
       .withTimeout(3.0)
       .finallyDo(this::stop)
       .withName("TurnToHeadingDifferential");
@@ -764,7 +763,7 @@ public class DifferentialSubsystem extends SubsystemBase {
    * @return Command to drive the specified distance
    */
   public Command driveDistanceCommand(double distance) {
-    return driveDistanceCommand(distance, 0.5);
+    return driveDistanceCommand(distance, 0.25);
   }
 
   /**
@@ -775,14 +774,21 @@ public class DifferentialSubsystem extends SubsystemBase {
    * WARNING: This method does not avoid obstacles! Ensure the path is clear before using.
    *          Use driveToPose(Pose2d pose) for pathfinding with obstacle avoidance.
    * @param distance The distance to drive in meters (+ forward, - reverse)
-   * @param power The power to apply to the motors (0 to 1)
+   * @param power The power to apply to the motors (0 to 1). The power is not squared.
    * @return Command to drive the specified distance
    */
   public Command driveDistanceCommand(double distance, double power) {
     return runOnce(this::resetEncoders)
-      .andThen(run(() -> drive.arcadeDrive(Math.copySign(MathUtil.clamp(power, 0.0, 1.0), distance), 0.0))
-        .until(() -> Math.abs((leftEncoder.getPosition() + rightEncoder.getPosition()) / 2.0) >= Math.abs(distance))
-      )
+      .andThen(run(() -> {
+        double clampedPower = MathUtil.clamp(power, 0.0, 1.0);
+        double directionalPower = Math.copySign(clampedPower, distance);
+        drive.tankDrive(
+          directionalPower,
+          directionalPower,
+          false
+        );
+      }))
+      .until(() -> Math.abs((leftEncoder.getPosition() + rightEncoder.getPosition()) / 2.0) >= Math.abs(distance))
       .withTimeout(10.0)
       .finallyDo(this::stop)
       .withName("DriveDistanceDifferential");
