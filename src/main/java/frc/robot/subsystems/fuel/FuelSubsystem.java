@@ -215,9 +215,9 @@ public class FuelSubsystem extends SubsystemBase {
    */
   private void setLauncherRPM(double rpm) {
     double clampedRPM = MathUtil.clamp(rpm, -6000, 6000);
-    launcherVelocityRequest.Velocity = clampedRPM;
-    rightIntakeLauncherMotor.setControl(launcherVelocityRequest);
-    leftIntakeLauncherMotor.setControl(launcherVelocityRequest);
+    double rps = clampedRPM / 60.0; // Convert RPM to RPS for the motor controller
+    rightIntakeLauncherMotor.setControl(launcherVelocityRequest.withVelocity(rps));
+    leftIntakeLauncherMotor.setControl(launcherVelocityRequest.withVelocity(rps));
   }
 
   /**
@@ -227,8 +227,8 @@ public class FuelSubsystem extends SubsystemBase {
    */
   private void setFeederRPM(double rpm) {
     double clampedRPM = MathUtil.clamp(rpm, -6380, 6380);
-    feederVelocityRequest.Velocity = clampedRPM;
-    feederMotor.setControl(feederVelocityRequest);
+    double rps = clampedRPM / 60.0; // Convert RPM to RPS for the motor controller
+    feederMotor.setControl(feederVelocityRequest.withVelocity(rps));
   }
   
   /**
@@ -338,8 +338,8 @@ public class FuelSubsystem extends SubsystemBase {
    * @return Average current in amps
    */
   private double getCurrent() {
-    return (leftIntakeLauncherMotor.getMotorOutputStatus().getValueAsDouble() + 
-            rightIntakeLauncherMotor.getMotorOutputStatus().getValueAsDouble()) / 2.0;
+    return (leftIntakeLauncherMotor.getSupplyCurrent().getValueAsDouble() + 
+            rightIntakeLauncherMotor.getSupplyCurrent().getValueAsDouble()) / 2.0;
   }
   
   /**
