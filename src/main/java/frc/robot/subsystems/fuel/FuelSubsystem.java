@@ -296,9 +296,9 @@ public class FuelSubsystem extends SubsystemBase {
    * Command to launch fuel out of the launcher at a fixed RPM.
    * Hold button: spins up for a brief period then feeds & launches.
    * Release button: stops everything immediately.
-   * @return Command that runs rollers at launching RPM
+   * @return Command that runs rollers at launching RPS
    */
-  public Command launchRpmCommand() {
+  public Command launchRpsCommand() {
     return run(() -> {
       setLauncherRPS(FuelConstants.kLauncherLaunchingRPS);
       setFeederRPS(FuelConstants.kFeederSpinUpPreLaunchRPS);

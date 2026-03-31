@@ -147,7 +147,7 @@ public class RobotContainer {
       fuelSubsystem.launchPowerCommand()
     );
     // driverXbox.rightBumper().and(() -> !visionSubsystem.isEnabled()).whileTrue(
-    //   fuelSubsystem.launchRpmCommand()
+    //   fuelSubsystem.launchRpsCommand()
     // );
 
     // manual climber control with DPAD
