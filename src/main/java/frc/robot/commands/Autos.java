@@ -154,4 +154,72 @@ public class Autos {
     )    
     .withName("rightSideForwardLaunchForwardClimb");
   }
+
+  public Command moveAndShootCommand() {
+    return Commands.sequence(
+      // // Turn on slow mode
+      driveSubsystem.setSlowModeCommand(true),
+
+      // Drive backwards 1 meter
+      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(61), 0.50),
+
+      // Launch fuel for 5.0 seconds
+      fuelSubsystem.launchCommand().withTimeout(5.0).finallyDo(fuelSubsystem::stop),
+
+      // // Lower climber all the way
+      // climberSubsystem.downToLimitCommand(), 
+
+      // // Drive forward 1 meter (back to starting position)
+      // driveSubsystem.driveDistanceCommand(Units.inchesToMeters(18.5), 0.405),
+      
+      // // Raise climber to level 1 position
+      // climberSubsystem.levelOneClimbCommand(),
+
+      // Turn off slow mode
+      driveSubsystem.setSlowModeCommand(false),
+
+      // Celebrate with feedback
+      feedbackSubsystem.funkyDiscoCommand()
+    )    
+    .withName("moveAndShootCommand");
+  }
+
+  /**
+   * Start:   The front of the robot facing & centered on the left side of the tower.
+   * Actions: 1. Turn on slow mode
+   *          2. Drives in reverse 18.5 inches
+   *          3. Launches fuel for 5 seconds
+   *          4. Lowers climber all the way
+   *          5. Drives forward 18.5 inches (back to starting position)
+   *          6. Raises climber to level 1 position
+   *          7. Turn off slow mode
+   * @return Command to run the backwardLaunchReturnClimb routine
+   */
+  public Command forwardLaunchForwardClimb() {
+    return Commands.sequence(
+      // // Turn on slow mode
+      driveSubsystem.setSlowModeCommand(true),
+
+      // Drive backwards 1 meter
+      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(63.5), 0.50),
+
+      Commands.parallel(
+        // Launch fuel for 5.0 seconds
+        fuelSubsystem.launchCommand().withTimeout(5.0).finallyDo(fuelSubsystem::stop),
+
+        // wait AND then lower the climber
+        Commands.waitSeconds(2.0).andThen(climberSubsystem.downToLimitCommand())
+      ),
+
+      // Drive forward 1 meter (back to starting position)
+      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(15.5), 0.425).withTimeout(2.25),
+      
+      // Raise climber to level 1 position
+      climberSubsystem.levelOneClimbCommand(),
+
+      // Turn off slow mode
+      driveSubsystem.setSlowModeCommand(false)
+    )    
+    .withName("forwardLaunchForwardClimb");
+  }
 }
