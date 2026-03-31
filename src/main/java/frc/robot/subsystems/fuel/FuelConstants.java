@@ -16,13 +16,13 @@ public final class FuelConstants {
   // Feeder motor percentages
   public static final double kFeederLaunchingPercent        =  0.60; // Feed fuel into the launcher for launcher
   public static final double kFeederPassingPercent          =  0.60; // Feed fuel into the launcher for passing
-  public static final double kFeederIntakingPercent         = -0.60; // A reverse power to pull fuel into the hopper
-  public static final double kFeederEjectingPercent         =  0.60; // Feed fuel towards the intake to eject fuel
+  public static final double kFeederIntakingPercent         = -0.80; // A reverse power to pull fuel into the hopper
+  public static final double kFeederEjectingPercent         =  0.95; // Feed fuel towards the intake to eject fuel
 
   // Launcher & intake percentages (physically same motors)
   public static final double kLauncherLaunchingPercent      =  0.80; // Power for launching
   public static final double kLauncherPassingPercent        =  0.60; // Power for passing
-  public static final double kLauncherIntakingPercent       =  0.60; // Power for intaking
+  public static final double kLauncherIntakingPercent       =  0.50; // Power for intaking
   public static final double kLauncherEjectingPercent       = -0.80; // Power for ejecting
   
   // hold back fuel during launcher spinup

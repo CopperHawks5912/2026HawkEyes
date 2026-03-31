@@ -108,7 +108,8 @@ public class RobotContainer {
 
     // Build the auto chooser and add it to the dashboard
     autoChooser.setDefaultOption("No auto", Commands.none());
-    autoChooser.addOption("BACKWARD_LAUNCH_RETURN_CLIMB", autos.backwardLaunchReturnClimb());
+    autoChooser.addOption("MOVE_AND_SHOOT", autos.moveAndShootCommand());
+    autoChooser.addOption("FWD_LAUNCH_FWD_CLIMB", autos.forwardLaunchForwardClimb());
     autoChooser.addOption("LAUNCH_5_SECONDS", autos.launchFiveSeconds());;    
     
     // Add auto chooser to dashboard

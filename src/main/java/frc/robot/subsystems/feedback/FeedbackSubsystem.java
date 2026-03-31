@@ -271,7 +271,7 @@ public class FeedbackSubsystem extends SubsystemBase {
     Color allianceColor = Utils.isRedAlliance() ? Color.kRed : Color.kBlue;
 
     // color to indicate inactive hub (collect fuel)
-    Color inactiveColor = Color.kWhiteSmoke;
+    Color inactiveColor = Color.kGreen;
 
     // if no game data, just show alliance color solid
     if (gameData == '?') {
@@ -287,7 +287,7 @@ public class FeedbackSubsystem extends SubsystemBase {
       }
       else if (time <= 145 && time > 140) {
         // autonomous - last 5 seconds (both alliances can score)
-        pulsePattern(allianceColor, 0.35, 0);
+        setAllLEDs(allianceColor);
       }
       else {
         // default
@@ -318,7 +318,7 @@ public class FeedbackSubsystem extends SubsystemBase {
       }
       else if (time <= 110 && time > 105) {
         // shift 1 - last 5 seconds
-        pulsePattern(isInactiveFirst ? inactiveColor : allianceColor, 0.35, 0);
+        setAllLEDs(isInactiveFirst ? inactiveColor : allianceColor);
       }
       else if (time <= 105 && time > 85) {
         // shift 2
@@ -326,7 +326,7 @@ public class FeedbackSubsystem extends SubsystemBase {
       }
       else if (time <= 85 && time > 80) {
         // shift 2 - last 5 seconds
-        pulsePattern(isInactiveFirst ? allianceColor : inactiveColor, 0.35, 0);
+        setAllLEDs(isInactiveFirst ? allianceColor : inactiveColor);
       }
       else if (time <= 80 && time > 60) {
         // shift 3
@@ -334,7 +334,7 @@ public class FeedbackSubsystem extends SubsystemBase {
       }
       else if (time <= 60 && time > 55) {
         // shift 3 - last 5 seconds
-        pulsePattern(isInactiveFirst ? inactiveColor : allianceColor, 0.35, 0);
+        setAllLEDs(isInactiveFirst ? inactiveColor : allianceColor);
       }
       else if (time <= 55 && time > 35) {
         // shift 4
@@ -342,7 +342,7 @@ public class FeedbackSubsystem extends SubsystemBase {
       }
       else if (time <= 35 && time > 30) {
         // shift 4 - last 5 seconds
-        pulsePattern(isInactiveFirst ? allianceColor : inactiveColor, 0.35, 0);
+        setAllLEDs(isInactiveFirst ? allianceColor : inactiveColor);
       }
       else if (time <= 30 && time > 5) {
         // end game (both alliances can score)
@@ -350,7 +350,7 @@ public class FeedbackSubsystem extends SubsystemBase {
       }
       else if (time <= 5 && time > 0) {
         // end game - last 5 seconds (both alliances can score)
-        pulsePattern(allianceColor, 0.35, 0);
+        setAllLEDs(allianceColor);
       }
       else {
         // default to off

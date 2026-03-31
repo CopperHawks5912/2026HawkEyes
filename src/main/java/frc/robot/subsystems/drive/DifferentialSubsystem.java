@@ -863,7 +863,7 @@ public class DifferentialSubsystem extends SubsystemBase {
       // 4. Invert controls if the inverted flag is set
       if (inverted) {
         xSpeed = -xSpeed;
-        rSpeed = -rSpeed;
+        // rSpeed = -rSpeed;
       }
 
       // 5. Drive the robot using the processed inputs (-1 to 1 range),
@@ -908,7 +908,7 @@ public class DifferentialSubsystem extends SubsystemBase {
       // 5. Invert controls if the inverted flag is set
       if (inverted) {
         xSpeed = -xSpeed;
-        rSpeed = -rSpeed;
+        // rSpeed = -rSpeed;
       }
 
       // 6. Drive the robot using the processed inputs (-1 to 1 range)

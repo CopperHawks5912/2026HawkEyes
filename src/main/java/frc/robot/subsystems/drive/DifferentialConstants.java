@@ -21,7 +21,7 @@ public final class DifferentialConstants {
    * Use this to set the robot's max forward/backward speed when 
    * controlling with joysticks for safety or driver preference.
    */
-  public static final double kMaxTranslationalSpeed = 0.8;
+  public static final double kMaxTranslationalSpeed = 0.935;
   
   /**
    * Rotation scaling factor (0.0 to 1.0) - used by driveArcadeCommand
