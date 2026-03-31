@@ -6,12 +6,8 @@ package frc.robot.subsystems.drive;
 
 import static edu.wpi.first.units.Units.Degrees;
 
-import java.util.Set;
 import java.util.function.DoubleSupplier;
 
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.controllers.PPLTVController;
-import com.pathplanner.lib.path.PathConstraints;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
@@ -42,7 +38,6 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants.CANConstants;
@@ -161,18 +156,6 @@ public class DifferentialSubsystem extends SubsystemBase {
       new Pose2d(),
       VecBuilder.fill(0.02, 0.02, 0.01), // State standard deviations (x, y, theta)
       VecBuilder.fill(0.1, 0.1, 0.1)     // Vision standard deviations (will be overridden)
-    );
-
-    // Configure AutoBuilder for path following
-    AutoBuilder.configure(
-      this::getPose, // Robot pose supplier
-      this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
-      this::getRobotRelativeSpeeds, // ChassisSpeeds supplier
-      (speeds, feedforwards) -> driveRobotRelativeWithoutPID(speeds), // Method that will drive the robot given ChassisSpeeds
-      new PPLTVController(0.02), // 20ms periodic cycle
-      DifferentialConstants.kRobotConfig, // Robot configuration
-      Utils::isRedAlliance, // Method to flip path based on alliance color
-      this // Reference to this subsystem to set requirements
     );
 
     // Reset odometry to starting pose
@@ -806,35 +789,6 @@ public class DifferentialSubsystem extends SubsystemBase {
   }
 
   /**
-   * Creates a command to drive to a specified pose using PathPlanner
-   * @param targetPose The Pose2d to drive to
-   * @return Command to drive via PathPlanner to the target pose
-   */
-  public Command driveToPoseCommand(Pose2d targetPose) {
-    // Deferred command to get latest pose when scheduled
-    // Set.of(this) ensures driveSubsystem is required
-    return Commands.defer(() -> {      
-      // Check for null target pose
-      if (targetPose == null) {
-        Utils.logError("Cannot drive to null pose");
-        return Commands.none();
-      }
-
-      // Create the constraints to use while pathfinding
-      PathConstraints constraints = new PathConstraints(
-        DifferentialConstants.kMaxSpeedMetersPerSecond, 
-        DifferentialConstants.kMaxAccelMetersPerSecondSq,
-        DifferentialConstants.kMaxAngularSpeedRadsPerSecond, 
-        DifferentialConstants.kMaxAngularAccelRadsPerSecondSq
-      );
-
-      // Since AutoBuilder is configured, we can use it to build pathfinding commands
-      return AutoBuilder.pathfindToPose(targetPose, constraints, 0.0);
-    }, Set.of(this))
-    .withName("DriveToPoseDifferential");
-  }
-
-  /**
    * Command to drive the differential in arcade mode using power percentages (-1 to 1 range).
    * @param xSupplier The forward/backward speed supplier
    * @param rSupplier The rotation rate supplier
@@ -859,7 +813,7 @@ public class DifferentialSubsystem extends SubsystemBase {
         xSpeed = MathUtil.clamp(xSpeed, -DifferentialConstants.kMaxTranslationalSpeed, DifferentialConstants.kMaxTranslationalSpeed);
         rSpeed = MathUtil.clamp(rSpeed, -DifferentialConstants.kMaxRotationalSpeed, DifferentialConstants.kMaxRotationalSpeed);
       }
-    
+
       // 4. Invert controls if the inverted flag is set
       if (inverted) {
         xSpeed = -xSpeed;
