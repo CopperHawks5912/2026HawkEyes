@@ -308,7 +308,7 @@ public class FuelSubsystem extends SubsystemBase {
       setLauncherRPS(FuelConstants.kLauncherLaunchingRPS);
       setFeederRPS(FuelConstants.kFeederLaunchingRPS);
     }))
-    .withName("LaunchRpmFuel");
+    .withName("LaunchRpsFuel");
   }
   
   // ==================== Telemetry Methods ====================
