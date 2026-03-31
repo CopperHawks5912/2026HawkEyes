@@ -103,7 +103,7 @@ public class FeedbackSubsystem extends SubsystemBase {
         break;
 
       case AIMED_AT_HUB:
-        blinkPattern(FeedbackConstants.AimedAtHubColor, 0.50);
+        setAllLEDs(FeedbackConstants.AimedAtHubColor);
         break;
         
       case IDLE:
@@ -111,15 +111,15 @@ public class FeedbackSubsystem extends SubsystemBase {
         break;
         
       case INFO:
-        blinkPattern(FeedbackConstants.InfoColor, 0.50);
+        setAllLEDs(FeedbackConstants.InfoColor);
         break;
         
       case WARNING:
-        blinkPattern(FeedbackConstants.WarningColor, 0.25);
+        setAllLEDs(FeedbackConstants.WarningColor);
         break;
         
       case ERROR:
-        blinkPattern(FeedbackConstants.ErrorColor, 0.15);
+        setAllLEDs(FeedbackConstants.ErrorColor);
         break;
         
       case TEAM_COLORS:
@@ -145,8 +145,15 @@ public class FeedbackSubsystem extends SubsystemBase {
    * @param color Color to set
    */
   private void setAllLEDs(Color color) {
+    // Tune brightness here if needed (0.0 to 1.0)
+    double brightness = 0.85;
+    Color scaledColor = new Color(
+      color.red * brightness,
+      color.green * brightness,
+      color.blue * brightness
+    );
     for (int i = 0; i < ledBuffer.getLength(); i++) {
-      ledBuffer.setLED(i, color);
+      ledBuffer.setLED(i, scaledColor);
     }
   }
   
@@ -271,28 +278,17 @@ public class FeedbackSubsystem extends SubsystemBase {
     Color allianceColor = Utils.isRedAlliance() ? Color.kRed : Color.kBlue;
 
     // color to indicate inactive hub (collect fuel)
-    Color inactiveColor = Color.kWhiteSmoke;
+    Color inactiveColor = Color.kDarkGreen;
 
-    // if no game data, just show alliance color solid
+    // if no game data, just show inactive color
     if (gameData == '?') {
-      setAllLEDs(allianceColor);
+      setAllLEDs(inactiveColor);
       return;
     }
 
-    // autonomous period 20 seconds (both alliances can score)
+    // autonomous period (both alliances can score)
     if (gameData == 'A') {
-      if (time <= 160 && time > 145) {
-        // autonomous (both alliances can score)
-        setAllLEDs(allianceColor);
-      }
-      else if (time <= 145 && time > 140) {
-        // autonomous - last 5 seconds (both alliances can score)
-        pulsePattern(allianceColor, 0.35, 0);
-      }
-      else {
-        // default
-        setAllLEDs(allianceColor);
-      }
+      setAllLEDs(allianceColor);
     }
 
     // check that we have valid game data
@@ -304,53 +300,29 @@ public class FeedbackSubsystem extends SubsystemBase {
 
       // shift data from 2026 FRC Game Manual
       // https://firstfrc.blob.core.windows.net/frc2026/Manual/2026GameManual.pdf
-      if (time <= 140 && time > 135) {
+      if (time <= 140 && time > 130) {
         // transition shift (both alliances can score)
         setAllLEDs(allianceColor);
       }
-      else if (time <= 135 && time > 130) {
-        // transition shift - last 5 seconds (both alliances can score)
-        pulsePattern(allianceColor, 0.35, 0);
-      }
-      else if (time <= 130 && time > 110) {
+      else if (time <= 130 && time > 105) {
         // shift 1
         setAllLEDs(isInactiveFirst ? inactiveColor : allianceColor);
       }
-      else if (time <= 110 && time > 105) {
-        // shift 1 - last 5 seconds
-        pulsePattern(isInactiveFirst ? inactiveColor : allianceColor, 0.35, 0);
-      }
-      else if (time <= 105 && time > 85) {
+      else if (time <= 105 && time > 80) {
         // shift 2
         setAllLEDs(isInactiveFirst ? allianceColor : inactiveColor);
       }
-      else if (time <= 85 && time > 80) {
-        // shift 2 - last 5 seconds
-        pulsePattern(isInactiveFirst ? allianceColor : inactiveColor, 0.35, 0);
-      }
-      else if (time <= 80 && time > 60) {
+      else if (time <= 80 && time > 55) {
         // shift 3
         setAllLEDs(isInactiveFirst ? inactiveColor : allianceColor);
       }
-      else if (time <= 60 && time > 55) {
-        // shift 3 - last 5 seconds
-        pulsePattern(isInactiveFirst ? inactiveColor : allianceColor, 0.35, 0);
-      }
-      else if (time <= 55 && time > 35) {
+      else if (time <= 55 && time > 30) {
         // shift 4
         setAllLEDs(isInactiveFirst ? allianceColor : inactiveColor);
       }
-      else if (time <= 35 && time > 30) {
-        // shift 4 - last 5 seconds
-        pulsePattern(isInactiveFirst ? allianceColor : inactiveColor, 0.35, 0);
-      }
-      else if (time <= 30 && time > 5) {
+      else if (time <= 30 && time > 0) {
         // end game (both alliances can score)
         setAllLEDs(allianceColor);
-      }
-      else if (time <= 5 && time > 0) {
-        // end game - last 5 seconds (both alliances can score)
-        pulsePattern(allianceColor, 0.35, 0);
       }
       else {
         // default to off

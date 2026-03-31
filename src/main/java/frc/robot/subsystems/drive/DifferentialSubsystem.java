@@ -393,38 +393,6 @@ public class DifferentialSubsystem extends SubsystemBase {
   }
 
   /**
-   * Drive the robot using robot-relative chassis speeds using the arcade method.
-   * @param speeds The desired robot-relative chassis speeds
-   */
-  private void driveRobotRelativeWithoutPID(ChassisSpeeds speeds) {
-    // Convert chassis speeds to wheel speeds
-    DifferentialDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(speeds);
-
-    // Desaturate wheel speeds to stay within maximum speed
-    // while preserving the ratio between left and right wheels
-    wheelSpeeds.desaturate(DifferentialConstants.kMaxSpeedMetersPerSecond);
-    
-    // Normalize to -1 to 1 range for motor output
-    double leftSpeed = wheelSpeeds.leftMetersPerSecond / DifferentialConstants.kMaxSpeedMetersPerSecond;
-    double rightSpeed = wheelSpeeds.rightMetersPerSecond / DifferentialConstants.kMaxSpeedMetersPerSecond;
-
-    // Clamp speeds to -1.0 to 1.0 just in case
-    leftSpeed = MathUtil.clamp(leftSpeed, -1.0, 1.0);
-    rightSpeed = MathUtil.clamp(rightSpeed, -1.0, 1.0);
-
-    // Drive using tank drive
-    drive.tankDrive(leftSpeed, rightSpeed);
-  }
-
-  /**
-   * Get the robot's current robot-relative chassis speeds
-   * @return The current robot-relative chassis speeds
-   */
-  private ChassisSpeeds getRobotRelativeSpeeds() {
-    return kinematics.toChassisSpeeds(getWheelSpeeds());
-  }
-
-  /**
    * Get the robot's current pose
    * @return The current estimated pose of the robot
    */
@@ -455,17 +423,6 @@ public class DifferentialSubsystem extends SubsystemBase {
     
     Utils.logInfo(String.format("Pose reset to: (%.2f, %.2f, %.2f°)", 
       pose.getX(), pose.getY(), pose.getRotation().getDegrees()));
-  }
-
-  /**
-   * Get the current wheel speeds
-   * @return The current wheel speeds
-   */
-  private DifferentialDriveWheelSpeeds getWheelSpeeds() {
-    return new DifferentialDriveWheelSpeeds(
-      leftEncoder.getVelocity(),
-      rightEncoder.getVelocity()
-    );
   }
 
   /**
@@ -571,7 +528,7 @@ public class DifferentialSubsystem extends SubsystemBase {
    * autonomous to ensure the drive is in a known state.
    */
   public void autonomousInit() {
-    // resetOdometry();
+    resetOdometry();
     setMotorBrake(true);
     inverted = false;
     slowMode = false;
@@ -740,14 +697,13 @@ public class DifferentialSubsystem extends SubsystemBase {
   public Command turnToHeadingCommand(double degrees) {
     return runOnce(() -> aimPIDController.reset(gyro.getRotation2d().getRadians()))
       .andThen(run(() -> {
-          double rotationSpeed = aimPIDController.calculate(
-            gyro.getRotation2d().getRadians(),
-            Math.toRadians(degrees)
-          );
-          driveRobotRelative(new ChassisSpeeds(0.0, 0.0, rotationSpeed));
-        })
-        .until(() -> aimPIDController.atSetpoint())
-      )
+        double rotationSpeed = aimPIDController.calculate(
+          gyro.getRotation2d().getRadians(),
+          Math.toRadians(degrees)
+        );
+        driveRobotRelative(new ChassisSpeeds(0.0, 0.0, rotationSpeed));
+      }))
+      .until(() -> aimPIDController.atSetpoint())
       .withTimeout(3.0)
       .finallyDo(this::stop)
       .withName("TurnToHeadingDifferential");
@@ -764,7 +720,7 @@ public class DifferentialSubsystem extends SubsystemBase {
    * @return Command to drive the specified distance
    */
   public Command driveDistanceCommand(double distance) {
-    return driveDistanceCommand(distance, 0.5);
+    return driveDistanceCommand(distance, 0.20);
   }
 
   /**
@@ -775,14 +731,21 @@ public class DifferentialSubsystem extends SubsystemBase {
    * WARNING: This method does not avoid obstacles! Ensure the path is clear before using.
    *          Use driveToPose(Pose2d pose) for pathfinding with obstacle avoidance.
    * @param distance The distance to drive in meters (+ forward, - reverse)
-   * @param power The power to apply to the motors (0 to 1)
+   * @param power The power to apply to the motors (0 to 1). The power is not squared.
    * @return Command to drive the specified distance
    */
   public Command driveDistanceCommand(double distance, double power) {
     return runOnce(this::resetEncoders)
-      .andThen(run(() -> drive.arcadeDrive(Math.copySign(MathUtil.clamp(power, 0.0, 1.0), distance), 0.0))
-        .until(() -> Math.abs((leftEncoder.getPosition() + rightEncoder.getPosition()) / 2.0) >= Math.abs(distance))
-      )
+      .andThen(run(() -> {
+        double clampedPower = MathUtil.clamp(power, 0.0, 1.0);
+        double directionalPower = Math.copySign(clampedPower, distance);
+        drive.tankDrive(
+          directionalPower,
+          directionalPower,
+          false
+        );
+      }))
+      .until(() -> Math.abs((leftEncoder.getPosition() + rightEncoder.getPosition()) / 2.0) >= Math.abs(distance))
       .withTimeout(10.0)
       .finallyDo(this::stop)
       .withName("DriveDistanceDifferential");
@@ -817,7 +780,7 @@ public class DifferentialSubsystem extends SubsystemBase {
       // 4. Invert controls if the inverted flag is set
       if (inverted) {
         xSpeed = -xSpeed;
-        rSpeed = -rSpeed;
+        // rSpeed = -rSpeed;
       }
 
       // 5. Drive the robot using the processed inputs (-1 to 1 range),
@@ -862,7 +825,7 @@ public class DifferentialSubsystem extends SubsystemBase {
       // 5. Invert controls if the inverted flag is set
       if (inverted) {
         xSpeed = -xSpeed;
-        rSpeed = -rSpeed;
+        // rSpeed = -rSpeed;
       }
 
       // 6. Drive the robot using the processed inputs (-1 to 1 range)
