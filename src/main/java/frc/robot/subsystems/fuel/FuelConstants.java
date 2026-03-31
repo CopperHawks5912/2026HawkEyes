@@ -58,8 +58,8 @@ public final class FuelConstants {
   public static final double kLauncherI = 0.0;
   public static final double kLauncherD = 0.0;
   public static final double kLauncherS = 0.1;    // Static friction (volts) - voltage to overcome friction
-  public static final double kLauncherV = 0.12;   // 12/100 w ith voltage compensation
-  public static final double kLauncherA = 0.0;    // Acceleration constant (volts per RPM/s) - usually small for flywheels
+  public static final double kLauncherV = 0.12;   // 12/100 with voltage compensation
+  public static final double kLauncherA = 0.0;    // Acceleration constant (volts per RPS/s)
   
   // Feeder velocity control PID constants
   public static final double kFeederP   = 0.012;
@@ -67,5 +67,5 @@ public final class FuelConstants {
   public static final double kFeederD   = 0.0;
   public static final double kFeederS   = 0.1;    // Static friction (volts) - voltage to overcome friction
   public static final double kFeederV   = 0.113;  // 12/106 with voltage compensation
-  public static final double kFeederA   = 0.0;    // Acceleration constant (volts per RPM/s) - usually small for flywheels
+  public static final double kFeederA   = 0.0;    // Acceleration constant (volts per RPS/s)
 }
