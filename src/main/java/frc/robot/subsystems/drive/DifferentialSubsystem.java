@@ -393,38 +393,6 @@ public class DifferentialSubsystem extends SubsystemBase {
   }
 
   /**
-   * Drive the robot using robot-relative chassis speeds using the arcade method.
-   * @param speeds The desired robot-relative chassis speeds
-   */
-  private void driveRobotRelativeWithoutPID(ChassisSpeeds speeds) {
-    // Convert chassis speeds to wheel speeds
-    DifferentialDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(speeds);
-
-    // Desaturate wheel speeds to stay within maximum speed
-    // while preserving the ratio between left and right wheels
-    wheelSpeeds.desaturate(DifferentialConstants.kMaxSpeedMetersPerSecond);
-    
-    // Normalize to -1 to 1 range for motor output
-    double leftSpeed = wheelSpeeds.leftMetersPerSecond / DifferentialConstants.kMaxSpeedMetersPerSecond;
-    double rightSpeed = wheelSpeeds.rightMetersPerSecond / DifferentialConstants.kMaxSpeedMetersPerSecond;
-
-    // Clamp speeds to -1.0 to 1.0 just in case
-    leftSpeed = MathUtil.clamp(leftSpeed, -1.0, 1.0);
-    rightSpeed = MathUtil.clamp(rightSpeed, -1.0, 1.0);
-
-    // Drive using tank drive
-    drive.tankDrive(leftSpeed, rightSpeed);
-  }
-
-  /**
-   * Get the robot's current robot-relative chassis speeds
-   * @return The current robot-relative chassis speeds
-   */
-  private ChassisSpeeds getRobotRelativeSpeeds() {
-    return kinematics.toChassisSpeeds(getWheelSpeeds());
-  }
-
-  /**
    * Get the robot's current pose
    * @return The current estimated pose of the robot
    */
@@ -455,17 +423,6 @@ public class DifferentialSubsystem extends SubsystemBase {
     
     Utils.logInfo(String.format("Pose reset to: (%.2f, %.2f, %.2f°)", 
       pose.getX(), pose.getY(), pose.getRotation().getDegrees()));
-  }
-
-  /**
-   * Get the current wheel speeds
-   * @return The current wheel speeds
-   */
-  private DifferentialDriveWheelSpeeds getWheelSpeeds() {
-    return new DifferentialDriveWheelSpeeds(
-      leftEncoder.getVelocity(),
-      rightEncoder.getVelocity()
-    );
   }
 
   /**
