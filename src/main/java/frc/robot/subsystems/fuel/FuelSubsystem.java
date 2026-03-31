@@ -209,26 +209,24 @@ public class FuelSubsystem extends SubsystemBase {
   }
   
   /**
-   * Set launcher motors to a desired RPM.
+   * Set launcher motors to a desired RPS.
    * Used for PID controlled intake/eject operations.
-   * @param rpm Desired RPM for the launcher/intake motors
+   * @param rps Desired RPS for the launcher/intake motors
    */
-  private void setLauncherRPM(double rpm) {
-    double clampedRPM = MathUtil.clamp(rpm, -6000, 6000);
-    double rps = clampedRPM / 60.0; // Convert RPM to RPS for the motor controller
-    rightIntakeLauncherMotor.setControl(launcherVelocityRequest.withVelocity(rps));
-    leftIntakeLauncherMotor.setControl(launcherVelocityRequest.withVelocity(rps));
+  private void setLauncherRPS(double rps) {
+    double clampedRPS = MathUtil.clamp(rps, -100, 100); // Kraken x60 max RPM is 6000, which is 100 RPS
+    rightIntakeLauncherMotor.setControl(launcherVelocityRequest.withVelocity(clampedRPS));
+    leftIntakeLauncherMotor.setControl(launcherVelocityRequest.withVelocity(clampedRPS));
   }
 
   /**
-   * Set feeder motors to a desired RPM.
+   * Set feeder motors to a desired RPS.
    * Used for PID controlled feed/intake/eject operations.
-   * @param rpm Desired RPM for the feeder motor
+   * @param rps Desired RPS for the feeder motor
    */
-  private void setFeederRPM(double rpm) {
-    double clampedRPM = MathUtil.clamp(rpm, -6380, 6380);
-    double rps = clampedRPM / 60.0; // Convert RPM to RPS for the motor controller
-    feederMotor.setControl(feederVelocityRequest.withVelocity(rps));
+  private void setFeederRPS(double rps) {
+    double clampedRPS = MathUtil.clamp(rps, -106.333, 106.333); // Falcon 500 max RPM is 6380, which is 106.333 RPS
+    feederMotor.setControl(feederVelocityRequest.withVelocity(clampedRPS));
   }
   
   /**
@@ -302,13 +300,13 @@ public class FuelSubsystem extends SubsystemBase {
    */
   public Command launchRpmCommand() {
     return run(() -> {
-      setLauncherRPM(FuelConstants.kLauncherLaunchingRPM);
-      setFeederRPM(FuelConstants.kFeederSpinUpPreLaunchRPM);
+      setLauncherRPS(FuelConstants.kLauncherLaunchingRPS);
+      setFeederRPS(FuelConstants.kFeederSpinUpPreLaunchRPS);
     })
     .withTimeout(FuelConstants.kLauncherSpinUpTimeoutSeconds)
     .andThen(run(() -> {
-      setLauncherRPM(FuelConstants.kLauncherLaunchingRPM);
-      setFeederRPM(FuelConstants.kFeederLaunchingRPM);
+      setLauncherRPS(FuelConstants.kLauncherLaunchingRPS);
+      setFeederRPS(FuelConstants.kFeederLaunchingRPS);
     }))
     .withName("LaunchRpmFuel");
   }
@@ -317,11 +315,11 @@ public class FuelSubsystem extends SubsystemBase {
 
   /**
    * Get the average velocity of both launcher motors
-   * @return Average velocity of the launcher motors in native RPM
+   * @return Average velocity of the launcher motors in RPM
    */
   private double getVelocity() {
     return (leftIntakeLauncherMotor.getVelocity().getValueAsDouble() + 
-            rightIntakeLauncherMotor.getVelocity().getValueAsDouble()) / 2.0;
+            rightIntakeLauncherMotor.getVelocity().getValueAsDouble()) / 2.0 * 60.0;
   }
 
   /**

@@ -38,34 +38,34 @@ public final class FuelConstants {
   // -------------------------------------------------------------------------
   // Tune these values when using RPM velocity control
   // -------------------------------------------------------------------------
-  // Feeder motor RPMs [-6380, 6380] for Falcon 500
-  public static final double kFeederLaunchingRPM            =  3828;
-  public static final double kFeederPassingRPM              =  3828;
-  public static final double kFeederIntakingRPM             = -3828; // must be negative
-  public static final double kFeederEjectingRPM             =  3828;
+  // Feeder motor RPMs [-6380, 6380] for Falcon 500 - convert to RPS for motor controller
+  public static final double kFeederLaunchingRPS            =  3828 / 60.0;
+  public static final double kFeederPassingRPS              =  3828 / 60.0;
+  public static final double kFeederIntakingRPS             = -3828 / 60.0; // must be negative
+  public static final double kFeederEjectingRPS             =  3828 / 60.0;
   
-  // Launcher & intake RPMs [-6000, 6000] for Kraken x60
-  public static final double kLauncherLaunchingRPM          =  4800;
-  public static final double kLauncherPassingRPM            =  3600;
-  public static final double kLauncherIntakingRPM           =  3600;
-  public static final double kLauncherEjectingRPM           = -4800; // must be negative
+  // Launcher & intake RPMs [-6000, 6000] for Kraken x60 - convert to RPS for motor controller
+  public static final double kLauncherLaunchingRPS          =  4800 / 60.0;
+  public static final double kLauncherPassingRPS            =  3600 / 60.0;
+  public static final double kLauncherIntakingRPS           =  3600 / 60.0;
+  public static final double kLauncherEjectingRPS           = -4800 / 60.0; // must be negative
   
   // hold back fuel during launcher spinup
-  public static final double kFeederSpinUpPreLaunchRPM      =   240;
+  public static final double kFeederSpinUpPreLaunchRPS      =   240 / 60.0; // 240 RPM converted to RPS for the motor controller
 
   // Launcher velocity control PID constants
-  public static final double kLauncherP = 0.0002; 
+  public static final double kLauncherP = 0.012; 
   public static final double kLauncherI = 0.0;
   public static final double kLauncherD = 0.0;
   public static final double kLauncherS = 0.1;    // Static friction (volts) - voltage to overcome friction
-  public static final double kLauncherV = 0.002;  // 12/6000 with voltage compensation
+  public static final double kLauncherV = 0.12;   // 12/100 w ith voltage compensation
   public static final double kLauncherA = 0.0;    // Acceleration constant (volts per RPM/s) - usually small for flywheels
   
   // Feeder velocity control PID constants
-  public static final double kFeederP   = 0.0002;
+  public static final double kFeederP   = 0.012;
   public static final double kFeederI   = 0.0;
   public static final double kFeederD   = 0.0;
   public static final double kFeederS   = 0.1;    // Static friction (volts) - voltage to overcome friction
-  public static final double kFeederV   = 0.0018; // 12/6380 with voltage compensation
+  public static final double kFeederV   = 0.113;  // 12/106 with voltage compensation
   public static final double kFeederA   = 0.0;    // Acceleration constant (volts per RPM/s) - usually small for flywheels
 }
