@@ -15,7 +15,7 @@ package frc.robot.subsystems.fuel;
 public final class FuelConstants {  
   // Wait a short time for the launcher to spin up before feeding fuel.
   // Used by both simple motor percentage control and RPM velocity control versions of the code.
-  public static final double kLauncherSpinUpTimeoutSeconds  =  0.25;
+  public static final double kLauncherSpinUpTimeoutSeconds  =  0.50;
 
   // -------------------------------------------------------------------------
   // Tune these values when using simple motor percentage control
