@@ -4,21 +4,13 @@
 
 package frc.robot.subsystems.fuel;
 
-import java.util.function.DoubleSupplier;
-
-import com.revrobotics.PersistMode;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.ResetMode;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkMaxConfig;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -28,47 +20,31 @@ import frc.robot.Constants.CANConstants;
 import frc.robot.util.Utils;
 
 public class FuelSubsystem extends SubsystemBase {
-  // Hardware
-  private final SparkMax leftIntakeLauncherMotor;
-  private final SparkMax rightIntakeLauncherMotor;
-  private final SparkMax feederMotor;
-  private final RelativeEncoder leftIntakeLauncherEncoder;
-  private final RelativeEncoder rightIntakeLauncherEncoder;
-  
-  // NetworkTables for tuning (works with Elastic Dashboard)
-  private NetworkTable tuningTable;
-  private NetworkTableEntry tuningDistanceEntry;
-  private NetworkTableEntry tuningPowerEntry;
-  private NetworkTableEntry currentDistanceEntry;
-  private NetworkTableEntry currentPowerEntry;
-  
-  // Distance to power lookup table
-  private final InterpolatingDoubleTreeMap launcherPower;
+  // Hardware (motors, encoders, etc.)
+  private final TalonFX leftIntakeLauncherMotor;
+  private final TalonFX rightIntakeLauncherMotor;
+  private final TalonFX feederMotor;
+
+  private final VelocityVoltage launcherVelocityRequest;
+  private final VelocityVoltage feederVelocityRequest;
   
   /** Creates a new FuelSubsystem. */
   public FuelSubsystem() {
-    // Initialize hardware (intake/launcher motors are NEOs, feeder is a brushed CIM motor)
-    leftIntakeLauncherMotor = new SparkMax(CANConstants.kLeftIntakeLauncherMotorID, MotorType.kBrushless);
-    rightIntakeLauncherMotor = new SparkMax(CANConstants.kRightIntakeLauncherMotorID, MotorType.kBrushless);
-    feederMotor = new SparkMax(CANConstants.kFeederMotorID, MotorType.kBrushed);
-    
-    // Configure motors
-    configureFeederMotor();
-    configureIntakeLauncherMotors();
+    // Initialize hardware (intake/launcher motors are Kraken x60s, feeder is a Falcon)
+    leftIntakeLauncherMotor = new TalonFX(CANConstants.kLeftIntakeLauncherMotorID);
+    rightIntakeLauncherMotor = new TalonFX(CANConstants.kRightIntakeLauncherMotorID);
+    feederMotor = new TalonFX(CANConstants.kFeederMotorID);
 
-    // Get the NEO builtin encoders (after motor configuration)
-    leftIntakeLauncherEncoder = leftIntakeLauncherMotor.getEncoder();
-    rightIntakeLauncherEncoder = rightIntakeLauncherMotor.getEncoder();
+    // Initialize the launcher and feeder velocity requests
+    launcherVelocityRequest = new VelocityVoltage(0).withSlot(0);
+    feederVelocityRequest = new VelocityVoltage(0).withSlot(0);
+
+    // Configure motors
+    configureIntakeLauncherMotors();
+    configureFeederMotor();
 
     // set the default command for this subsystem
     setDefaultCommand(stopCommand());
-
-    // Initialize lookup table for launching power based on distance
-    launcherPower = new InterpolatingDoubleTreeMap();
-    loadLauncherPowers();
-
-    // Setup NetworkTables for tuning (works with Elastic)
-    setupNetworkTables();
 
     // Initialize dashboard
     SmartDashboard.putData("Fuel", this);
@@ -81,112 +57,128 @@ public class FuelSubsystem extends SubsystemBase {
    * Configure the intake/launcher motors with all settings
    */
   private void configureIntakeLauncherMotors() {
-    SparkMaxConfig launcherConfig = new SparkMaxConfig();
+    // Create a shared configuration object for both launcher/intake motors
+    TalonFXConfiguration launcherConfig = new TalonFXConfiguration();
 
-    // configure intake/launcher motors
-    launcherConfig
-      .smartCurrentLimit(30) // amps
-      .voltageCompensation(12)
-      .idleMode(IdleMode.kCoast);
-
-    // Optimize CAN status frames for reduced lag
-    launcherConfig.signals
-      .primaryEncoderPositionPeriodMs(500)  // Position: not used
-      .primaryEncoderVelocityPeriodMs(500)  // Velocity: not used
-      .appliedOutputPeriodMs(100)           // Applied output: 10Hz (was Status0)
-      .faultsPeriodMs(200)                  // Faults: 5Hz (was Status1)
-      .analogVoltagePeriodMs(500)           // Analog: unused (was Status3)
-      .externalOrAltEncoderPosition(500)    // Alt encoder: unused (was Status4)
-      .externalOrAltEncoderVelocity(500);   // Alt encoder: unused (was Status4)
-
-    // configure the right motor
-    rightIntakeLauncherMotor.configure(
-      launcherConfig, 
-      ResetMode.kResetSafeParameters, 
-      PersistMode.kPersistParameters
-    );
+    // -------------------------------------------------------------------------
+    // Shared configuration for both motors (inverted separately below)
+    // -------------------------------------------------------------------------
+    // Motor outputs
+    launcherConfig.MotorOutput
+      .withDutyCycleNeutralDeadband(0.001)  // 0.1% deadband (tight control)
+      .withNeutralMode(NeutralModeValue.Coast)
+      .withInverted(InvertedValue.CounterClockwise_Positive);
     
-    // invert the left motor
-    launcherConfig.inverted(true);
+    // Current limits (hardcoded here for safety)
+    launcherConfig.CurrentLimits
+      .withSupplyCurrentLimitEnable(true)   // Enable supply limits
+      .withSupplyCurrentLimit(30)                 // Peak current spike limit in Amps
+      .withSupplyCurrentLowerLimit(25)       // Continuous current limit in Amps
+      .withSupplyCurrentLowerTime(0.5)        // Time until lower current in seconds
+      .withStatorCurrentLimitEnable(true)   // Enable stator limits
+      .withStatorCurrentLimit(80);                // Max stator current in Amps (prevents overheating)
 
-    // configure the left motor
-    leftIntakeLauncherMotor.configure(
-      launcherConfig, 
-      ResetMode.kResetSafeParameters, 
-      PersistMode.kPersistParameters
-    );    
+    // Voltage compensation
+    launcherConfig.Voltage
+      .withPeakForwardVoltage(12)                   // Max voltage when running motor forward
+      .withPeakReverseVoltage(-12)                                        // Max voltage when running motor in reverse
+      .withSupplyVoltageTimeConstant(0.02);  // Voltage filter time constant in seconds
+
+    // Velocity PID (runs on onboard motor controller, tunable in constants)
+    launcherConfig.Slot0
+      .withKP(FuelConstants.kLauncherP)      // Proportional gain
+      .withKI(FuelConstants.kLauncherI)      // Integral gain
+      .withKD(FuelConstants.kLauncherD)      // Derivative gain
+      .withKS(FuelConstants.kLauncherS)      // Static feedforward
+      .withKV(FuelConstants.kLauncherV)      // Velocity feedforward
+      .withKA(FuelConstants.kLauncherA);     // Acceleration feedforward
+    
+    // -------------------------------------------------------------------------
+    // Apply the configuration to the RIGHT motor first (non-inverted)
+    // -------------------------------------------------------------------------
+    rightIntakeLauncherMotor.getConfigurator().apply(launcherConfig);
+
+    // -------------------------------------------------------------------------
+    // Invert the configuration for the LEFT motor (physically mirrored)
+    // -------------------------------------------------------------------------
+    launcherConfig.MotorOutput.withInverted(InvertedValue.Clockwise_Positive);
+    leftIntakeLauncherMotor.getConfigurator().apply(launcherConfig);
+
+    // -------------------------------------------------------
+    // OPTIMIZE CAN STATUS FRAMES for reduced lag
+    // -------------------------------------------------------
+    rightIntakeLauncherMotor.getVelocity().setUpdateFrequency(50.0);      // velocity feedback
+    rightIntakeLauncherMotor.getPosition().setUpdateFrequency(2.0);       // not used
+    rightIntakeLauncherMotor.getMotorVoltage().setUpdateFrequency(25.0);  // motor voltage
+    rightIntakeLauncherMotor.getSupplyCurrent().setUpdateFrequency(25.0); // supply current
+    rightIntakeLauncherMotor.getTorqueCurrent().setUpdateFrequency(25.0); // stator/torque current
+    rightIntakeLauncherMotor.getDeviceTemp().setUpdateFrequency(4.0);     // temperature
+    rightIntakeLauncherMotor.optimizeBusUtilization();
+
+    leftIntakeLauncherMotor.getVelocity().setUpdateFrequency(50.0);      // velocity feedback
+    leftIntakeLauncherMotor.getPosition().setUpdateFrequency(2.0);       // not used
+    leftIntakeLauncherMotor.getMotorVoltage().setUpdateFrequency(25.0);  // motor voltage
+    leftIntakeLauncherMotor.getSupplyCurrent().setUpdateFrequency(25.0); // supply current
+    leftIntakeLauncherMotor.getTorqueCurrent().setUpdateFrequency(25.0); // stator/torque current
+    leftIntakeLauncherMotor.getDeviceTemp().setUpdateFrequency(4.0);     // temperature
+    leftIntakeLauncherMotor.optimizeBusUtilization();
   }
 
   /**
    * Configure the feeder motor with all settings
    */
   private void configureFeederMotor() {
-    SparkMaxConfig feederConfig = new SparkMaxConfig();
+    // Create a configuration object for the feeder motor
+    TalonFXConfiguration feederConfig = new TalonFXConfiguration();
 
-    // motor output
-    feederConfig
-      .smartCurrentLimit(30) // amps
-      .voltageCompensation(12)
-      .idleMode(IdleMode.kBrake);
+    // -------------------------------------------------------------------------
+    // Shared configuration for both motors (inverted separately below)
+    // -------------------------------------------------------------------------
+    // Motor outputs
+    feederConfig.MotorOutput
+      .withDutyCycleNeutralDeadband(0.001)  // 0.1% deadband (tight control)
+      .withNeutralMode(NeutralModeValue.Coast)
+      .withInverted(InvertedValue.CounterClockwise_Positive);
+    
+    // Current limits (hardcoded here for safety)
+    feederConfig.CurrentLimits
+      .withSupplyCurrentLimitEnable(true)   // Enable supply limits
+      .withSupplyCurrentLimit(30)                 // Peak current spike limit in Amps
+      .withSupplyCurrentLowerLimit(25)       // Continuous current limit in Amps
+      .withSupplyCurrentLowerTime(0.5)        // Time until lower current in seconds
+      .withStatorCurrentLimitEnable(true)   // Enable stator limits
+      .withStatorCurrentLimit(80);                // Max stator current in Amps (prevents overheating)
 
-    // Optimize CAN status frames for reduced lag
-    feederConfig.signals
-      .primaryEncoderPositionPeriodMs(500)  // Position: not used
-      .primaryEncoderVelocityPeriodMs(500)  // Velocity: not used
-      .appliedOutputPeriodMs(100)           // Applied output: 10Hz (was Status0)
-      .faultsPeriodMs(200)                  // Faults: 5Hz (was Status1)
-      .analogVoltagePeriodMs(500)           // Analog: not used
-      .externalOrAltEncoderPosition(500)    // Alt encoder: not used
-      .externalOrAltEncoderVelocity(500);   // Alt encoder: not used
+    // Voltage compensation
+    feederConfig.Voltage
+      .withPeakForwardVoltage(12)                  // Max voltage when running motor forward
+      .withPeakReverseVoltage(-12)                                       // Max voltage when running motor in reverse
+      .withSupplyVoltageTimeConstant(0.02); // Voltage filter time constant in seconds
 
-    // apply configuration
-    feederMotor.configure(
-      feederConfig, 
-      ResetMode.kResetSafeParameters, 
-      PersistMode.kPersistParameters
-    );
-  }
+    // Velocity PID (runs on onboard motor controller, tunable in constants)
+    feederConfig.Slot0
+      .withKP(FuelConstants.kFeederP)      // Proportional gain
+      .withKI(FuelConstants.kFeederI)      // Integral gain
+      .withKD(FuelConstants.kFeederD)      // Derivative gain
+      .withKS(FuelConstants.kFeederS)      // Static feedforward
+      .withKV(FuelConstants.kFeederV)      // Velocity feedforward
+      .withKA(FuelConstants.kFeederA);     // Acceleration feedforward
+    
+    // -------------------------------------------------------------------------
+    // Apply the configuration to the RIGHT motor first (non-inverted)
+    // -------------------------------------------------------------------------
+    feederMotor.getConfigurator().apply(feederConfig);
 
-  /**
-   * Load launcher distance to power map
-   */
-  private void loadLauncherPowers() {
-    launcherPower.clear();
-    launcherPower.put(0.0, 0.30);  // 0.0 meters - close range
-    launcherPower.put(1.0, 0.40);  // 1.0 meters
-    launcherPower.put(2.0, 0.50);  // 2.0 meters
-    launcherPower.put(3.0, 0.60);  // 3.0 meters
-    launcherPower.put(4.0, 0.70);  // 4.0 meters
-    launcherPower.put(5.0, 0.80);  // 5.0 meters
-    launcherPower.put(6.0, 0.90);  // 6.0 meters
-  }
-
-  /**
-   * Setup NetworkTables for tuning the launcher
-   */
-  private void setupNetworkTables() {
-    // Get or create the tuning table
-    tuningTable = NetworkTableInstance.getDefault().getTable("LauncherTuning");
-    
-    // Create input entries with default values
-    tuningDistanceEntry = tuningTable.getEntry("TuneDistance");
-    tuningDistanceEntry.setDouble(5.0);
-    
-    tuningPowerEntry = tuningTable.getEntry("TunePower");
-    tuningPowerEntry.setDouble(0.80);
-    
-    // Create output/display entries
-    currentDistanceEntry = tuningTable.getEntry("CurrentDistance");
-    currentDistanceEntry.setDouble(0.0);
-    
-    currentPowerEntry = tuningTable.getEntry("CurrentPower");
-    currentPowerEntry.setDouble(0.0);
-    
-    // Add commands to SmartDashboard so they appear in Elastic
-    SmartDashboard.putData("Launcher/TestTunedShot", testTunedShotCommand());
-    SmartDashboard.putData("Launcher/ResetToDefaults", resetLookupTableCommand());
-    
-    Utils.logInfo("Launcher tuning NetworkTables initialized");
+    // -------------------------------------------------------
+    // OPTIMIZE CAN STATUS FRAMES for reduced lag
+    // -------------------------------------------------------
+    feederMotor.getVelocity().setUpdateFrequency(50.0);      // velocity feedback
+    feederMotor.getPosition().setUpdateFrequency(2.0);       // not used
+    feederMotor.getMotorVoltage().setUpdateFrequency(25.0);  // motor voltage
+    feederMotor.getSupplyCurrent().setUpdateFrequency(25.0); // supply current
+    feederMotor.getTorqueCurrent().setUpdateFrequency(25.0); // stator/torque current
+    feederMotor.getDeviceTemp().setUpdateFrequency(4.0);     // temperature
+    feederMotor.optimizeBusUtilization();
   }
 
   @Override
@@ -204,8 +196,8 @@ public class FuelSubsystem extends SubsystemBase {
     double clampedPower = MathUtil.clamp(power, -1, 1);
 
     // Set motor power directly (for open-loop control)
-    leftIntakeLauncherMotor.set(clampedPower);
     rightIntakeLauncherMotor.set(clampedPower);
+    leftIntakeLauncherMotor.set(clampedPower);
   }
 
   /**
@@ -217,45 +209,35 @@ public class FuelSubsystem extends SubsystemBase {
   }
   
   /**
+   * Set launcher motors to a desired RPM.
+   * Used for PID controlled intake/eject operations.
+   * @param rpm Desired RPM for the launcher/intake motors
+   */
+  private void setLauncherRPM(double rpm) {
+    double clampedRPM = MathUtil.clamp(rpm, -6000, 6000);
+    launcherVelocityRequest.Velocity = clampedRPM;
+    rightIntakeLauncherMotor.setControl(launcherVelocityRequest);
+    leftIntakeLauncherMotor.setControl(launcherVelocityRequest);
+  }
+
+  /**
+   * Set feeder motors to a desired RPM.
+   * Used for PID controlled feed/intake/eject operations.
+   * @param rpm Desired RPM for the feeder motor
+   */
+  private void setFeederRPM(double rpm) {
+    double clampedRPM = MathUtil.clamp(rpm, -6380, 6380);
+    feederVelocityRequest.Velocity = clampedRPM;
+    feederMotor.setControl(feederVelocityRequest);
+  }
+  
+  /**
    * Stop all motors immediately
    */
   public void stop() {
     leftIntakeLauncherMotor.stopMotor();
     rightIntakeLauncherMotor.stopMotor();
     feederMotor.stopMotor();
-  }
-
-  // ==================== Tuning Commands ====================
-  
-  /**
-   * Command to test the currently tuned shot parameters
-   * Uses values from Shuffleboard sliders
-   */
-  public Command testTunedShotCommand() {
-    return run(() -> {
-      double power = MathUtil.clamp(tuningPowerEntry.getDouble(0.80), 0, 1);
-      currentPowerEntry.setDouble(power);
-      setLauncherPower(power);
-      setFeederPower(FuelConstants.kFeederSpinUpPreLaunchPercent);
-    })
-    .withTimeout(FuelConstants.kLauncherSpinUpTimeoutSeconds)
-    .andThen(run(() -> {
-      double power = MathUtil.clamp(tuningPowerEntry.getDouble(0.80), 0, 1);
-      currentPowerEntry.setDouble(power);
-      setLauncherPower(power);
-      setFeederPower(FuelConstants.kFeederLaunchingPercent);
-    }))
-    .withName("TestTunedShot");
-  }
-  
-  /**
-   * Command to reset the lookup table to default values
-   */
-  public Command resetLookupTableCommand() {
-    return runOnce(() -> {
-      loadLauncherPowers();
-      Utils.logInfo("Reset launcher lookup table to defaults");
-    }).withName("ResetLookupTable");
   }
 
   // ==================== Command Factories ====================
@@ -294,31 +276,12 @@ public class FuelSubsystem extends SubsystemBase {
   }
   
   /**
-   * Command to pass fuel out of the launcher at a lower speed
-   * Hold button: spins up → automatically feeds when ready
-   * Release button: stops everything immediately
-   * @return Command that runs rollers at passing speed
+   * Command to launch fuel out of the launcher at a fixed motor percentage.
+   * Hold button: spins up for a brief period then feeds & launches.
+   * Release button: stops everything immediately.
+   * @return Command that runs rollers at launching power percentage
    */
-  public Command passCommand() {
-    return run(() -> {
-      setLauncherPower(FuelConstants.kLauncherPassingPercent);
-      setFeederPower(FuelConstants.kFeederSpinUpPreLaunchPercent);
-    })
-    .withTimeout(FuelConstants.kLauncherSpinUpTimeoutSeconds)
-    .andThen(run(() -> {
-      setLauncherPower(FuelConstants.kLauncherPassingPercent);
-      setFeederPower(FuelConstants.kFeederPassingPercent);
-    }))
-    .withName("PassFuel");
-  }
-  
-  /**
-   * Command to launch fuel out of the launcher at a fixed speed and distance
-   * Hold button: spins up for a brief period then feeds & launches
-   * Release button: stops everything immediately
-   * @return Command that runs rollers at launching speed
-   */
-  public Command launchCommand() {
+  public Command launchPowerCommand() {
     return run(() -> {
       setLauncherPower(FuelConstants.kLauncherLaunchingPercent);
       setFeederPower(FuelConstants.kFeederSpinUpPreLaunchPercent);
@@ -326,49 +289,28 @@ public class FuelSubsystem extends SubsystemBase {
     .withTimeout(FuelConstants.kLauncherSpinUpTimeoutSeconds)
     .andThen(run(() -> {
       setLauncherPower(FuelConstants.kLauncherLaunchingPercent);
-      setFeederPower(FuelConstants.kFeederLaunchingPercent);
-    }))
-    .withName("LaunchFuel");
-  }
-  
-  /**
-   * Command to launch/shoot fuel based on how far a button is pressed
-   * Hold button: spins up for a brief period then feeds & launches
-   * Release button: stops everything immediately
-   * @param powerSupplier Supplier that provides the launcher power based on button input (0.0 to 1.0)
-   * @return Command that intelligently spins up then launches
-   */
-  public Command launchPowerCommand(DoubleSupplier powerSupplier) {
-    return run(() -> {
-      setLauncherPower(MathUtil.clamp(powerSupplier.getAsDouble(), 0.0, 1.0));
-      setFeederPower(FuelConstants.kFeederSpinUpPreLaunchPercent);
-    })
-    .withTimeout(FuelConstants.kLauncherSpinUpTimeoutSeconds)
-    .andThen(run(() -> {
-      setLauncherPower(MathUtil.clamp(powerSupplier.getAsDouble(), 0.0, 1.0));
       setFeederPower(FuelConstants.kFeederLaunchingPercent);
     }))
     .withName("LaunchPowerFuel");
   }
   
   /**
-   * Command to launch/shoot fuel with distance-based power using the lookup table
-   * Hold button: spins up for a brief period then feeds & launches
-   * Release button: stops everything immediately
-   * @param distanceToHub Supplier that provides the distance to the hub in meters
-   * @return Command that intelligently spins up then launches
+   * Command to launch fuel out of the launcher at a fixed RPM.
+   * Hold button: spins up for a brief period then feeds & launches.
+   * Release button: stops everything immediately.
+   * @return Command that runs rollers at launching RPM
    */
-  public Command launchDistanceCommand(DoubleSupplier distanceToHub) {
+  public Command launchRpmCommand() {
     return run(() -> {
-      setLauncherPower(launcherPower.get(MathUtil.clamp(distanceToHub.getAsDouble(), 0.0, 6.0)));
-      setFeederPower(FuelConstants.kFeederSpinUpPreLaunchPercent);
+      setLauncherRPM(FuelConstants.kLauncherLaunchingRPM);
+      setFeederRPM(FuelConstants.kFeederSpinUpPreLaunchRPM);
     })
     .withTimeout(FuelConstants.kLauncherSpinUpTimeoutSeconds)
     .andThen(run(() -> {
-      setLauncherPower(launcherPower.get(MathUtil.clamp(distanceToHub.getAsDouble(), 0.0, 6.0)));
-      setFeederPower(FuelConstants.kFeederLaunchingPercent);
+      setLauncherRPM(FuelConstants.kLauncherLaunchingRPM);
+      setFeederRPM(FuelConstants.kFeederLaunchingRPM);
     }))
-    .withName("LaunchDistanceFuel");
+    .withName("LaunchRpmFuel");
   }
   
   // ==================== Telemetry Methods ====================
@@ -378,8 +320,8 @@ public class FuelSubsystem extends SubsystemBase {
    * @return Average velocity of the launcher motors in native RPM
    */
   private double getVelocity() {
-    return (leftIntakeLauncherEncoder.getVelocity() + 
-            rightIntakeLauncherEncoder.getVelocity()) / 2.0;
+    return (leftIntakeLauncherMotor.getVelocity().getValueAsDouble() + 
+            rightIntakeLauncherMotor.getVelocity().getValueAsDouble()) / 2.0;
   }
 
   /**
@@ -387,8 +329,8 @@ public class FuelSubsystem extends SubsystemBase {
    * @return Average voltage applied to the launcher motors
    */
   private double getVoltage() {
-    return (leftIntakeLauncherMotor.getAppliedOutput() + 
-            rightIntakeLauncherMotor.getAppliedOutput()) / 2.0;
+    return (leftIntakeLauncherMotor.getMotorVoltage().getValueAsDouble() + 
+            rightIntakeLauncherMotor.getMotorVoltage().getValueAsDouble()) / 2.0;
   }
   
   /**
@@ -396,8 +338,8 @@ public class FuelSubsystem extends SubsystemBase {
    * @return Average current in amps
    */
   private double getCurrent() {
-    return (leftIntakeLauncherMotor.getOutputCurrent() + 
-            rightIntakeLauncherMotor.getOutputCurrent()) / 2.0;
+    return (leftIntakeLauncherMotor.getMotorOutputStatus().getValueAsDouble() + 
+            rightIntakeLauncherMotor.getMotorOutputStatus().getValueAsDouble()) / 2.0;
   }
   
   /**
@@ -405,8 +347,8 @@ public class FuelSubsystem extends SubsystemBase {
    * @return Average temperature in Celsius
    */
   private double getTemperature() {
-    return (leftIntakeLauncherMotor.getMotorTemperature() + 
-            rightIntakeLauncherMotor.getMotorTemperature()) / 2.0;
+    return (leftIntakeLauncherMotor.getDeviceTemp().getValueAsDouble() + 
+            rightIntakeLauncherMotor.getDeviceTemp().getValueAsDouble()) / 2.0;
   }
 
   /**

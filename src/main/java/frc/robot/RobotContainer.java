@@ -80,8 +80,11 @@ public class RobotContainer {
   private void configureAutos() {
     // Build the auto chooser and add it to the dashboard
     autoChooser.setDefaultOption("No auto", Commands.none());
-    autoChooser.addOption("BACKWARD_LAUNCH_RETURN_CLIMB", autos.backwardLaunchReturnClimb());
-    autoChooser.addOption("LAUNCH_5_SECONDS", autos.launchFiveSeconds());    
+    autoChooser.addOption("LEFT_FWD_LAUNCH_FWD_CLIMB", autos.leftSideForwardLaunchForwardClimb());
+    autoChooser.addOption("RIGHT_FWD_LAUNCH_FWD_CLIMB", autos.rightSideForwardLaunchForwardClimb());
+    autoChooser.addOption("LAUNCH_5_SECONDS", autos.launchFiveSeconds());
+    autoChooser.addOption("FWD_1M", autos.forwardOneMeter());
+    autoChooser.addOption("BWD_1M", autos.backwardOneMeter());
     
     // Add auto chooser to dashboard
     SmartDashboard.putData("Auto Command", autoChooser);
@@ -134,36 +137,14 @@ public class RobotContainer {
     // intake fuel from the ground while holding left trigger
     driverXbox.leftTrigger().whileTrue(fuelSubsystem.intakeCommand());
 
-    // pass fuel while holding left bumper
-    // driverXbox.leftBumper().whileTrue(fuelSubsystem.passCommand());
-    // OR
     // drive in slow mode while holding the left bumper down
     driverXbox.leftBumper()
       .onTrue(driveSubsystem.setSlowModeCommand(true))
       .onFalse(driveSubsystem.setSlowModeCommand(false));
 
-    // RIGHT-TRIGGER when vision enabled
-    // launch fuel based on dynamically calculated distance from hub (requires vision)
-    driverXbox.rightTrigger().and(visionSubsystem::isEnabled).whileTrue(
-      fuelSubsystem.launchDistanceCommand(driveSubsystem::getDistanceToAllianceHub)
-    );
-    
-    // RIGHT-BUMPER when vision enabled
-    // auto-aim at hub when holding right bumper (requires vision)
-    driverXbox.rightBumper().and(visionSubsystem::isEnabled).whileTrue(
-      driveSubsystem.aimAtHubCommand().andThen(feedbackSubsystem.aimedAtHubCommand())
-    );
-    
-    // RIGHT-TRIGGER when vision disabled
-    // launch fuel based on how far the trigger is pressed (non-vision version)
-    driverXbox.rightTrigger(0.25).and(() -> !visionSubsystem.isEnabled()).whileTrue(
-      fuelSubsystem.launchPowerCommand(driverXbox::getRightTriggerAxis)
-    );
-
-    // RIGHT-BUMPER when vision disabled
-    // launch fuel at a fixed power/distance while holding right bumper (non-vision version)
+    // launch fuel at a fixed power / RPM while holding right bumper (non-vision version)
     driverXbox.rightBumper().and(() -> !visionSubsystem.isEnabled()).whileTrue(
-      fuelSubsystem.launchCommand()
+      fuelSubsystem.launchPowerCommand()
     );
 
     // manual climber control with DPAD

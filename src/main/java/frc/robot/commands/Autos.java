@@ -50,14 +50,11 @@ public class Autos {
    * @return Command to run the launchFiveSeconds routine
    */
   public Command launchFiveSeconds() {
-    return Commands.sequence(
-      // Launch fuel for 5.0 seconds
-      fuelSubsystem.launchCommand().withTimeout(5.0).finallyDo(fuelSubsystem::stop),
-
-      // Celebrate with feedback
-      feedbackSubsystem.funkyDiscoCommand()
-    )    
-    .withName("launchFiveSeconds");
+    return fuelSubsystem.launchPowerCommand()
+      .withTimeout(5.0)
+      .finallyDo(fuelSubsystem::stop)
+      .andThen(feedbackSubsystem.idleCommand())
+      .withName("launchFiveSeconds");
   }
 
   /**
@@ -66,14 +63,9 @@ public class Autos {
    * @return Command to run the forwardOneMeter routine
    */
   public Command forwardOneMeter() {
-    return Commands.sequence(
-      // Drive forward 1 meter
-      driveSubsystem.driveDistanceCommand(1), 
-      
-      // Celebrate with feedback
-      feedbackSubsystem.funkyDiscoCommand()
-    )
-    .withName("forwardOneMeter");
+    return driveSubsystem.driveDistanceCommand(1.0)
+      .andThen(feedbackSubsystem.idleCommand())
+      .withName("forwardOneMeter");
   }
 
   /**
@@ -82,53 +74,84 @@ public class Autos {
    * @return Command to run the backwardOneMeter routine
    */
   public Command backwardOneMeter() {
-    return Commands.sequence(
-      // Drive backward 1 meter
-      driveSubsystem.driveDistanceCommand(-1), 
-      
-      // Celebrate with feedback
-      feedbackSubsystem.funkyDiscoCommand()
-    )
-    .withName("backwardOneMeter");
+    return driveSubsystem.driveDistanceCommand(-1.0)
+      .andThen(feedbackSubsystem.idleCommand())
+      .withName("backwardOneMeter");
   }
 
   /**
-   * Start:   The front of the robot facing & centered on the left side of the tower.
-   * Actions: 1. Turn on slow mode
-   *          2. Drives in reverse 18.5 inches
-   *          3. Launches fuel for 5 seconds
-   *          4. Lowers climber all the way
-   *          5. Drives forward 18.5 inches (back to starting position)
-   *          6. Raises climber to level 1 position
-   *          7. Turn off slow mode
-   * @return Command to run the backwardLaunchReturnClimb routine
+   * Start:   The back of the robot touching the hub, aligned with the left side of the tower.
+   * Actions: 1. Drives forward 63.5 inches
+   *          2. Launches fuel for 5 seconds
+   *          3. Lowers climber all the way
+   *          4. Drives forward 18.5 inches (just touching tower)
+   *          5. Raises climber to level 1 position
+   * @return Command to run the leftSideForwardLaunchForwardClimb routine
    */
-  public Command backwardLaunchReturnClimb() {
+  public Command leftSideForwardLaunchForwardClimb() {
     return Commands.sequence(
-      // // Turn on slow mode
-      driveSubsystem.setSlowModeCommand(true),
+      // Drive forward 63.5 inches
+      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(63.5), 0.20),
 
-      // Drive backwards 1 meter
-      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(-18.5), 0.405),
+      Commands.parallel(
+        // Launch fuel for 5.0 seconds
+        fuelSubsystem.launchPowerCommand().withTimeout(5.0).finallyDo(fuelSubsystem::stop),
 
-      // Launch fuel for 5.0 seconds
-      fuelSubsystem.launchCommand().withTimeout(5.0).finallyDo(fuelSubsystem::stop),
+        // Wait a brief period and then lower the climber all the way
+        Commands.waitSeconds(2.5).andThen(climberSubsystem.downToLimitCommand())
+      ),
 
-      // Lower climber all the way
-      climberSubsystem.downToLimitCommand(), 
-
-      // Drive forward 1 meter (back to starting position)
-      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(18.5), 0.405),
+      // Drive forward 18.5 inches (just touching tower)
+      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(18.5), 0.20),
       
       // Raise climber to level 1 position
       climberSubsystem.levelOneClimbCommand(),
 
-      // Turn off slow mode
-      driveSubsystem.setSlowModeCommand(false),
-
-      // Celebrate with feedback
-      feedbackSubsystem.funkyDiscoCommand()
+      // Show feedback
+      feedbackSubsystem.idleCommand()
     )    
-    .withName("backwardLaunchReturnClimb");
+    .withName("leftSideForwardLaunchForwardClimb");
+  }
+
+  /**
+   * Start:   The back of the robot touching the hub, aligned with the right side of the tower.
+   * Actions: 1. Drives forward 63.5 inches
+   *          2. Turns to face the center of the hub
+   *          3. Launches fuel for 5 seconds
+   *          4. Lowers climber all the way
+   *          5. Turns to face the straight ahead direction again
+   *          6. Drives forward 18.5 inches (just touching tower)
+   *          7. Raises climber to level 1 position
+   * @return Command to run the rightSideForwardLaunchForwardClimb routine
+   */
+  public Command rightSideForwardLaunchForwardClimb() {
+    return Commands.sequence(
+      // Drive forward 63.5 inches
+      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(63.5), 0.20),
+
+      // Turn to face the center of the hub
+      driveSubsystem.turnToHeadingCommand(5.0),
+
+      Commands.parallel(
+        // Launch fuel for 5.0 seconds
+        fuelSubsystem.launchPowerCommand().withTimeout(5.0).finallyDo(fuelSubsystem::stop),
+
+        // Wait a brief period and then lower the climber all the way
+        Commands.waitSeconds(2.5).andThen(climberSubsystem.downToLimitCommand())
+      ),
+
+      // Turn to face the straight ahead direction again
+      driveSubsystem.turnToHeadingCommand(0),
+
+      // Drive forward 18.5 inches (just touching tower)
+      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(18.5), 0.20),
+      
+      // Raise climber to level 1 position
+      climberSubsystem.levelOneClimbCommand(),
+
+      // Show feedback
+      feedbackSubsystem.idleCommand()
+    )    
+    .withName("rightSideForwardLaunchForwardClimb");
   }
 }

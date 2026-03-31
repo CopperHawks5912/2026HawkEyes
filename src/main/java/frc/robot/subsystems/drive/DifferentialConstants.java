@@ -66,7 +66,7 @@ public final class DifferentialConstants {
   /**
    * Joystick deadband (ignore inputs below this threshold)
    */
-  public static final double kJoystickDeadband = 0.1;
+  public static final double kJoystickDeadband = 0.05;
   
   /**
    * Translational slew rate limit (units per second)

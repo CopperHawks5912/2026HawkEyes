@@ -571,7 +571,7 @@ public class DifferentialSubsystem extends SubsystemBase {
    * autonomous to ensure the drive is in a known state.
    */
   public void autonomousInit() {
-    // resetOdometry();
+    resetOdometry();
     setMotorBrake(true);
     inverted = false;
     slowMode = false;
@@ -763,7 +763,7 @@ public class DifferentialSubsystem extends SubsystemBase {
    * @return Command to drive the specified distance
    */
   public Command driveDistanceCommand(double distance) {
-    return driveDistanceCommand(distance, 0.25);
+    return driveDistanceCommand(distance, 0.20);
   }
 
   /**
