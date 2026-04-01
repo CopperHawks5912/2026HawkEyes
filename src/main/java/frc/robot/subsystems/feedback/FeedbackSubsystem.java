@@ -164,8 +164,7 @@ public class FeedbackSubsystem extends SubsystemBase {
    * @param timeOffset Time offset for phase shift (in seconds)
    */
   private void pulsePattern(Color color, double pulsesPerSecond, double timeOffset) {
-    pulsesPerSecond = MathUtil.clamp(pulsesPerSecond, 0.1, 2.5);
-    double period = 1.0 / pulsesPerSecond;
+    double period = 1.0 / MathUtil.clamp(pulsesPerSecond, 0.1, 2.5);
     double brightness = (Math.sin((animationTimer - timeOffset) * 2 * Math.PI / period) + 1) / 2;
     Color scaledColor = new Color(
       color.red * brightness,
@@ -181,8 +180,7 @@ public class FeedbackSubsystem extends SubsystemBase {
    * @param blinksPerSecond Number of blinks per second (max 2.5 for FRC guidelines)
    */
   private void blinkPattern(Color color, double blinksPerSecond) {
-    blinksPerSecond = MathUtil.clamp(blinksPerSecond, 0.1, 2.5);
-    double period = 1.0 / blinksPerSecond;
+    double period = 1.0 / MathUtil.clamp(blinksPerSecond, 0.1, 2.5);
     boolean on = (animationTimer % period) < (period / 2);
     double brightness = 0.85;
     Color scaledColor = new Color(
