@@ -107,7 +107,7 @@ public class FeedbackSubsystem extends SubsystemBase {
         break;
         
       case IDLE:
-        chasePattern(FeedbackConstants.IdleColor, 0.50);
+        chasePattern(FeedbackConstants.IdleColor, 10);
         break;
         
       case INFO:
@@ -185,11 +185,11 @@ public class FeedbackSubsystem extends SubsystemBase {
   /**
    * Chase pattern that moves along the strip
    * @param color Color to chase
-   * @param speed Speed of the chase (lower = faster)
+   * @param pixelsPerSecond Speed of the chase in pixels per second
    */
-  private void chasePattern(Color color, double speed) {
+  private void chasePattern(Color color, double pixelsPerSecond) {
     // Calculate offset directly from time
-    animationOffset = (int)(animationTimer / speed) % ledBuffer.getLength();
+    animationOffset = (int)(animationTimer * pixelsPerSecond) % ledBuffer.getLength();
     
     for (int i = 0; i < ledBuffer.getLength(); i++) {
       if ((i + animationOffset) % 5 == 0) {
