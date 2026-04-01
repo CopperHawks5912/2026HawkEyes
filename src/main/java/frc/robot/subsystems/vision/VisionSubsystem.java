@@ -52,7 +52,7 @@ public class VisionSubsystem extends SubsystemBase {
 
     // Exit early if vision is not enabled to avoid unnecessary initialization
     if (!VisionConstants.kEnableVision) {
-      Utils.logError("Vision is not enabled! Vision subsystem not initialized");
+      Utils.logError("Vision is not enabled in VisionConstants!");
       return;
     }
 

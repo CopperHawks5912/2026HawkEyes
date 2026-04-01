@@ -4,8 +4,6 @@
 
 package frc.robot.subsystems.fuel;
 
-import java.util.function.DoubleSupplier;
-
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
@@ -15,10 +13,6 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -34,16 +28,6 @@ public class FuelSubsystem extends SubsystemBase {
   private final SparkMax feederMotor;
   private final RelativeEncoder leftIntakeLauncherEncoder;
   private final RelativeEncoder rightIntakeLauncherEncoder;
-  
-  // NetworkTables for tuning (works with Elastic Dashboard)
-  private NetworkTable tuningTable;
-  private NetworkTableEntry tuningDistanceEntry;
-  private NetworkTableEntry tuningPowerEntry;
-  private NetworkTableEntry currentDistanceEntry;
-  private NetworkTableEntry currentPowerEntry;
-  
-  // Distance to power lookup table
-  private final InterpolatingDoubleTreeMap launcherPower;
   
   /** Creates a new FuelSubsystem. */
   public FuelSubsystem() {
@@ -62,13 +46,6 @@ public class FuelSubsystem extends SubsystemBase {
 
     // set the default command for this subsystem
     setDefaultCommand(stopCommand());
-
-    // Initialize lookup table for launching power based on distance
-    launcherPower = new InterpolatingDoubleTreeMap();
-    loadLauncherPowers();
-
-    // Setup NetworkTables for tuning (works with Elastic)
-    setupNetworkTables();
 
     // Initialize dashboard
     SmartDashboard.putData("Fuel", this);
@@ -147,48 +124,6 @@ public class FuelSubsystem extends SubsystemBase {
     );
   }
 
-  /**
-   * Load launcher distance to power map
-   */
-  private void loadLauncherPowers() {
-    launcherPower.clear();
-    launcherPower.put(0.0, 0.30);  // 0.0 meters - close range
-    launcherPower.put(1.0, 0.40);  // 1.0 meters
-    launcherPower.put(2.0, 0.50);  // 2.0 meters
-    launcherPower.put(3.0, 0.60);  // 3.0 meters
-    launcherPower.put(4.0, 0.70);  // 4.0 meters
-    launcherPower.put(5.0, 0.80);  // 5.0 meters
-    launcherPower.put(6.0, 0.90);  // 6.0 meters
-  }
-
-  /**
-   * Setup NetworkTables for tuning the launcher
-   */
-  private void setupNetworkTables() {
-    // Get or create the tuning table
-    tuningTable = NetworkTableInstance.getDefault().getTable("LauncherTuning");
-    
-    // Create input entries with default values
-    tuningDistanceEntry = tuningTable.getEntry("TuneDistance");
-    tuningDistanceEntry.setDouble(5.0);
-    
-    tuningPowerEntry = tuningTable.getEntry("TunePower");
-    tuningPowerEntry.setDouble(0.80);
-    
-    // Create output/display entries
-    currentDistanceEntry = tuningTable.getEntry("CurrentDistance");
-    currentDistanceEntry.setDouble(0.0);
-    
-    currentPowerEntry = tuningTable.getEntry("CurrentPower");
-    currentPowerEntry.setDouble(0.0);
-    
-    // Add commands to SmartDashboard so they appear in Elastic
-    SmartDashboard.putData("Launcher/TestTunedShot", testTunedShotCommand());
-    SmartDashboard.putData("Launcher/ResetToDefaults", resetLookupTableCommand());
-    
-    Utils.logInfo("Launcher tuning NetworkTables initialized");
-  }
-
   @Override
   public void periodic() {}
     
@@ -223,39 +158,6 @@ public class FuelSubsystem extends SubsystemBase {
     leftIntakeLauncherMotor.stopMotor();
     rightIntakeLauncherMotor.stopMotor();
     feederMotor.stopMotor();
-  }
-
-  // ==================== Tuning Commands ====================
-  
-  /**
-   * Command to test the currently tuned shot parameters
-   * Uses values from Shuffleboard sliders
-   */
-  public Command testTunedShotCommand() {
-    return run(() -> {
-      double power = MathUtil.clamp(tuningPowerEntry.getDouble(0.80), 0, 1);
-      currentPowerEntry.setDouble(power);
-      setLauncherPower(power);
-      setFeederPower(FuelConstants.kFeederSpinUpPreLaunchPercent);
-    })
-    .withTimeout(FuelConstants.kLauncherSpinUpTimeoutSeconds)
-    .andThen(run(() -> {
-      double power = MathUtil.clamp(tuningPowerEntry.getDouble(0.80), 0, 1);
-      currentPowerEntry.setDouble(power);
-      setLauncherPower(power);
-      setFeederPower(FuelConstants.kFeederLaunchingPercent);
-    }))
-    .withName("TestTunedShot");
-  }
-  
-  /**
-   * Command to reset the lookup table to default values
-   */
-  public Command resetLookupTableCommand() {
-    return runOnce(() -> {
-      loadLauncherPowers();
-      Utils.logInfo("Reset launcher lookup table to defaults");
-    }).withName("ResetLookupTable");
   }
 
   // ==================== Command Factories ====================
@@ -329,46 +231,6 @@ public class FuelSubsystem extends SubsystemBase {
       setFeederPower(FuelConstants.kFeederLaunchingPercent);
     }))
     .withName("LaunchFuel");
-  }
-  
-  /**
-   * Command to launch/shoot fuel based on how far a button is pressed
-   * Hold button: spins up for a brief period then feeds & launches
-   * Release button: stops everything immediately
-   * @param powerSupplier Supplier that provides the launcher power based on button input (0.0 to 1.0)
-   * @return Command that intelligently spins up then launches
-   */
-  public Command launchPowerCommand(DoubleSupplier powerSupplier) {
-    return run(() -> {
-      setLauncherPower(MathUtil.clamp(powerSupplier.getAsDouble(), 0.0, 1.0));
-      setFeederPower(FuelConstants.kFeederSpinUpPreLaunchPercent);
-    })
-    .withTimeout(FuelConstants.kLauncherSpinUpTimeoutSeconds)
-    .andThen(run(() -> {
-      setLauncherPower(MathUtil.clamp(powerSupplier.getAsDouble(), 0.0, 1.0));
-      setFeederPower(FuelConstants.kFeederLaunchingPercent);
-    }))
-    .withName("LaunchPowerFuel");
-  }
-  
-  /**
-   * Command to launch/shoot fuel with distance-based power using the lookup table
-   * Hold button: spins up for a brief period then feeds & launches
-   * Release button: stops everything immediately
-   * @param distanceToHub Supplier that provides the distance to the hub in meters
-   * @return Command that intelligently spins up then launches
-   */
-  public Command launchDistanceCommand(DoubleSupplier distanceToHub) {
-    return run(() -> {
-      setLauncherPower(launcherPower.get(MathUtil.clamp(distanceToHub.getAsDouble(), 0.0, 6.0)));
-      setFeederPower(FuelConstants.kFeederSpinUpPreLaunchPercent);
-    })
-    .withTimeout(FuelConstants.kLauncherSpinUpTimeoutSeconds)
-    .andThen(run(() -> {
-      setLauncherPower(launcherPower.get(MathUtil.clamp(distanceToHub.getAsDouble(), 0.0, 6.0)));
-      setFeederPower(FuelConstants.kFeederLaunchingPercent);
-    }))
-    .withName("LaunchDistanceFuel");
   }
   
   // ==================== Telemetry Methods ====================
