@@ -160,11 +160,12 @@ public class FeedbackSubsystem extends SubsystemBase {
   /**
    * Pulse pattern that fades in and out
    * @param color Base color
-   * @param period Time for one complete pulse cycle in seconds
+   * @param pulsePerSecond Number of pulses per second
+   * @param timeOffset Time offset for the pulse animation
    */
-  private void pulsePattern(Color color, double period, double timeOffset) {
-    // max 2.5 blinks per second (FRC guidelines allow 5 pulses per second)
-    double clampedPeriod = Math.max(period, 0.4); 
+  private void pulsePattern(Color color, double pulsePerSecond, double timeOffset) {
+    // max 2.5 pulses per second (FRC guidelines allow 5 pulses per second)
+    double clampedPeriod = MathUtil.clamp(1.0 / pulsePerSecond, 0, 2.5); 
     double brightness = (Math.sin((animationTimer - timeOffset) * 2 * Math.PI / clampedPeriod) + 1) / 2;
     Color scaledColor = new Color(
       color.red * brightness,
@@ -177,11 +178,11 @@ public class FeedbackSubsystem extends SubsystemBase {
   /**
    * Blink pattern that turns on and off
    * @param color Color to blink
-   * @param period Time for one complete blink cycle in seconds 
+   * @param blinkPerSecond Number of blinks per second
    */
-  private void blinkPattern(Color color, double period) {
+  private void blinkPattern(Color color, double blinkPerSecond) {
     // max 2.5 blinks per second (FRC guidelines allow 5 blinks per second)
-    double clampedPeriod = Math.max(period, 0.4); 
+    double clampedPeriod = MathUtil.clamp(1.0 / blinkPerSecond, 0, 2.5); 
     boolean on = (animationTimer % clampedPeriod) < (clampedPeriod / 2);
     setAllLEDs(on ? color : Color.kBlack);
   }
