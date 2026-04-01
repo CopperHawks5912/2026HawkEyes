@@ -213,7 +213,7 @@ public class FeedbackSubsystem extends SubsystemBase {
    * Team colors pattern that fades between green & orange repeatedly
    */
   private void teamColorsPattern() {
-    double phaseDuration = 1.5; // seconds per full pulse
+    double phaseDuration = 2.5; // seconds per full pulse
     double cycleTime = animationTimer % (phaseDuration * 2);
 
     if (cycleTime < phaseDuration) {
