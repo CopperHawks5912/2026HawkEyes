@@ -22,36 +22,32 @@ public final class FuelConstants {
   // -------------------------------------------------------------------------
   // Feeder motor percentages
   public static final double kFeederLaunchingPercent        =  0.60; // Feed fuel into the launcher for launcher
-  public static final double kFeederPassingPercent          =  0.60; // Feed fuel into the launcher for passing
   public static final double kFeederIntakingPercent         = -0.80; // A reverse power to pull fuel into the hopper
-  public static final double kFeederEjectingPercent         =  0.95; // Feed fuel towards the intake to eject fuel
+  public static final double kFeederEjectingPercent         =  0.60; // Feed fuel towards the intake to eject fuel
 
   // Launcher & intake percentages (physically same motors)
   public static final double kLauncherLaunchingPercent      =  0.80; // Power for launching
-  public static final double kLauncherPassingPercent        =  0.60; // Power for passing
   public static final double kLauncherIntakingPercent       =  0.50; // Power for intaking
   public static final double kLauncherEjectingPercent       = -0.80; // Power for ejecting
   
   // hold back fuel during launcher spinup
-  public static final double kFeederSpinUpPreLaunchPercent  =  0.25;
+  public static final double kFeederSpinUpPreLaunchPercent  = -0.25; // must be negative
 
   // -------------------------------------------------------------------------
   // Tune these values when using RPM velocity control
   // -------------------------------------------------------------------------
   // Feeder motor RPMs [-6380, 6380] for Falcon 500 - convert to RPS for motor controller
   public static final double kFeederLaunchingRPS            =  3828 / 60.0;
-  public static final double kFeederPassingRPS              =  3828 / 60.0;
-  public static final double kFeederIntakingRPS             = -3828 / 60.0; // must be negative
+  public static final double kFeederIntakingRPS             = -5104 / 60.0; // must be negative
   public static final double kFeederEjectingRPS             =  3828 / 60.0;
   
   // Launcher & intake RPMs [-6000, 6000] for Kraken x60 - convert to RPS for motor controller
   public static final double kLauncherLaunchingRPS          =  4800 / 60.0;
-  public static final double kLauncherPassingRPS            =  3600 / 60.0;
-  public static final double kLauncherIntakingRPS           =  3600 / 60.0;
+  public static final double kLauncherIntakingRPS           =  3000 / 60.0;
   public static final double kLauncherEjectingRPS           = -4800 / 60.0; // must be negative
   
   // hold back fuel during launcher spinup
-  public static final double kFeederSpinUpPreLaunchRPS      =   240 / 60.0; // 240 RPM converted to RPS for the motor controller
+  public static final double kFeederSpinUpPreLaunchRPS      =  -240 / 60.0; // must be negative
 
   // Launcher velocity control PID constants
   public static final double kLauncherP = 0.012; 

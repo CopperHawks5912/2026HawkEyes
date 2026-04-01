@@ -155,6 +155,15 @@ public class Autos {
     .withName("rightSideForwardLaunchForwardClimb");
   }
 
+  /**
+   * Start:   The back of the robot touching the hub, aligned with the left side of the tower.
+   * Actions: 1. Turn on slow mode
+   *          2. Drives in reverse 61 inches
+   *          3. Launches fuel for 5 seconds
+   *          4. Turn off slow mode
+   *          5. Celebrate with feedback
+   * @return Command to run the moveAndShoot routine
+   */
   public Command moveAndShootCommand() {
     return Commands.sequence(
       // // Turn on slow mode
@@ -164,7 +173,7 @@ public class Autos {
       driveSubsystem.driveDistanceCommand(Units.inchesToMeters(61), 0.50),
 
       // Launch fuel for 5.0 seconds
-      fuelSubsystem.launchCommand().withTimeout(5.0).finallyDo(fuelSubsystem::stop),
+      fuelSubsystem.launchPowerCommand().withTimeout(5.0).finallyDo(fuelSubsystem::stop),
 
       // // Lower climber all the way
       // climberSubsystem.downToLimitCommand(), 
@@ -179,7 +188,7 @@ public class Autos {
       driveSubsystem.setSlowModeCommand(false),
 
       // Celebrate with feedback
-      feedbackSubsystem.funkyDiscoCommand()
+      feedbackSubsystem.idleCommand()
     )    
     .withName("moveAndShootCommand");
   }
@@ -193,7 +202,7 @@ public class Autos {
    *          5. Drives forward 18.5 inches (back to starting position)
    *          6. Raises climber to level 1 position
    *          7. Turn off slow mode
-   * @return Command to run the backwardLaunchReturnClimb routine
+   * @return Command to run the forwardLaunchForwardClimb routine
    */
   public Command forwardLaunchForwardClimb() {
     return Commands.sequence(
@@ -205,7 +214,7 @@ public class Autos {
 
       Commands.parallel(
         // Launch fuel for 5.0 seconds
-        fuelSubsystem.launchCommand().withTimeout(5.0).finallyDo(fuelSubsystem::stop),
+        fuelSubsystem.launchPowerCommand().withTimeout(5.0).finallyDo(fuelSubsystem::stop),
 
         // wait AND then lower the climber
         Commands.waitSeconds(2.0).andThen(climberSubsystem.downToLimitCommand())
