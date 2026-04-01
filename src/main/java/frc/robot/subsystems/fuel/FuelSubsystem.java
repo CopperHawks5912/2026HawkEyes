@@ -32,7 +32,7 @@ public class FuelSubsystem extends SubsystemBase {
   
   /** Creates a new FuelSubsystem. */
   public FuelSubsystem() {
-    // Initialize hardware (intake/launcher motors are Kraken x60s, feeder is a Falcon)
+    // Initialize hardware (intake/launcher motors are Kraken x60s, feeder is a Falcon 500)
     leftIntakeLauncherMotor = new TalonFX(CANConstants.kLeftIntakeLauncherMotorID);
     rightIntakeLauncherMotor = new TalonFX(CANConstants.kRightIntakeLauncherMotorID);
     feederMotor = new TalonFX(CANConstants.kFeederMotorID);
