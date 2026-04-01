@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems.fuel;
 
+import java.util.function.DoubleSupplier;
+
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -101,7 +103,7 @@ public class FuelSubsystem extends SubsystemBase {
     // -------------------------------------------------------------------------
     // Invert the configuration for the LEFT motor (physically mirrored)
     // -------------------------------------------------------------------------
-    launcherConfig.MotorOutput.withInverted(InvertedValue.Clockwise_Positive);
+    launcherConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     leftIntakeLauncherMotor.getConfigurator().apply(launcherConfig);
 
     // -------------------------------------------------------
