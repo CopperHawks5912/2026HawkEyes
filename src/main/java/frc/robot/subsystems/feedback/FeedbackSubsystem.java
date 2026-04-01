@@ -160,12 +160,13 @@ public class FeedbackSubsystem extends SubsystemBase {
   /**
    * Pulse pattern that fades in and out
    * @param color Base color
-   * @param period Time for one complete pulse cycle in seconds
+   * @param pulsesPerSecond Number of pulses per second (max 2.5 for FRC guidelines)
+   * @param timeOffset Time offset for phase shift (in seconds)
    */
-  private void pulsePattern(Color color, double period, double timeOffset) {
-    // max 2.5 blinks per second (FRC guidelines allow 5 pulses per second)
-    double clampedPeriod = Math.max(period, 0.4); 
-    double brightness = (Math.sin((animationTimer - timeOffset) * 2 * Math.PI / clampedPeriod) + 1) / 2;
+  private void pulsePattern(Color color, double pulsesPerSecond, double timeOffset) {
+    pulsesPerSecond = MathUtil.clamp(pulsesPerSecond, 0.1, 2.5);
+    double period = 1.0 / pulsesPerSecond;
+    double brightness = (Math.sin((animationTimer - timeOffset) * 2 * Math.PI / period) + 1) / 2;
     Color scaledColor = new Color(
       color.red * brightness,
       color.green * brightness,
@@ -177,13 +178,19 @@ public class FeedbackSubsystem extends SubsystemBase {
   /**
    * Blink pattern that turns on and off
    * @param color Color to blink
-   * @param period Time for one complete blink cycle in seconds
+   * @param blinksPerSecond Number of blinks per second (max 2.5 for FRC guidelines)
    */
-  private void blinkPattern(Color color, double period) {
-    // max 2.5 blinks per second (FRC guidelines allow 5 blinks per second)
-    double clampedPeriod = Math.max(period, 0.4); 
-    boolean on = (animationTimer % clampedPeriod) < (clampedPeriod / 2);
-    setAllLEDs(on ? color : Color.kBlack);
+  private void blinkPattern(Color color, double blinksPerSecond) {
+    blinksPerSecond = MathUtil.clamp(blinksPerSecond, 0.1, 2.5);
+    double period = 1.0 / blinksPerSecond;
+    boolean on = (animationTimer % period) < (period / 2);
+    double brightness = 0.85;
+    Color scaledColor = new Color(
+      color.red * brightness,
+      color.green * brightness,
+      color.blue * brightness
+    );
+    setAllLEDs(on ? scaledColor : Color.kBlack);
   }
   
   /**
