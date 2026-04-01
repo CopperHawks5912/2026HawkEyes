@@ -160,17 +160,16 @@ public class FeedbackSubsystem extends SubsystemBase {
   /**
    * Pulse pattern that fades in and out
    * @param color Base color
-   * @param pulsePerSecond Number of pulses per second
-   * @param timeOffset Time offset for the pulse animation
+   * @param pulsesPerSecond Number of pulses per second (max 2.5 for FRC guidelines)
+   * @param timeOffset Time offset for phase shift (in seconds)
    */
-  private void pulsePattern(Color color, double pulsePerSecond, double timeOffset) {
-    // max 2.5 pulses per second (FRC guidelines allow 5 pulses per second)
-    double clampedPeriod = MathUtil.clamp(1.0 / pulsePerSecond, 0, 2.5); 
-    double brightness = (Math.sin((animationTimer - timeOffset) * 2 * Math.PI / clampedPeriod) + 1) / 2;
+  private void pulsePattern(Color color, double pulsesPerSecond, double timeOffset) {
+    double period = 1.0 / MathUtil.clamp(pulsesPerSecond, 0.1, 2.5);
+    double brightness = (Math.sin((animationTimer - timeOffset) * 2 * Math.PI / period) + 1) / 2;
     Color scaledColor = new Color(
       color.red * brightness,
       color.green * brightness,
-      color.blue * brightness 
+      color.blue * brightness
     );
     setAllLEDs(scaledColor);
   }
@@ -178,13 +177,18 @@ public class FeedbackSubsystem extends SubsystemBase {
   /**
    * Blink pattern that turns on and off
    * @param color Color to blink
-   * @param blinkPerSecond Number of blinks per second
+   * @param blinksPerSecond Number of blinks per second (max 2.5 for FRC guidelines)
    */
-  private void blinkPattern(Color color, double blinkPerSecond) {
-    // max 2.5 blinks per second (FRC guidelines allow 5 blinks per second)
-    double clampedPeriod = MathUtil.clamp(1.0 / blinkPerSecond, 0, 2.5); 
-    boolean on = (animationTimer % clampedPeriod) < (clampedPeriod / 2);
-    setAllLEDs(on ? color : Color.kBlack);
+  private void blinkPattern(Color color, double blinksPerSecond) {
+    double period = 1.0 / MathUtil.clamp(blinksPerSecond, 0.1, 2.5);
+    boolean on = (animationTimer % period) < (period / 2);
+    double brightness = 0.85;
+    Color scaledColor = new Color(
+      color.red * brightness,
+      color.green * brightness,
+      color.blue * brightness
+    );
+    setAllLEDs(on ? scaledColor : Color.kBlack);
   }
   
   /**
