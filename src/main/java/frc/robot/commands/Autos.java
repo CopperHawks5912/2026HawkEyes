@@ -170,7 +170,7 @@ public class Autos {
       driveSubsystem.setSlowModeCommand(true),
 
       // Drive backwards 1 meter
-      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(61), 0.50),
+      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(61), 0.20),
 
       // Launch fuel for 5.0 seconds
       fuelSubsystem.launchPowerCommand().withTimeout(5.0).finallyDo(fuelSubsystem::stop),
@@ -179,7 +179,7 @@ public class Autos {
       // climberSubsystem.downToLimitCommand(), 
 
       // // Drive forward 1 meter (back to starting position)
-      // driveSubsystem.driveDistanceCommand(Units.inchesToMeters(18.5), 0.405),
+      // driveSubsystem.driveDistanceCommand(Units.inchesToMeters(18.5), 0.20),
       
       // // Raise climber to level 1 position
       // climberSubsystem.levelOneClimbCommand(),
@@ -210,7 +210,7 @@ public class Autos {
       driveSubsystem.setSlowModeCommand(true),
 
       // Drive backwards 1 meter
-      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(63.5), 0.50),
+      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(63.5), 0.20),
 
       Commands.parallel(
         // Launch fuel for 5.0 seconds
@@ -221,7 +221,7 @@ public class Autos {
       ),
 
       // Drive forward 1 meter (back to starting position)
-      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(15.5), 0.425).withTimeout(2.25),
+      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(15.5), 0.20).withTimeout(2.25),
       
       // Raise climber to level 1 position
       climberSubsystem.levelOneClimbCommand(),
