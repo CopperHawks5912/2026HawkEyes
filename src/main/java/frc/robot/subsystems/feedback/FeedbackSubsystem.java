@@ -107,7 +107,7 @@ public class FeedbackSubsystem extends SubsystemBase {
         break;
         
       case IDLE:
-        chasePattern(FeedbackConstants.IdleColor, 0.50);
+        chasePattern(FeedbackConstants.IdleColor, 10);
         break;
         
       case INFO:
@@ -163,7 +163,9 @@ public class FeedbackSubsystem extends SubsystemBase {
    * @param period Time for one complete pulse cycle in seconds
    */
   private void pulsePattern(Color color, double period, double timeOffset) {
-    double brightness = (Math.sin((animationTimer - timeOffset) * 2 * Math.PI / period) + 1) / 2;
+    // max 2.5 blinks per second (FRC guidelines allow 5 pulses per second)
+    double clampedPeriod = Math.max(period, 0.4); 
+    double brightness = (Math.sin((animationTimer - timeOffset) * 2 * Math.PI / clampedPeriod) + 1) / 2;
     Color scaledColor = new Color(
       color.red * brightness,
       color.green * brightness,
@@ -178,18 +180,20 @@ public class FeedbackSubsystem extends SubsystemBase {
    * @param period Time for one complete blink cycle in seconds
    */
   private void blinkPattern(Color color, double period) {
-    boolean on = (animationTimer % period) < (period / 2);
+    // max 2.5 blinks per second (FRC guidelines allow 5 blinks per second)
+    double clampedPeriod = Math.max(period, 0.4); 
+    boolean on = (animationTimer % clampedPeriod) < (clampedPeriod / 2);
     setAllLEDs(on ? color : Color.kBlack);
   }
   
   /**
    * Chase pattern that moves along the strip
    * @param color Color to chase
-   * @param speed Speed of the chase (lower = faster)
+   * @param pixelsPerSecond Speed of the chase in pixels per second
    */
-  private void chasePattern(Color color, double speed) {
+  private void chasePattern(Color color, double pixelsPerSecond) {
     // Calculate offset directly from time
-    animationOffset = (int)(animationTimer / speed) % ledBuffer.getLength();
+    animationOffset = (int)(animationTimer * pixelsPerSecond) % ledBuffer.getLength();
     
     for (int i = 0; i < ledBuffer.getLength(); i++) {
       if ((i + animationOffset) % 5 == 0) {
