@@ -50,11 +50,8 @@ public class Autos {
    * @return Command to run the launchFiveSeconds routine
    */
   public Command launchFiveSeconds() {
-    return fuelSubsystem.launchPowerCommand()
-      .withTimeout(5.0)
-      .finallyDo(fuelSubsystem::stop)
-      .andThen(feedbackSubsystem.idleCommand())
-      .withName("launchFiveSeconds");
+    return  fuelSubsystem.launchPowerCommand().withTimeout(5.0).finallyDo(fuelSubsystem::stop)
+    .withName("launchFiveSeconds");
   }
 
   /**
@@ -131,6 +128,7 @@ public class Autos {
 
       // Turn to face the center of the hub
       driveSubsystem.turnToHeadingCommand(5.0),
+      // driveSubsystem.turnDegreesCommand(5.0),
 
       Commands.parallel(
         // Launch fuel for 5.0 seconds
@@ -142,6 +140,7 @@ public class Autos {
 
       // Turn to face the straight ahead direction again
       driveSubsystem.turnToHeadingCommand(0),
+      // driveSubsystem.turnDegreesCommand(-5.0),
 
       // Drive forward 18.5 inches (just touching tower)
       driveSubsystem.driveDistanceCommand(Units.inchesToMeters(18.5), 0.20),
@@ -158,10 +157,9 @@ public class Autos {
   /**
    * Start:   The back of the robot touching the hub, aligned with the left side of the tower.
    * Actions: 1. Turn on slow mode
-   *          2. Drives in reverse 61 inches
+   *          2. Drives backward 61 inches
    *          3. Launches fuel for 5 seconds
    *          4. Turn off slow mode
-   *          5. Celebrate with feedback
    * @return Command to run the moveAndShoot routine
    */
   public Command moveAndShootCommand() {
@@ -170,7 +168,7 @@ public class Autos {
       driveSubsystem.setSlowModeCommand(true),
 
       // Drive backwards 1 meter
-      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(61), 0.20),
+      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(61), 0.50),
 
       // Launch fuel for 5.0 seconds
       fuelSubsystem.launchPowerCommand().withTimeout(5.0).finallyDo(fuelSubsystem::stop),
@@ -179,16 +177,13 @@ public class Autos {
       // climberSubsystem.downToLimitCommand(), 
 
       // // Drive forward 1 meter (back to starting position)
-      // driveSubsystem.driveDistanceCommand(Units.inchesToMeters(18.5), 0.20),
+      // driveSubsystem.driveDistanceCommand(Units.inchesToMeters(18.5), 0.405),
       
       // // Raise climber to level 1 position
       // climberSubsystem.levelOneClimbCommand(),
 
       // Turn off slow mode
-      driveSubsystem.setSlowModeCommand(false),
-
-      // Celebrate with feedback
-      feedbackSubsystem.idleCommand()
+      driveSubsystem.setSlowModeCommand(false)
     )    
     .withName("moveAndShootCommand");
   }
@@ -202,7 +197,7 @@ public class Autos {
    *          5. Drives forward 18.5 inches (back to starting position)
    *          6. Raises climber to level 1 position
    *          7. Turn off slow mode
-   * @return Command to run the forwardLaunchForwardClimb routine
+   * @return Command to run the backwardLaunchReturnClimb routine
    */
   public Command forwardLaunchForwardClimb() {
     return Commands.sequence(
@@ -210,7 +205,7 @@ public class Autos {
       driveSubsystem.setSlowModeCommand(true),
 
       // Drive backwards 1 meter
-      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(63.5), 0.20),
+      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(63.5), 0.50),
 
       Commands.parallel(
         // Launch fuel for 5.0 seconds
@@ -221,7 +216,7 @@ public class Autos {
       ),
 
       // Drive forward 1 meter (back to starting position)
-      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(15.5), 0.20).withTimeout(2.25),
+      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(15.5), 0.425).withTimeout(2.25),
       
       // Raise climber to level 1 position
       climberSubsystem.levelOneClimbCommand(),
