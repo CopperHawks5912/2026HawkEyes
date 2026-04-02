@@ -128,6 +128,7 @@ public class Autos {
 
       // Turn to face the center of the hub
       driveSubsystem.turnToHeadingCommand(5.0),
+      // driveSubsystem.turnDegreesCommand(5.0),
 
       Commands.parallel(
         // Launch fuel for 5.0 seconds
@@ -139,6 +140,7 @@ public class Autos {
 
       // Turn to face the straight ahead direction again
       driveSubsystem.turnToHeadingCommand(0),
+      // driveSubsystem.turnDegreesCommand(-5.0),
 
       // Drive forward 18.5 inches (just touching tower)
       driveSubsystem.driveDistanceCommand(Units.inchesToMeters(18.5), 0.20),
@@ -152,6 +154,14 @@ public class Autos {
     .withName("rightSideForwardLaunchForwardClimb");
   }
 
+  /**
+   * Start:   The back of the robot touching the hub, aligned with the left side of the tower.
+   * Actions: 1. Turn on slow mode
+   *          2. Drives backward 61 inches
+   *          3. Launches fuel for 5 seconds
+   *          4. Turn off slow mode
+   * @return Command to run the moveAndShoot routine
+   */
   public Command moveAndShootCommand() {
     return Commands.sequence(
       // // Turn on slow mode
