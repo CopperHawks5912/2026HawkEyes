@@ -52,6 +52,7 @@ public class FeedbackSubsystem extends SubsystemBase {
   private DisplayMode previousMode = DisplayMode.OFF; // For reverting after temporary displays
   private double animationTimer = 0;
   private int animationOffset = 0;
+  private double ledBrightness = 0.85; // Default brightness (0.0 to 1.0)
   private char gameData = '?';
       
   /**
@@ -145,18 +146,24 @@ public class FeedbackSubsystem extends SubsystemBase {
    * @param color Color to set
    */
   private void setAllLEDs(Color color) {
-    // Tune brightness here if needed (0.0 to 1.0)
-    double brightness = 0.85;
-    Color scaledColor = new Color(
-      color.red * brightness,
-      color.green * brightness,
-      color.blue * brightness
-    );
     for (int i = 0; i < ledBuffer.getLength(); i++) {
-      ledBuffer.setLED(i, scaledColor);
+      setLED(i, color);
     }
   }
   
+  /**
+   * Set a single LED to a color (with brightness scaling)
+   * @param index The index of the LED to set
+   * @param color The color to set (will be scaled by ledBrightness)
+   */
+  private void setLED(int index, Color color) {
+    ledBuffer.setLED(index, new Color(
+      color.red * ledBrightness,
+      color.green * ledBrightness,
+      color.blue * ledBrightness
+    ));
+  }
+
   /**
    * Pulse pattern that fades in and out
    * @param color Base color
@@ -182,13 +189,7 @@ public class FeedbackSubsystem extends SubsystemBase {
   private void blinkPattern(Color color, double blinksPerSecond) {
     double period = 1.0 / MathUtil.clamp(blinksPerSecond, 0.1, 2.5);
     boolean on = (animationTimer % period) < (period / 2);
-    double brightness = 0.85;
-    Color scaledColor = new Color(
-      color.red * brightness,
-      color.green * brightness,
-      color.blue * brightness
-    );
-    setAllLEDs(on ? scaledColor : Color.kBlack);
+    setAllLEDs(on ? color : Color.kBlack);
   }
   
   /**
@@ -202,9 +203,9 @@ public class FeedbackSubsystem extends SubsystemBase {
     
     for (int i = 0; i < ledBuffer.getLength(); i++) {
       if ((i + animationOffset) % 5 == 0) {
-        ledBuffer.setLED(i, color);
+        setLED(i, color);
       } else {
-        ledBuffer.setLED(i, Color.kBlack);
+        setLED(i, Color.kBlack);
       }
     }
   }
@@ -241,7 +242,7 @@ public class FeedbackSubsystem extends SubsystemBase {
       boolean isRedStripe = ((position / stripeWidth) % 2) == 0;
       
       // Set color (red or white)
-      ledBuffer.setLED(i, isRedStripe ? Color.kRed : Color.kWhite);
+      setLED(i, isRedStripe ? Color.kRed : Color.kWhite);
     }
   }
 
@@ -267,7 +268,7 @@ public class FeedbackSubsystem extends SubsystemBase {
       
       // Convert HSV to RGB
       Color color = Color.fromHSV(hue, (int)(saturation * 255), (int)(value * 255));
-      ledBuffer.setLED(i, color);
+      setLED(i, color);
     }
   }
 
