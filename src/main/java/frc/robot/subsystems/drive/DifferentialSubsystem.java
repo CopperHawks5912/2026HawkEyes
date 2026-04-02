@@ -97,10 +97,10 @@ public class DifferentialSubsystem extends SubsystemBase {
       false,
       false,
       false,
+      false,
+      false,
+      false,
       true,
-      false,
-      false,
-      false,
       true
     );
 
@@ -528,6 +528,7 @@ public class DifferentialSubsystem extends SubsystemBase {
    * autonomous to ensure the drive is in a known state.
    */
   public void autonomousInit() {
+    drive.setSafetyEnabled(false); // SUPER BAD!!! disable at comp
     resetOdometry();
     setMotorBrake(true);
     inverted = false;
@@ -707,7 +708,6 @@ public class DifferentialSubsystem extends SubsystemBase {
           return avgDistance >= arcLength;
         })
       )
-      .withTimeout(3.0)
       .finallyDo(this::stop)
       .withName("TurnDegreesDifferential");
   }
@@ -724,15 +724,21 @@ public class DifferentialSubsystem extends SubsystemBase {
     return runOnce(() -> aimPIDController.reset(gyro.getRotation2d().getRadians()))
       .andThen(
         run(() -> {
-          double rotationSpeed = aimPIDController.calculate(
-            gyro.getRotation2d().getRadians(),
-            Math.toRadians(degrees)
-          );
-          driveRobotRelative(new ChassisSpeeds(0.0, 0.0, rotationSpeed));
+          double rotationSpeed = aimPIDController.calculate(gyro.getRotation2d().getRadians(), Math.toRadians(degrees));
+          // driveRobotRelative(new ChassisSpeeds(0.0, 0.0, rotationSpeed));
+          drive.arcadeDrive(0.0, rotationSpeed, false);
+          // if (degrees < 0) {
+          //   drive.tankDrive(0.20, -0.20, false);
+          // } else {
+          //   drive.tankDrive(-0.20, 0.205, false);
+          // }
+          // SmartDashboard.putNumber("Gyro Rads", gyro.getRotation2d().getRadians());
+          // SmartDashboard.putNumber("Target Header", Math.toRadians(degrees));
+          // SmartDashboard.putNumber("Rot Speed", rotationSpeed);
         })
-        .until(() -> aimPIDController.atSetpoint())
+        .until(() -> MathUtil.isNear(degrees, gyro.getAngle().in(Degrees), 1.0))
+        // .until(() -> aimPIDController.atSetpoint())
       )
-      .withTimeout(3.0)
       .finallyDo(this::stop)
       .withName("TurnToHeadingDifferential");
   }

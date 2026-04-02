@@ -195,7 +195,7 @@ public final class DifferentialConstants {
   /**
    * Aiming PID proportional gain - used by the aimAtHubCommand
    */
-  public static final double kAimP = 2.0; // TODO: Tune this value
+  public static final double kAimP = 4.0; // TODO: Tune this value
   
   /**
    * Aiming PID integral gain - used by the aimAtHubCommand

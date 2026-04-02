@@ -77,6 +77,19 @@ public class Autos {
   }
 
   /**
+   * Start:   The back of the robot centered on the left side of the tower.
+   * Actions: 1. Drives backward 1m
+   * @return Command to run the backwardOneMeter routine
+   */
+  public Command turnAndTurnBack() {
+    return driveSubsystem.turnToHeadingCommand(20.0)
+      .andThen(Commands.waitSeconds(1.0))
+      .andThen(driveSubsystem.turnToHeadingCommand(-1.0))
+      .andThen(feedbackSubsystem.idleCommand())
+      .withName("turnAndTurnBack");
+  }
+
+  /**
    * Start:   The back of the robot touching the hub, aligned with the left side of the tower.
    * Actions: 1. Drives forward 63.5 inches
    *          2. Launches fuel for 5 seconds
@@ -88,7 +101,7 @@ public class Autos {
   public Command leftSideForwardLaunchForwardClimb() {
     return Commands.sequence(
       // Drive forward 63.5 inches
-      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(63.5), 0.20),
+      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(47.5), 0.20),
 
       Commands.parallel(
         // Launch fuel for 5.0 seconds
@@ -99,7 +112,7 @@ public class Autos {
       ),
 
       // Drive forward 18.5 inches (just touching tower)
-      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(18.5), 0.20),
+      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(28.5), 0.20),
       
       // Raise climber to level 1 position
       climberSubsystem.levelOneClimbCommand(),
@@ -124,10 +137,10 @@ public class Autos {
   public Command rightSideForwardLaunchForwardClimb() {
     return Commands.sequence(
       // Drive forward 63.5 inches
-      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(63.5), 0.20),
+      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(47.5), 0.20),
 
       // Turn to face the center of the hub
-      driveSubsystem.turnToHeadingCommand(5.0),
+      driveSubsystem.turnToHeadingCommand(20.0),
       // driveSubsystem.turnDegreesCommand(5.0),
 
       Commands.parallel(
@@ -143,7 +156,7 @@ public class Autos {
       // driveSubsystem.turnDegreesCommand(-5.0),
 
       // Drive forward 18.5 inches (just touching tower)
-      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(18.5), 0.20),
+      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(28.5), 0.20),
       
       // Raise climber to level 1 position
       climberSubsystem.levelOneClimbCommand(),
