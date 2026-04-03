@@ -773,6 +773,7 @@ public class DifferentialSubsystem extends SubsystemBase {
     .finallyDo(this::stop)
     .withName("DriveDistanceDifferential");
 
+    // ALTERNATIVE - no power scaling but no subsystem command gap
     // return startRun(
     //   () -> resetEncoders(),
     //   () -> drive.tankDrive(
@@ -786,6 +787,7 @@ public class DifferentialSubsystem extends SubsystemBase {
     // .finallyDo(this::stop)
     // .withName("DriveDistanceDifferential");
 
+    // ORIGINAL - no power scaling
     // return runOnce(this::resetEncoders)
     //   .andThen(
     //     run(() -> {

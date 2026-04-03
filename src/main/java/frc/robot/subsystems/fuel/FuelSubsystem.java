@@ -192,10 +192,7 @@ public class FuelSubsystem extends SubsystemBase {
    * @param power Percentage of voltage to apply (-1.0 to 1.0)
    */
   private void setLauncherPower(double power) {
-    // clamp power to valid range
     double clampedPower = MathUtil.clamp(power, -1, 1);
-
-    // Set motor power directly (for open-loop control)
     rightIntakeLauncherMotor.set(clampedPower);
     leftIntakeLauncherMotor.set(clampedPower);
   }
