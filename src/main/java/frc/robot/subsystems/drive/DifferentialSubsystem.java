@@ -4,8 +4,6 @@
 
 package frc.robot.subsystems.drive;
 
-import static edu.wpi.first.units.Units.Degrees;
-
 import java.util.function.DoubleSupplier;
 
 import com.revrobotics.PersistMode;
@@ -32,6 +30,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
@@ -168,7 +167,7 @@ public class DifferentialSubsystem extends SubsystemBase {
     SmartDashboard.putData("Drive/Field", field2d);
     SmartDashboard.putData("Drive/Gyro", builder -> {
       builder.setSmartDashboardType("Gyro");
-      builder.addDoubleProperty("Value", () -> gyro.getYaw().in(Degrees), null);
+      builder.addDoubleProperty("Value", () -> gyro.getRotation2d().getDegrees(), null);
     });
     SmartDashboard.putData("Drive/Differential", this);
     
@@ -706,6 +705,7 @@ public class DifferentialSubsystem extends SubsystemBase {
       double avgDistance = Math.abs((leftEncoder.getPosition() - rightEncoder.getPosition()) / 2.0);
       return avgDistance >= arcLength;
     })
+    .withTimeout(3.0)
     .finallyDo(this::stop)
     .withName("TurnDegreesDifferential");
   }
@@ -722,11 +722,12 @@ public class DifferentialSubsystem extends SubsystemBase {
     return startRun(
       () -> aimPIDController.reset(gyro.getRotation2d().getRadians()),
       () -> {
-        double rotationSpeed = aimPIDController.calculate(gyro.getRotation2d().getRadians(), Math.toRadians(degrees));
+        double rotationSpeed = aimPIDController.calculate(gyro.getRotation2d().getRadians(), Units.degreesToRadians(degrees));
         drive.arcadeDrive(0.0, rotationSpeed, false);
       }
     )
-    .until(() -> MathUtil.isNear(degrees, gyro.getAngle().in(Degrees), 1.0))
+    .until(() -> MathUtil.isNear(degrees, gyro.getRotation2d().getDegrees(), 1.0))
+    .withTimeout(3.0)
     .finallyDo(this::stop)
     .withName("TurnToHeadingDifferential");
   }
@@ -758,24 +759,17 @@ public class DifferentialSubsystem extends SubsystemBase {
    */
   public Command driveDistanceCommand(double distance, double power) {
     return startRun(
-      () -> {
-        resetEncoders();
-        leftPIDController.reset();
-        rightPIDController.reset();
-      },
-      () -> {
-        double leftPower = leftPIDController.calculate(leftEncoder.getPosition(), distance);
-        double rightPower = rightPIDController.calculate(rightEncoder.getPosition(), distance);
-        drive.tankDrive(
-          MathUtil.clamp(leftPower, -power, power),
-          MathUtil.clamp(rightPower, -power, power),
-          false
-        );
-      }
+      () -> resetEncoders(),
+      () -> drive.tankDrive(
+        Math.copySign(MathUtil.clamp(power, 0.0, 1.0), distance),
+        Math.copySign(MathUtil.clamp(power, 0.0, 1.0), distance),
+        false
+      )
     )
-    .until(() -> leftPIDController.atSetpoint() && rightPIDController.atSetpoint())
+    .until(() -> Math.abs((leftEncoder.getPosition() + rightEncoder.getPosition()) / 2.0) >= Math.abs(distance))
+    .withTimeout(10.0)
     .finallyDo(this::stop)
-    .withName("DriveDistance");
+    .withName("DriveDistanceDifferential");
 
     // return runOnce(this::resetEncoders)
     //   .andThen(
@@ -931,7 +925,7 @@ public class DifferentialSubsystem extends SubsystemBase {
     builder.addDoubleProperty("Right Position (m)", () -> Utils.showDouble(rightEncoder.getPosition()), null);
     builder.addDoubleProperty("Left Velocity (mps)", () -> Utils.showDouble(leftEncoder.getVelocity()), null);
     builder.addDoubleProperty("Right Velocity (mps)", () -> Utils.showDouble(rightEncoder.getVelocity()), null);
-    builder.addDoubleProperty("Gyro Angle (deg)", () -> Utils.showDouble(gyro.getAngle().in(Degrees)), null);
+    builder.addDoubleProperty("Gyro Angle (deg)", () -> Utils.showDouble(gyro.getRotation2d().getDegrees()), null);
     builder.addDoubleProperty("Dist To Hub (m)", () -> Utils.showDouble(getDistanceToAllianceHub()), null);
     builder.addDoubleProperty("Voltage (V)", () -> Utils.showDouble(getVoltage()), null);
     builder.addDoubleProperty("Current (A)", () -> Utils.showDouble(getCurrent()), null);

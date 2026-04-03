@@ -108,7 +108,7 @@ public class FeedbackSubsystem extends SubsystemBase {
         break;
         
       case IDLE:
-        chasePattern(FeedbackConstants.IdleColor, 10);
+        setAllLEDs(FeedbackConstants.IdleColor);
         break;
         
       case INFO:
