@@ -760,16 +760,37 @@ public class DifferentialSubsystem extends SubsystemBase {
   public Command driveDistanceCommand(double distance, double power) {
     return startRun(
       () -> resetEncoders(),
-      () -> drive.tankDrive(
-        Math.copySign(MathUtil.clamp(power, 0.0, 1.0), distance),
-        Math.copySign(MathUtil.clamp(power, 0.0, 1.0), distance),
-        false
-      )
+      () -> {
+        // Calculate the average distance traveled by the encoders & the remaining distance to the target
+        double avgTravelledDistance = (leftEncoder.getPosition() + rightEncoder.getPosition()) / 2.0;
+        double remaining = distance - avgTravelledDistance;
+        
+        // Scale power proportionally to the remaining distance but clamp to the maximum 
+        // power to avoid going too fast. Tune the value multiplied to "remaining" for 
+        // proportional control as needed. Essentially a poor man's PID controller.
+        double scaledPower = MathUtil.clamp(remaining * 2.0, -power, power);
+
+        // Drive the robot with the calculated power
+        drive.tankDrive(scaledPower, scaledPower, false);
+      }
     )
     .until(() -> Math.abs((leftEncoder.getPosition() + rightEncoder.getPosition()) / 2.0) >= Math.abs(distance))
     .withTimeout(10.0)
     .finallyDo(this::stop)
     .withName("DriveDistanceDifferential");
+
+    // return startRun(
+    //   () -> resetEncoders(),
+    //   () -> drive.tankDrive(
+    //     Math.copySign(MathUtil.clamp(power, 0.0, 1.0), distance),
+    //     Math.copySign(MathUtil.clamp(power, 0.0, 1.0), distance),
+    //     false
+    //   )
+    // )
+    // .until(() -> Math.abs((leftEncoder.getPosition() + rightEncoder.getPosition()) / 2.0) >= Math.abs(distance))
+    // .withTimeout(10.0)
+    // .finallyDo(this::stop)
+    // .withName("DriveDistanceDifferential");
 
     // return runOnce(this::resetEncoders)
     //   .andThen(
