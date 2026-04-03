@@ -230,8 +230,8 @@ public class FuelSubsystem extends SubsystemBase {
    * Stop all motors immediately
    */
   public void stop() {
-    leftIntakeLauncherMotor.stopMotor();
     rightIntakeLauncherMotor.stopMotor();
+    leftIntakeLauncherMotor.stopMotor();
     feederMotor.stopMotor();
   }
 
