@@ -113,7 +113,7 @@ public class FuelSubsystem extends SubsystemBase {
     rightIntakeLauncherMotor.getPosition().setUpdateFrequency(2.0);       // not used
     rightIntakeLauncherMotor.getMotorVoltage().setUpdateFrequency(25.0);  // motor voltage
     rightIntakeLauncherMotor.getSupplyCurrent().setUpdateFrequency(25.0); // supply current
-    rightIntakeLauncherMotor.getTorqueCurrent().setUpdateFrequency(25.0); // stator/torque current
+    rightIntakeLauncherMotor.getTorqueCurrent().setUpdateFrequency(4.0);  // stator/torque current
     rightIntakeLauncherMotor.getDeviceTemp().setUpdateFrequency(4.0);     // temperature
     rightIntakeLauncherMotor.optimizeBusUtilization();
 
@@ -121,7 +121,7 @@ public class FuelSubsystem extends SubsystemBase {
     leftIntakeLauncherMotor.getPosition().setUpdateFrequency(2.0);       // not used
     leftIntakeLauncherMotor.getMotorVoltage().setUpdateFrequency(25.0);  // motor voltage
     leftIntakeLauncherMotor.getSupplyCurrent().setUpdateFrequency(25.0); // supply current
-    leftIntakeLauncherMotor.getTorqueCurrent().setUpdateFrequency(25.0); // stator/torque current
+    leftIntakeLauncherMotor.getTorqueCurrent().setUpdateFrequency(4.0);  // stator/torque current
     leftIntakeLauncherMotor.getDeviceTemp().setUpdateFrequency(4.0);     // temperature
     leftIntakeLauncherMotor.optimizeBusUtilization();
   }
@@ -178,7 +178,7 @@ public class FuelSubsystem extends SubsystemBase {
     feederMotor.getPosition().setUpdateFrequency(2.0);       // not used
     feederMotor.getMotorVoltage().setUpdateFrequency(25.0);  // motor voltage
     feederMotor.getSupplyCurrent().setUpdateFrequency(25.0); // supply current
-    feederMotor.getTorqueCurrent().setUpdateFrequency(25.0); // stator/torque current
+    feederMotor.getTorqueCurrent().setUpdateFrequency(4.0);  // stator/torque current
     feederMotor.getDeviceTemp().setUpdateFrequency(4.0);     // temperature
     feederMotor.optimizeBusUtilization();
   }
