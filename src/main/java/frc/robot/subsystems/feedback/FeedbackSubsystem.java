@@ -52,7 +52,6 @@ public class FeedbackSubsystem extends SubsystemBase {
   private DisplayMode previousMode = DisplayMode.OFF; // For reverting after temporary displays
   private double animationTimer = 0;
   private int animationOffset = 0;
-  private double ledBrightness = 0.85; // Default brightness (0.0 to 1.0)
   private char gameData = '?';
       
   /**
@@ -108,7 +107,7 @@ public class FeedbackSubsystem extends SubsystemBase {
         break;
         
       case IDLE:
-        chasePattern(FeedbackConstants.IdleColor, 10);
+        setAllLEDs(FeedbackConstants.IdleColor);
         break;
         
       case INFO:
@@ -154,13 +153,13 @@ public class FeedbackSubsystem extends SubsystemBase {
   /**
    * Set a single LED to a color (with brightness scaling)
    * @param index The index of the LED to set
-   * @param color The color to set (will be scaled by ledBrightness)
+   * @param color The color to set (will be scaled by FeedbackConstants.kBrightness)
    */
   private void setLED(int index, Color color) {
     ledBuffer.setLED(index, new Color(
-      color.red * ledBrightness,
-      color.green * ledBrightness,
-      color.blue * ledBrightness
+      color.red * FeedbackConstants.kBrightness,
+      color.green * FeedbackConstants.kBrightness,
+      color.blue * FeedbackConstants.kBrightness
     ));
   }
 

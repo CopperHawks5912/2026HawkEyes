@@ -18,6 +18,9 @@ public final class FeedbackConstants {
   /** Number of LEDs in the strip */
   public static final int LEDLength = 60;
 
+  /** Control the brightness of the LEDs 0.0 to 1.0 */
+  public static final double kBrightness = 0.85;
+
   /** Color for indicating that the robot is aimed at the hub */
   public static final Color AimedAtHubColor = Color.kGreen;
       
