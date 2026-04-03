@@ -705,7 +705,7 @@ public class DifferentialSubsystem extends SubsystemBase {
       double avgDistance = Math.abs((leftEncoder.getPosition() - rightEncoder.getPosition()) / 2.0);
       return avgDistance >= arcLength;
     })
-    .withTimeout(3.0)
+    .withTimeout(5.0)
     .finallyDo(this::stop)
     .withName("TurnDegreesDifferential");
   }
@@ -727,7 +727,7 @@ public class DifferentialSubsystem extends SubsystemBase {
       }
     )
     .until(() -> MathUtil.isNear(degrees, gyro.getRotation2d().getDegrees(), 1.0))
-    .withTimeout(3.0)
+    .withTimeout(5.0)
     .finallyDo(this::stop)
     .withName("TurnToHeadingDifferential");
   }
