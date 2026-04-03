@@ -749,8 +749,8 @@ public class DifferentialSubsystem extends SubsystemBase {
   /**
    * Drive a specified distance in meters using the encoders. This command will reset the 
    * encoders, then drive forward or backward until the average distance traveled by the
-   * encoders reaches the target distance. The command will timeout after 10 seconds 
-   * to prevent a runaway robot.
+   * encoders reaches the target distance. The power is scaled down as the robot nears
+   * the target distance. The command will timeout after 10 seconds.
    * WARNING: This method does not avoid obstacles! Ensure the path is clear before using.
    *          Use driveToPose(Pose2d pose) for pathfinding with obstacle avoidance.
    * @param distance The distance to drive in meters (+ forward, - reverse)
@@ -761,16 +761,10 @@ public class DifferentialSubsystem extends SubsystemBase {
     return startRun(
       () -> resetEncoders(),
       () -> {
-        // Calculate the average distance traveled by the encoders & the remaining distance to the target
-        double avgTravelledDistance = (leftEncoder.getPosition() + rightEncoder.getPosition()) / 2.0;
-        double remaining = distance - avgTravelledDistance;
-        
-        // Scale power proportionally to the remaining distance but clamp to the maximum 
-        // power to avoid going too fast. Tune the value multiplied to "remaining" for 
-        // proportional control as needed. Essentially a poor man's PID controller.
-        double scaledPower = MathUtil.clamp(remaining * 2.0, -power, power);
-
-        // Drive the robot with the calculated power
+        double p = 2.0; // Proportional gain for distance control (tune this for your robot)
+        double travelled = (leftEncoder.getPosition() + rightEncoder.getPosition()) / 2.0;
+        double remaining = distance - travelled;
+        double scaledPower = MathUtil.clamp(remaining * p, -power, power);
         drive.tankDrive(scaledPower, scaledPower, false);
       }
     )
