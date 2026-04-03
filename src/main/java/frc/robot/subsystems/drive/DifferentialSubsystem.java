@@ -4,8 +4,6 @@
 
 package frc.robot.subsystems.drive;
 
-import static edu.wpi.first.units.Units.Degrees;
-
 import java.util.function.DoubleSupplier;
 
 import com.revrobotics.PersistMode;
@@ -32,6 +30,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
@@ -97,10 +96,10 @@ public class DifferentialSubsystem extends SubsystemBase {
       false,
       false,
       false,
+      false,
+      false,
+      false,
       true,
-      false,
-      false,
-      false,
       true
     );
 
@@ -168,7 +167,7 @@ public class DifferentialSubsystem extends SubsystemBase {
     SmartDashboard.putData("Drive/Field", field2d);
     SmartDashboard.putData("Drive/Gyro", builder -> {
       builder.setSmartDashboardType("Gyro");
-      builder.addDoubleProperty("Value", () -> gyro.getYaw().in(Degrees), null);
+      builder.addDoubleProperty("Value", () -> gyro.getRotation2d().getDegrees(), null);
     });
     SmartDashboard.putData("Drive/Differential", this);
     
@@ -528,6 +527,7 @@ public class DifferentialSubsystem extends SubsystemBase {
    * autonomous to ensure the drive is in a known state.
    */
   public void autonomousInit() {
+    // drive.setSafetyEnabled(false); // SUPER BAD!!! disable at comp
     resetOdometry();
     setMotorBrake(true);
     inverted = false;
@@ -678,7 +678,8 @@ public class DifferentialSubsystem extends SubsystemBase {
       );
 
       // Drive the robot with the calculated rotation speed only
-      driveRobotRelative(new ChassisSpeeds(0.0, 0.0, rotationSpeed));
+      drive.arcadeDrive(0.0, rotationSpeed, false);
+      // driveRobotRelative(new ChassisSpeeds(0.0, 0.0, rotationSpeed));
     })
     .until(() -> aimPIDController.atSetpoint())
     .withTimeout(3.0)
@@ -695,21 +696,18 @@ public class DifferentialSubsystem extends SubsystemBase {
    * @return Command that turns the robot the specified number of degrees using the encoders
    */
   public Command turnDegreesCommand(double degrees) {
-    return runOnce(() -> resetEncoders())
-      .andThen(
-        run(() -> {
-          // left wheel forward, right wheel backward for positive (counterclockwise) turn
-          drive.arcadeDrive(0.0, Math.copySign(0.3, degrees));
-        })
-        .until(() -> {
-          double arcLength = (Math.abs(degrees) / 360.0) * Math.PI * DifferentialConstants.kTrackWidthMeters;
-          double avgDistance = Math.abs((leftEncoder.getPosition() - rightEncoder.getPosition()) / 2.0);
-          return avgDistance >= arcLength;
-        })
-      )
-      .withTimeout(3.0)
-      .finallyDo(this::stop)
-      .withName("TurnDegreesDifferential");
+    return startRun(
+      () -> resetEncoders(),
+      () -> drive.arcadeDrive(0.0, Math.copySign(0.20, degrees), false)
+    )
+    .until(() -> {
+      double arcLength = (Math.abs(degrees) / 360.0) * Math.PI * DifferentialConstants.kTrackWidthMeters;
+      double avgDistance = Math.abs((leftEncoder.getPosition() - rightEncoder.getPosition()) / 2.0);
+      return avgDistance >= arcLength;
+    })
+    .withTimeout(3.0)
+    .finallyDo(this::stop)
+    .withName("TurnDegreesDifferential");
   }
 
   /**
@@ -721,20 +719,17 @@ public class DifferentialSubsystem extends SubsystemBase {
    * @return Command that turns the robot to the specified heading then stops
    */
   public Command turnToHeadingCommand(double degrees) {
-    return runOnce(() -> aimPIDController.reset(gyro.getRotation2d().getRadians()))
-      .andThen(
-        run(() -> {
-          double rotationSpeed = aimPIDController.calculate(
-            gyro.getRotation2d().getRadians(),
-            Math.toRadians(degrees)
-          );
-          driveRobotRelative(new ChassisSpeeds(0.0, 0.0, rotationSpeed));
-        })
-        .until(() -> aimPIDController.atSetpoint())
-      )
-      .withTimeout(3.0)
-      .finallyDo(this::stop)
-      .withName("TurnToHeadingDifferential");
+    return startRun(
+      () -> aimPIDController.reset(gyro.getRotation2d().getRadians()),
+      () -> {
+        double rotationSpeed = aimPIDController.calculate(gyro.getRotation2d().getRadians(), Units.degreesToRadians(degrees));
+        drive.arcadeDrive(0.0, rotationSpeed, false);
+      }
+    )
+    .until(() -> MathUtil.isNear(degrees, gyro.getRotation2d().getDegrees(), 1.0))
+    .withTimeout(3.0)
+    .finallyDo(this::stop)
+    .withName("TurnToHeadingDifferential");
   }
 
   /**
@@ -763,22 +758,35 @@ public class DifferentialSubsystem extends SubsystemBase {
    * @return Command to drive the specified distance
    */
   public Command driveDistanceCommand(double distance, double power) {
-    return runOnce(this::resetEncoders)
-      .andThen(
-        run(() -> {
-          double clampedPower = MathUtil.clamp(power, 0.0, 1.0);
-          double directionalPower = Math.copySign(clampedPower, distance);
-          drive.tankDrive(
-            directionalPower,
-            directionalPower,
-            false
-          );
-        })
-        .until(() -> Math.abs((leftEncoder.getPosition() + rightEncoder.getPosition()) / 2.0) >= Math.abs(distance))
+    return startRun(
+      () -> resetEncoders(),
+      () -> drive.tankDrive(
+        Math.copySign(MathUtil.clamp(power, 0.0, 1.0), distance),
+        Math.copySign(MathUtil.clamp(power, 0.0, 1.0), distance),
+        false
       )
-      .withTimeout(10.0)
-      .finallyDo(this::stop)
-      .withName("DriveDistanceDifferential");
+    )
+    .until(() -> Math.abs((leftEncoder.getPosition() + rightEncoder.getPosition()) / 2.0) >= Math.abs(distance))
+    .withTimeout(10.0)
+    .finallyDo(this::stop)
+    .withName("DriveDistanceDifferential");
+
+    // return runOnce(this::resetEncoders)
+    //   .andThen(
+    //     run(() -> {
+    //       double clampedPower = MathUtil.clamp(power, 0.0, 1.0);
+    //       double directionalPower = Math.copySign(clampedPower, distance);
+    //       drive.tankDrive(
+    //         directionalPower,
+    //         directionalPower,
+    //         false
+    //       );
+    //     })
+    //     .until(() -> Math.abs((leftEncoder.getPosition() + rightEncoder.getPosition()) / 2.0) >= Math.abs(distance))
+    //   )
+    //   .withTimeout(10.0)
+    //   .finallyDo(this::stop)
+    //   .withName("DriveDistanceDifferential");
   }
 
   /**
@@ -917,7 +925,7 @@ public class DifferentialSubsystem extends SubsystemBase {
     builder.addDoubleProperty("Right Position (m)", () -> Utils.showDouble(rightEncoder.getPosition()), null);
     builder.addDoubleProperty("Left Velocity (mps)", () -> Utils.showDouble(leftEncoder.getVelocity()), null);
     builder.addDoubleProperty("Right Velocity (mps)", () -> Utils.showDouble(rightEncoder.getVelocity()), null);
-    builder.addDoubleProperty("Gyro Angle (deg)", () -> Utils.showDouble(gyro.getAngle().in(Degrees)), null);
+    builder.addDoubleProperty("Gyro Angle (deg)", () -> Utils.showDouble(gyro.getRotation2d().getDegrees()), null);
     builder.addDoubleProperty("Dist To Hub (m)", () -> Utils.showDouble(getDistanceToAllianceHub()), null);
     builder.addDoubleProperty("Voltage (V)", () -> Utils.showDouble(getVoltage()), null);
     builder.addDoubleProperty("Current (A)", () -> Utils.showDouble(getCurrent()), null);
