@@ -761,16 +761,10 @@ public class DifferentialSubsystem extends SubsystemBase {
     return startRun(
       () -> resetEncoders(),
       () -> {
-        // Calculate the average distance traveled by the encoders & the remaining distance to the target
-        double avgTravelledDistance = (leftEncoder.getPosition() + rightEncoder.getPosition()) / 2.0;
-        double remaining = distance - avgTravelledDistance;
-        
-        // Scale power proportionally to the remaining distance but clamp to the maximum 
-        // power to avoid going too fast. Tune the value multiplied to "remaining" for 
-        // proportional control as needed. Essentially a poor man's PID controller.
-        double scaledPower = MathUtil.clamp(remaining * 2.0, -power, power);
-
-        // Drive the robot with the calculated power
+        double p = 2.0; // Proportional gain for distance control (tune this for your robot)
+        double travelled = (leftEncoder.getPosition() + rightEncoder.getPosition()) / 2.0;
+        double remaining = distance - travelled;
+        double scaledPower = MathUtil.clamp(remaining * p, -power, power);
         drive.tankDrive(scaledPower, scaledPower, false);
       }
     )
