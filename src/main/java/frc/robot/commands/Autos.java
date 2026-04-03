@@ -152,7 +152,7 @@ public class Autos {
       ),
 
       // Turn to face the straight ahead direction again
-      driveSubsystem.turnToHeadingCommand(0),
+      driveSubsystem.turnToHeadingCommand(-1.0),
       // driveSubsystem.turnDegreesCommand(-5.0),
 
       // Drive forward 18.5 inches (just touching tower)

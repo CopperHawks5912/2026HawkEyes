@@ -82,8 +82,8 @@ public class RobotContainer {
     autoChooser.setDefaultOption("No auto", Commands.none());
     autoChooser.addOption("LEFT_FWD_LAUNCH_FWD_CLIMB", autos.leftSideForwardLaunchForwardClimb());
     autoChooser.addOption("RIGHT_FWD_LAUNCH_FWD_CLIMB", autos.rightSideForwardLaunchForwardClimb());
-    autoChooser.addOption("FWD_LAUNCH_FWD_CLIMB", autos.forwardLaunchForwardClimb());
     autoChooser.addOption("LAUNCH_5_SECONDS", autos.launchFiveSeconds());
+    autoChooser.addOption("TURN_AND_TURN_BACK", autos.turnAndTurnBack());
     autoChooser.addOption("FWD_1M", autos.forwardOneMeter());
     autoChooser.addOption("BWD_1M", autos.backwardOneMeter());
     
