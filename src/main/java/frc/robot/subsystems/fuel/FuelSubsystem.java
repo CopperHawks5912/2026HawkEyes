@@ -4,8 +4,6 @@
 
 package frc.robot.subsystems.fuel;
 
-import java.util.function.DoubleSupplier;
-
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
