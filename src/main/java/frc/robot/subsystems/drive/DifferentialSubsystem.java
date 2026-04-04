@@ -167,7 +167,7 @@ public class DifferentialSubsystem extends SubsystemBase {
     SmartDashboard.putData("Drive/Field", field2d);
     SmartDashboard.putData("Drive/Gyro", builder -> {
       builder.setSmartDashboardType("Gyro");
-      builder.addDoubleProperty("Value", () -> gyro.getRotation2d().getDegrees(), null);
+      builder.addDoubleProperty("Value", () -> Utils.showDouble(gyro.getRotation2d().getDegrees()), null);
     });
     SmartDashboard.putData("Drive/Differential", this);
     
@@ -705,7 +705,7 @@ public class DifferentialSubsystem extends SubsystemBase {
       double avgDistance = Math.abs((leftEncoder.getPosition() - rightEncoder.getPosition()) / 2.0);
       return avgDistance >= arcLength;
     })
-    .withTimeout(5.0)
+    .withTimeout(3.0)
     .finallyDo(this::stop)
     .withName("TurnDegreesDifferential");
   }
@@ -726,8 +726,8 @@ public class DifferentialSubsystem extends SubsystemBase {
         drive.arcadeDrive(0.0, rotationSpeed, false);
       }
     )
-    .until(() -> MathUtil.isNear(degrees, gyro.getRotation2d().getDegrees(), 1.0))
-    .withTimeout(5.0)
+    .until(() -> MathUtil.isNear(degrees, gyro.getRotation2d().getDegrees(), 2.0))
+    .withTimeout(3.0)
     .finallyDo(this::stop)
     .withName("TurnToHeadingDifferential");
   }
@@ -758,34 +758,34 @@ public class DifferentialSubsystem extends SubsystemBase {
    * @return Command to drive the specified distance
    */
   public Command driveDistanceCommand(double distance, double power) {
-    return startRun(
-      () -> resetEncoders(),
-      () -> {
-        double p = 2.0; // Proportional gain for distance control (tune this for your robot)
-        double travelled = (leftEncoder.getPosition() + rightEncoder.getPosition()) / 2.0;
-        double remaining = distance - travelled;
-        double scaledPower = MathUtil.clamp(remaining * p, -power, power);
-        drive.tankDrive(scaledPower, scaledPower, false);
-      }
-    )
-    .until(() -> Math.abs((leftEncoder.getPosition() + rightEncoder.getPosition()) / 2.0) >= Math.abs(distance))
-    .withTimeout(10.0)
-    .finallyDo(this::stop)
-    .withName("DriveDistanceDifferential");
-
-    // ALTERNATIVE - no power scaling but no subsystem command gap
     // return startRun(
     //   () -> resetEncoders(),
-    //   () -> drive.tankDrive(
-    //     Math.copySign(MathUtil.clamp(power, 0.0, 1.0), distance),
-    //     Math.copySign(MathUtil.clamp(power, 0.0, 1.0), distance),
-    //     false
-    //   )
+    //   () -> {
+    //     double p = 2.0; // Proportional gain for distance control (tune this for your robot)
+    //     double travelled = (leftEncoder.getPosition() + rightEncoder.getPosition()) / 2.0;
+    //     double remaining = distance - travelled;
+    //     double scaledPower = MathUtil.clamp(remaining * p, -power, power);
+    //     drive.tankDrive(scaledPower, scaledPower, false);
+    //   }
     // )
     // .until(() -> Math.abs((leftEncoder.getPosition() + rightEncoder.getPosition()) / 2.0) >= Math.abs(distance))
     // .withTimeout(10.0)
     // .finallyDo(this::stop)
     // .withName("DriveDistanceDifferential");
+
+    // ALTERNATIVE - no power scaling but no subsystem command gap
+    return startRun(
+      () -> resetEncoders(),
+      () -> drive.tankDrive(
+        Math.copySign(MathUtil.clamp(power, 0.0, 1.0), distance),
+        Math.copySign(MathUtil.clamp(power, 0.0, 1.0), distance),
+        false
+      )
+    )
+    .until(() -> Math.abs((leftEncoder.getPosition() + rightEncoder.getPosition()) / 2.0) >= Math.abs(distance))
+    .withTimeout(10.0)
+    .finallyDo(this::stop)
+    .withName("DriveDistanceDifferential");
 
     // ORIGINAL - no power scaling
     // return runOnce(this::resetEncoders)

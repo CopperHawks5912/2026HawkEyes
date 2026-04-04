@@ -356,5 +356,23 @@ public class FuelSubsystem extends SubsystemBase {
     builder.addDoubleProperty("Voltage (V)", () -> Utils.showDouble(getVoltage()), null);
     builder.addDoubleProperty("Current (A)", () -> Utils.showDouble(getCurrent()), null);
     builder.addDoubleProperty("Temperature (C)", () -> Utils.showDouble(getTemperature()), null);
+
+    // right motor stats
+    builder.addDoubleProperty("Right Velocity (rpm)", () -> Utils.showDouble(rightIntakeLauncherMotor.getVelocity().getValueAsDouble()), null);
+    builder.addDoubleProperty("Right Voltage (V)", () -> Utils.showDouble(rightIntakeLauncherMotor.getMotorVoltage().getValueAsDouble()), null);
+    builder.addDoubleProperty("Right Current (A)", () -> Utils.showDouble(rightIntakeLauncherMotor.getSupplyCurrent().getValueAsDouble()), null);
+    builder.addDoubleProperty("Right Temperature (C)", () -> Utils.showDouble(rightIntakeLauncherMotor.getDeviceTemp().getValueAsDouble()), null);
+
+    // left motor stats
+    builder.addDoubleProperty("Left Velocity (rpm)", () -> Utils.showDouble(leftIntakeLauncherMotor.getVelocity().getValueAsDouble()), null);
+    builder.addDoubleProperty("Left Voltage (V)", () -> Utils.showDouble(leftIntakeLauncherMotor.getMotorVoltage().getValueAsDouble()), null);
+    builder.addDoubleProperty("Left Current (A)", () -> Utils.showDouble(leftIntakeLauncherMotor.getSupplyCurrent().getValueAsDouble()), null);
+    builder.addDoubleProperty("Left Temperature (C)", () -> Utils.showDouble(leftIntakeLauncherMotor.getDeviceTemp().getValueAsDouble()), null);
+
+    // feeder motor stats
+    builder.addDoubleProperty("Feeder Velocity (rpm)", () -> Utils.showDouble(feederMotor.getVelocity().getValueAsDouble()), null);
+    builder.addDoubleProperty("Feeder Voltage (V)", () -> Utils.showDouble(feederMotor.getMotorVoltage().getValueAsDouble()), null);
+    builder.addDoubleProperty("Feeder Current (A)", () -> Utils.showDouble(feederMotor.getSupplyCurrent().getValueAsDouble()), null);
+    builder.addDoubleProperty("Feeder Temperature (C)", () -> Utils.showDouble(feederMotor.getDeviceTemp().getValueAsDouble()), null);
   }
 }

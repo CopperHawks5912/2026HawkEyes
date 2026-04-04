@@ -10,9 +10,9 @@
           {
             "title": "Field",
             "x": 175.0,
-            "y": 0.0,
-            "width": 1250.0,
-            "height": 550.0,
+            "y": 125.0,
+            "width": 1350.0,
+            "height": 300.0,
             "type": "Field",
             "properties": {
               "topic": "/SmartDashboard/Drive/Field",
@@ -29,35 +29,9 @@
             }
           },
           {
-            "title": "Distance To Hub (m)",
-            "x": 850.0,
-            "y": 550.0,
-            "width": 250.0,
-            "height": 125.0,
-            "type": "Large Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/Drive/Differential/Dist To Hub (m)",
-              "period": 0.06,
-              "data_type": "double"
-            }
-          },
-          {
-            "title": "Best Target ID",
-            "x": 0.0,
-            "y": 125.0,
-            "width": 175.0,
-            "height": 125.0,
-            "type": "Large Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/Vision/Camera/VISION_FRONT/Best Target ID",
-              "period": 0.06,
-              "data_type": "double"
-            }
-          },
-          {
             "title": "Joystick Inverted",
-            "x": 1100.0,
-            "y": 550.0,
+            "x": 1225.0,
+            "y": 0.0,
             "width": 150.0,
             "height": 125.0,
             "type": "Boolean Box",
@@ -72,37 +46,11 @@
             }
           },
           {
-            "title": "Total Targets",
-            "x": 0.0,
-            "y": 0.0,
-            "width": 175.0,
-            "height": 125.0,
-            "type": "Large Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/Vision/Total Targets",
-              "period": 0.06,
-              "data_type": "double"
-            }
-          },
-          {
-            "title": "Climber (degrees)",
-            "x": 700.0,
-            "y": 550.0,
-            "width": 150.0,
-            "height": 125.0,
-            "type": "Large Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/Climber/Position (degrees)",
-              "period": 0.06,
-              "data_type": "double"
-            }
-          },
-          {
             "title": "Climber At Home",
-            "x": 350.0,
-            "y": 550.0,
+            "x": 0.0,
+            "y": 100.0,
             "width": 175.0,
-            "height": 125.0,
+            "height": 100.0,
             "type": "Boolean Box",
             "properties": {
               "topic": "/SmartDashboard/Climber/At Home Position",
@@ -116,10 +64,10 @@
           },
           {
             "title": "At Lower Limit",
-            "x": 525.0,
-            "y": 550.0,
+            "x": 0.0,
+            "y": 200.0,
             "width": 175.0,
-            "height": 125.0,
+            "height": 100.0,
             "type": "Boolean Box",
             "properties": {
               "topic": "/SmartDashboard/Climber/At Lower Limit",
@@ -133,10 +81,10 @@
           },
           {
             "title": "At Upper Limit",
-            "x": 175.0,
-            "y": 550.0,
+            "x": 0.0,
+            "y": 0.0,
             "width": 175.0,
-            "height": 125.0,
+            "height": 100.0,
             "type": "Boolean Box",
             "properties": {
               "topic": "/SmartDashboard/Climber/At Upper Limit",
@@ -147,91 +95,30 @@
               "true_icon": "None",
               "false_icon": "None"
             }
-          }
-        ]
-      }
-    },
-    {
-      "name": "Autonomous",
-      "grid_layout": {
-        "layouts": [
+          },
           {
-            "title": "3. Adjust Starting Position",
-            "x": 300.0,
-            "y": 200.0,
-            "width": 400.0,
-            "height": 375.0,
-            "type": "List Layout",
+            "title": "Slow Mode",
+            "x": 1375.0,
+            "y": 0.0,
+            "width": 150.0,
+            "height": 125.0,
+            "type": "Boolean Box",
             "properties": {
-              "label_position": "TOP"
-            },
-            "children": [
-              {
-                "title": "Angle Error (deg)",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 150.0,
-                "height": 150.0,
-                "type": "Large Text Display",
-                "properties": {
-                  "topic": "/SmartDashboard/Auto/AngleError (deg)",
-                  "period": 0.06,
-                  "data_type": "double"
-                }
-              },
-              {
-                "title": "X - Forward/Back Error (m)",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 150.0,
-                "height": 150.0,
-                "type": "Large Text Display",
-                "properties": {
-                  "topic": "/SmartDashboard/Auto/XError (m)",
-                  "period": 0.06,
-                  "data_type": "double"
-                }
-              },
-              {
-                "title": "Y - Left/Right Error (m)",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 150.0,
-                "height": 150.0,
-                "type": "Large Text Display",
-                "properties": {
-                  "topic": "/SmartDashboard/Auto/YError (m)",
-                  "period": 0.06,
-                  "data_type": "double"
-                }
-              },
-              {
-                "title": "Robot In Position",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 150.0,
-                "height": 150.0,
-                "type": "Boolean Box",
-                "properties": {
-                  "topic": "/SmartDashboard/Auto/RobotInPosition",
-                  "period": 0.06,
-                  "data_type": "boolean",
-                  "true_color": 4283215696,
-                  "false_color": 4294198070,
-                  "true_icon": "None",
-                  "false_icon": "None"
-                }
-              }
-            ]
-          }
-        ],
-        "containers": [
+              "topic": "/SmartDashboard/Drive/Differential/Slow Mode",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4289374890,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
           {
-            "title": "2. Choose Auto Delay",
-            "x": 900.0,
-            "y": 50.0,
-            "width": 200.0,
-            "height": 150.0,
+            "title": "Auto Delay",
+            "x": 725.0,
+            "y": 0.0,
+            "width": 250.0,
+            "height": 125.0,
             "type": "ComboBox Chooser",
             "properties": {
               "topic": "/SmartDashboard/Auto Delay",
@@ -240,29 +127,42 @@
             }
           },
           {
-            "title": "1. Choose Auto Command",
-            "x": 300.0,
-            "y": 50.0,
-            "width": 600.0,
-            "height": 150.0,
+            "title": "Position (deg)",
+            "x": 0.0,
+            "y": 300.0,
+            "width": 175.0,
+            "height": 125.0,
+            "type": "Large Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/Climber/Position (deg)",
+              "period": 0.06,
+              "data_type": "double"
+            }
+          },
+          {
+            "title": "Gyro Angle (deg)",
+            "x": 975.0,
+            "y": 0.0,
+            "width": 250.0,
+            "height": 125.0,
+            "type": "Large Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/Drive/Differential/Gyro Angle (deg)",
+              "period": 0.06,
+              "data_type": "double"
+            }
+          },
+          {
+            "title": "Auto Command",
+            "x": 175.0,
+            "y": 0.0,
+            "width": 550.0,
+            "height": 125.0,
             "type": "ComboBox Chooser",
             "properties": {
               "topic": "/SmartDashboard/Auto Command",
               "period": 0.06,
               "sort_options": false
-            }
-          },
-          {
-            "title": "Gyro",
-            "x": 700.0,
-            "y": 200.0,
-            "width": 400.0,
-            "height": 375.0,
-            "type": "Gyro",
-            "properties": {
-              "topic": "/SmartDashboard/Drive/Gyro",
-              "period": 0.06,
-              "counter_clockwise_positive": true
             }
           }
         ]
@@ -335,20 +235,6 @@
                 }
               },
               {
-                "title": "Position (degrees)",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 150.0,
-                "height": 150.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/SmartDashboard/Climber/Position (degrees)",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
-                }
-              },
-              {
                 "title": "Current (A)",
                 "x": 0.0,
                 "y": 0.0,
@@ -363,14 +249,14 @@
                 }
               },
               {
-                "title": "Temperature (C)",
+                "title": "Position (deg)",
                 "x": 0.0,
                 "y": 0.0,
                 "width": 150.0,
                 "height": 150.0,
                 "type": "Text Display",
                 "properties": {
-                  "topic": "/SmartDashboard/Climber/Temperature (C)",
+                  "topic": "/SmartDashboard/Climber/Position (deg)",
                   "period": 0.06,
                   "data_type": "double",
                   "show_submit_button": false
@@ -392,145 +278,315 @@
                   "true_icon": "None",
                   "false_icon": "None"
                 }
+              },
+              {
+                "title": "Temperature (C)",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 150.0,
+                "height": 150.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Climber/Temperature (C)",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Velocity (deg per sec)",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 150.0,
+                "height": 150.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Climber/Velocity (deg per sec)",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              }
+            ]
+          },
+          {
+            "title": "Avg Fuel",
+            "x": 575.0,
+            "y": 0.0,
+            "width": 250.0,
+            "height": 325.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "Current (A)",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 150.0,
+                "height": 150.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Fuel/Current (A)",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Temperature (C)",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 150.0,
+                "height": 150.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Fuel/Temperature (C)",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Velocity (rpm)",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 150.0,
+                "height": 150.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Fuel/Velocity (rpm)",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Voltage (V)",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 150.0,
+                "height": 150.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Fuel/Voltage (V)",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              }
+            ]
+          },
+          {
+            "title": "Left Launcher / Intake",
+            "x": 325.0,
+            "y": 0.0,
+            "width": 250.0,
+            "height": 325.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "Left Current (A)",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 150.0,
+                "height": 150.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Fuel/Left Current (A)",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Left Temperature (C)",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 150.0,
+                "height": 150.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Fuel/Left Temperature (C)",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Left Velocity (rpm)",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 150.0,
+                "height": 150.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Fuel/Left Velocity (rpm)",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Left Voltage (V)",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 150.0,
+                "height": 150.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Fuel/Left Voltage (V)",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              }
+            ]
+          },
+          {
+            "title": "Right Launcher / Intake",
+            "x": 825.0,
+            "y": 0.0,
+            "width": 250.0,
+            "height": 325.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "Right Current (A)",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 150.0,
+                "height": 150.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Fuel/Right Current (A)",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Right Temperature (C)",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 150.0,
+                "height": 150.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Fuel/Right Temperature (C)",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Right Velocity (rpm)",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 150.0,
+                "height": 150.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Fuel/Right Velocity (rpm)",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Right Voltage (V)",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 150.0,
+                "height": 150.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Fuel/Right Voltage (V)",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              }
+            ]
+          },
+          {
+            "title": "Feeder",
+            "x": 1075.0,
+            "y": 0.0,
+            "width": 250.0,
+            "height": 325.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "Feeder Current (A)",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 150.0,
+                "height": 150.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Fuel/Feeder Current (A)",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Feeder Temperature (C)",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 150.0,
+                "height": 150.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Fuel/Feeder Temperature (C)",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Feeder Velocity (rpm)",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 150.0,
+                "height": 150.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Fuel/Feeder Velocity (rpm)",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Feeder Voltage (V)",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 150.0,
+                "height": 150.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Fuel/Feeder Voltage (V)",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
               }
             ]
           }
         ],
-        "containers": [
-          {
-            "title": "Tune Distance (meters)",
-            "x": 325.0,
-            "y": 0.0,
-            "width": 700.0,
-            "height": 150.0,
-            "type": "Number Slider",
-            "properties": {
-              "topic": "/LauncherTuning/TuneDistance",
-              "period": 0.06,
-              "data_type": "double",
-              "min_value": 0.0,
-              "max_value": 10.0,
-              "divisions": 5,
-              "update_continuously": false
-            }
-          },
-          {
-            "title": "Tune RPM",
-            "x": 325.0,
-            "y": 150.0,
-            "width": 700.0,
-            "height": 150.0,
-            "type": "Number Slider",
-            "properties": {
-              "topic": "/LauncherTuning/TuneRPM",
-              "period": 0.06,
-              "data_type": "double",
-              "min_value": 0.0,
-              "max_value": 6000.0,
-              "divisions": 5,
-              "update_continuously": false
-            }
-          },
-          {
-            "title": "Current Distance",
-            "x": 1025.0,
-            "y": 0.0,
-            "width": 300.0,
-            "height": 150.0,
-            "type": "Large Text Display",
-            "properties": {
-              "topic": "/LauncherTuning/CurrentDistance",
-              "period": 0.06,
-              "data_type": "double"
-            }
-          },
-          {
-            "title": "Current Target RPM",
-            "x": 1025.0,
-            "y": 150.0,
-            "width": 300.0,
-            "height": 150.0,
-            "type": "Large Text Display",
-            "properties": {
-              "topic": "/LauncherTuning/CurrentTargetRPM",
-              "period": 0.06,
-              "data_type": "double"
-            }
-          },
-          {
-            "title": "Launcher At Speed",
-            "x": 1025.0,
-            "y": 300.0,
-            "width": 300.0,
-            "height": 150.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/LauncherTuning/AtSpeed",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          },
-          {
-            "title": "Print Lookup Table",
-            "x": 325.0,
-            "y": 450.0,
-            "width": 350.0,
-            "height": 150.0,
-            "type": "Command",
-            "properties": {
-              "topic": "/SmartDashboard/Launcher/PrintLookupTable",
-              "period": 0.06,
-              "show_type": false,
-              "maximize_button_space": true
-            }
-          },
-          {
-            "title": "Reset To Defaults",
-            "x": 675.0,
-            "y": 450.0,
-            "width": 350.0,
-            "height": 150.0,
-            "type": "Command",
-            "properties": {
-              "topic": "/SmartDashboard/Launcher/ResetToDefaults",
-              "period": 0.06,
-              "show_type": false,
-              "maximize_button_space": true
-            }
-          },
-          {
-            "title": "Save Tuning Point",
-            "x": 675.0,
-            "y": 300.0,
-            "width": 350.0,
-            "height": 150.0,
-            "type": "Command",
-            "properties": {
-              "topic": "/SmartDashboard/Launcher/SaveTuningPoint",
-              "period": 0.06,
-              "show_type": false,
-              "maximize_button_space": true
-            }
-          },
-          {
-            "title": "Test Tuned Shot",
-            "x": 325.0,
-            "y": 300.0,
-            "width": 350.0,
-            "height": 150.0,
-            "type": "Command",
-            "properties": {
-              "topic": "/SmartDashboard/Launcher/TestTunedShot",
-              "period": 0.06,
-              "show_type": false,
-              "maximize_button_space": true
-            }
-          }
-        ]
+        "containers": []
       }
     }
   ]
