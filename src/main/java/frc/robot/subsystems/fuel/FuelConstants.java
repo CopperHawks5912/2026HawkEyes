@@ -22,7 +22,7 @@ public final class FuelConstants {
   // -------------------------------------------------------------------------
   // Feeder motor percentages
   public static final double kFeederLaunchingPercent        = -0.75; // must be negative
-  public static final double kFeederIntakingPercent         =  0.80; 
+  public static final double kFeederIntakingPercent         =  0.45; // was 0.80
   public static final double kFeederEjectingPercent         = -0.60; // must be negative
 
   // Launcher & intake percentages (physically same motors)

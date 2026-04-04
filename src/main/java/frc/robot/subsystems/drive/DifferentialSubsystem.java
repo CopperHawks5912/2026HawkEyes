@@ -726,7 +726,7 @@ public class DifferentialSubsystem extends SubsystemBase {
         drive.arcadeDrive(0.0, rotationSpeed, false);
       }
     )
-    .until(() -> MathUtil.isNear(degrees, gyro.getRotation2d().getDegrees(), 2.0))
+    .until(() -> MathUtil.isNear(degrees, gyro.getRotation2d().getDegrees(), 1.0))
     .withTimeout(3.0)
     .finallyDo(this::stop)
     .withName("TurnToHeadingDifferential");

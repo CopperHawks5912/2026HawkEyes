@@ -208,19 +208,28 @@ public class FeedbackSubsystem extends SubsystemBase {
       }
     }
   }
-  
+
   /**
-   * Team colors pattern that fades between green & orange repeatedly
+   * Team colors pattern that breathes smoothly between copper & green.
+   * Each color pulses on a 2-second cycle, offset by half a period so
+   * one fades in as the other fades out.
    */
   private void teamColorsPattern() {
-    double phaseDuration = 2.5; // seconds per full pulse
-    double cycleTime = animationTimer % (phaseDuration * 2);
+    double period = 3.0; // seconds per full breath — slow and smooth
+    double halfPeriod = period / 2.0;
 
-    if (cycleTime < phaseDuration) {
-      pulsePattern(FeedbackConstants.TeamCopper, phaseDuration, 0);
-    } else {
-      pulsePattern(FeedbackConstants.TeamGreen, phaseDuration, phaseDuration);
-    }
+    // Copper brightness: sine wave from 0→1→0 over one period
+    double copperBrightness = (Math.sin(animationTimer * 2 * Math.PI / period) + 1) / 2;
+
+    // Green brightness: offset by half a period so it's brightest when copper is darkest
+    double greenBrightness  = (Math.sin((animationTimer - halfPeriod) * 2 * Math.PI / period) + 1) / 2;
+
+    Color blended = new Color(
+      FeedbackConstants.TeamCopper.red   * copperBrightness + FeedbackConstants.TeamGreen.red   * greenBrightness,
+      FeedbackConstants.TeamCopper.green * copperBrightness + FeedbackConstants.TeamGreen.green * greenBrightness,
+      FeedbackConstants.TeamCopper.blue  * copperBrightness + FeedbackConstants.TeamGreen.blue  * greenBrightness
+    );
+    setAllLEDs(blended);
   }
   
   /**
@@ -228,7 +237,7 @@ public class FeedbackSubsystem extends SubsystemBase {
    */
   private void candyCanePattern() {
     // Calculate offset for rotation effect
-    animationOffset = (int)(animationTimer * 10) % ledBuffer.getLength(); // 10 pixels/second
+    animationOffset = (int)(animationTimer * 5) % ledBuffer.getLength(); // 10 pixels/second
     
     // Stripe width (number of LEDs per stripe)
     int stripeWidth = 3;

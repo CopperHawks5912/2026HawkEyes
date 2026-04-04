@@ -160,7 +160,7 @@ public final class DifferentialConstants {
   /**
    * PID proportional gain for velocity control - used by Pathplanner
    */
-  public static final double kP = 2.0; // TODO: Tune this value
+  public static final double kP = 6.0; // TODO: Tune this value
 
   /**
    * PID integral gain for velocity control - used by Pathplanner
@@ -195,7 +195,7 @@ public final class DifferentialConstants {
   /**
    * Aiming PID proportional gain - used by the aimAtHubCommand
    */
-  public static final double kAimP = 2.0; // TODO: Tune this value
+  public static final double kAimP = 2.25; // TODO: Tune this value
   
   /**
    * Aiming PID integral gain - used by the aimAtHubCommand

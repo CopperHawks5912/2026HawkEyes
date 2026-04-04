@@ -140,7 +140,7 @@ public class Autos {
       driveSubsystem.driveDistanceCommand(Units.inchesToMeters(47.5), 0.20),
 
       // Turn to face the center of the hub
-      driveSubsystem.turnToHeadingCommand(20.0),
+      driveSubsystem.turnToHeadingCommand(15.0),
       // driveSubsystem.turnDegreesCommand(5.0),
 
       Commands.parallel(
@@ -152,7 +152,7 @@ public class Autos {
       ),
 
       // Turn to face the straight ahead direction again
-      driveSubsystem.turnToHeadingCommand(-1.0),
+      driveSubsystem.turnToHeadingCommand(0.0),
       // driveSubsystem.turnDegreesCommand(-5.0),
 
       // Drive forward 18.5 inches (just touching tower)
