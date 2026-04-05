@@ -210,7 +210,7 @@ public final class DifferentialConstants {
   /**
    * Aiming tolerance in radians (how close is "good enough") - used by the aimAtHubCommand
    */
-  public static final double kAimToleranceRad = Units.degreesToRadians(2.0);
+  public static final double kAimToleranceRad = Units.degreesToRadians(1.0);
   
   // ==================== Vision Parameters ====================
   

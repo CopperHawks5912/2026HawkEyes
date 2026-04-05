@@ -646,41 +646,44 @@ public class DifferentialSubsystem extends SubsystemBase {
    * @return Command that aims the robot at the alliance hub using PID control
    */
   public Command aimAtHubCommand() {
-    return run(() -> {
-      // Get current pose
-      Pose2d currentPose = getPose();
+    return startRun(
+      () -> aimPIDController.reset(gyro.getRotation2d().getRadians()),
+      () -> {
+        // Get current pose
+        Pose2d currentPose = getPose();
 
-      // Get the current alliance hub
-      Translation2d hubCenter = Utils.isRedAlliance() 
-        ? FieldConstants.kRedHubCenter 
-        : FieldConstants.kBlueHubCenter;
-      
-      // Calculate the angle from the robot to the hub
-      Translation2d toHub = hubCenter.minus(currentPose.getTranslation());
-      Rotation2d targetAngle = new Rotation2d(toHub.getX(), toHub.getY());
-      
-      // Calculate rotation speed to aim at the hub using the "aim" PID controller.
-      // Add Math.PI so the rear-mounted launcher faces the hub.
-      // The aim PID controller automatically handles:
-      //  1. angle wrapping
-      //  2. rotation acceleration constraints 
-      //  3. and takes the shortest path to the target angle
-      double rotationSpeed = aimPIDController.calculate(
-        currentPose.getRotation().getRadians(),
-        MathUtil.angleModulus(targetAngle.getRadians() + Math.PI)
-      );
+        // Get the current alliance hub
+        Translation2d hubCenter = Utils.isRedAlliance() 
+          ? FieldConstants.kRedHubCenter 
+          : FieldConstants.kBlueHubCenter;
+        
+        // Calculate the angle from the robot to the hub
+        Translation2d toHub = hubCenter.minus(currentPose.getTranslation());
+        Rotation2d targetAngle = new Rotation2d(toHub.getX(), toHub.getY());
+        
+        // Calculate rotation speed to aim at the hub using the "aim" PID controller.
+        // Add Math.PI so the rear-mounted launcher faces the hub.
+        // The aim PID controller automatically handles:
+        //  1. angle wrapping
+        //  2. rotation acceleration constraints 
+        //  3. and takes the shortest path to the target angle
+        double rotationSpeed = aimPIDController.calculate(
+          currentPose.getRotation().getRadians(),
+          MathUtil.angleModulus(targetAngle.getRadians() + Math.PI)
+        );
 
-      // Clamp the rotation speed to the maximum rotational speed of the robot
-      rotationSpeed = MathUtil.clamp(
-        rotationSpeed, 
-        -DifferentialConstants.kMaxAngularSpeedRadsPerSecond, 
-        DifferentialConstants.kMaxAngularSpeedRadsPerSecond
-      );
+        // Clamp the rotation speed to the maximum rotational speed of the robot
+        rotationSpeed = MathUtil.clamp(
+          rotationSpeed, 
+          -DifferentialConstants.kMaxAngularSpeedRadsPerSecond, 
+          DifferentialConstants.kMaxAngularSpeedRadsPerSecond
+        );
 
-      // Drive the robot with the calculated rotation speed only
-      drive.arcadeDrive(0.0, rotationSpeed, false);
-      // driveRobotRelative(new ChassisSpeeds(0.0, 0.0, rotationSpeed));
-    })
+        // Drive the robot with the calculated rotation speed only
+        drive.arcadeDrive(0.0, rotationSpeed, false);
+        // driveRobotRelative(new ChassisSpeeds(0.0, 0.0, rotationSpeed));
+      }
+    )    
     .until(() -> aimPIDController.atSetpoint())
     .withTimeout(3.0)
     .finallyDo(this::stop)
@@ -722,11 +725,17 @@ public class DifferentialSubsystem extends SubsystemBase {
     return startRun(
       () -> aimPIDController.reset(gyro.getRotation2d().getRadians()),
       () -> {
+        // Calculate rotation speed to aim at the target heading using the "aim" PID controller
         double rotationSpeed = aimPIDController.calculate(gyro.getRotation2d().getRadians(), Units.degreesToRadians(degrees));
-        drive.arcadeDrive(0.0, rotationSpeed, false);
+  
+        // Normalize rad/s to -1 to 1 range for arcadeDrive
+        double normalizedSpeed = rotationSpeed / DifferentialConstants.kMaxAngularSpeedRadsPerSecond;
+        
+        // Clamp the normalized speed to ensure we don't exceed the maximum speed
+        drive.arcadeDrive(0.0, MathUtil.clamp(normalizedSpeed, -1.0, 1.0), false);
       }
     )
-    .until(() -> MathUtil.isNear(degrees, gyro.getRotation2d().getDegrees(), 1.0))
+    .until(() -> Math.abs(Rotation2d.fromDegrees(degrees).minus(gyro.getRotation2d()).getDegrees()) < 1.0)
     .withTimeout(3.0)
     .finallyDo(this::stop)
     .withName("TurnToHeadingDifferential");
