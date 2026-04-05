@@ -729,13 +729,17 @@ public class DifferentialSubsystem extends SubsystemBase {
         double rotationSpeed = aimPIDController.calculate(gyro.getRotation2d().getRadians(), Units.degreesToRadians(degrees));
   
         // Normalize rad/s to -1 to 1 range for arcadeDrive
-        double normalizedSpeed = rotationSpeed / DifferentialConstants.kMaxAngularSpeedRadsPerSecond;
-        
+        double normalizedSpeed = MathUtil.clamp(rotationSpeed / DifferentialConstants.kMaxAngularSpeedRadsPerSecond, -1.0, 1.0);
+
+        // Enforce a minimum power to overcome static friction
+        normalizedSpeed = Math.copySign(Math.max(Math.abs(normalizedSpeed), 0.10), normalizedSpeed);
+
         // Clamp the normalized speed to ensure we don't exceed the maximum speed
-        drive.arcadeDrive(0.0, MathUtil.clamp(normalizedSpeed, -1.0, 1.0), false);
+        drive.arcadeDrive(0.0, normalizedSpeed, false);
       }
     )
-    .until(() -> Math.abs(Rotation2d.fromDegrees(degrees).minus(gyro.getRotation2d()).getDegrees()) < 1.0)
+    .until(() -> aimPIDController.atSetpoint())
+    // .until(() -> Math.abs(Rotation2d.fromDegrees(degrees).minus(gyro.getRotation2d()).getDegrees()) < 1.0)
     .withTimeout(3.0)
     .finallyDo(this::stop)
     .withName("TurnToHeadingDifferential");
@@ -767,13 +771,22 @@ public class DifferentialSubsystem extends SubsystemBase {
    * @return Command to drive the specified distance
    */
   public Command driveDistanceCommand(double distance, double power) {
+    // scale power based on the distance remaining to ensure we slow down as we approach the target, 
+    // but enforce a minimum power to overcome static friction
     // return startRun(
     //   () -> resetEncoders(),
     //   () -> {
-    //     double p = 2.0; // Proportional gain for distance control (tune this for your robot)
     //     double travelled = (leftEncoder.getPosition() + rightEncoder.getPosition()) / 2.0;
     //     double remaining = distance - travelled;
-    //     double scaledPower = MathUtil.clamp(remaining * p, -power, power);
+    //     double distanceFraction = Math.abs(remaining) / Math.abs(distance);
+        
+    //     // Scale power proportionally but enforce a minimum to overcome static friction
+    //     double scaledPower = Math.max(distanceFraction * power, 0.10);
+        
+    //     // Apply direction and clamp to max power
+    //     scaledPower = Math.copySign(MathUtil.clamp(scaledPower, 0.0, power), remaining);
+
+    //     // Drive the robot with the calculated power
     //     drive.tankDrive(scaledPower, scaledPower, false);
     //   }
     // )
@@ -795,24 +808,6 @@ public class DifferentialSubsystem extends SubsystemBase {
     .withTimeout(10.0)
     .finallyDo(this::stop)
     .withName("DriveDistanceDifferential");
-
-    // ORIGINAL - no power scaling
-    // return runOnce(this::resetEncoders)
-    //   .andThen(
-    //     run(() -> {
-    //       double clampedPower = MathUtil.clamp(power, 0.0, 1.0);
-    //       double directionalPower = Math.copySign(clampedPower, distance);
-    //       drive.tankDrive(
-    //         directionalPower,
-    //         directionalPower,
-    //         false
-    //       );
-    //     })
-    //     .until(() -> Math.abs((leftEncoder.getPosition() + rightEncoder.getPosition()) / 2.0) >= Math.abs(distance))
-    //   )
-    //   .withTimeout(10.0)
-    //   .finallyDo(this::stop)
-    //   .withName("DriveDistanceDifferential");
   }
 
   /**
