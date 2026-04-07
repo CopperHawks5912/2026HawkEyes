@@ -84,7 +84,7 @@ public class Autos {
   public Command turnAndTurnBack() {
     return driveSubsystem.turnToHeadingCommand(20.0)
       .andThen(Commands.waitSeconds(1.0))
-      .andThen(driveSubsystem.turnToHeadingCommand(-1.0))
+      .andThen(driveSubsystem.turnToHeadingCommand(0.0))
       .andThen(feedbackSubsystem.idleCommand())
       .withName("turnAndTurnBack");
   }

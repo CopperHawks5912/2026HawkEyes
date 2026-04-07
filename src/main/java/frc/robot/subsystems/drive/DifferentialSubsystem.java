@@ -772,26 +772,26 @@ public class DifferentialSubsystem extends SubsystemBase {
    */
   public Command turnToHeadingCommand(double degrees) {
     // OPTION 1 - PID & arcadeDrive
-    // return startRun(
-    //   () -> aimPIDController.reset(gyro.getRotation2d().getRadians()),
-    //   () -> {
-    //     // Calculate rotation speed to aim at the target heading using the "aim" PID controller
-    //     double rotationSpeed = aimPIDController.calculate(gyro.getRotation2d().getRadians(), Units.degreesToRadians(degrees));
+    return startRun(
+      () -> aimPIDController.reset(gyro.getRotation2d().getRadians()),
+      () -> {
+        // Calculate rotation speed to aim at the target heading using the "aim" PID controller
+        double rotationSpeed = aimPIDController.calculate(gyro.getRotation2d().getRadians(), Units.degreesToRadians(degrees));
 
-    //     // Normalize rad/s to -1 to 1 range for arcadeDrive
-    //     rotationSpeed = MathUtil.clamp(rotationSpeed / DifferentialConstants.kMaxAngularSpeedRadsPerSecond, -1.0, 1.0);
+        // Normalize rad/s to -1 to 1 range for arcadeDrive
+        rotationSpeed = MathUtil.clamp(rotationSpeed / DifferentialConstants.kMaxAngularSpeedRadsPerSecond, -1.0, 1.0);
 
-    //     // Enforce a minimum power to overcome static friction
-    //     rotationSpeed = Math.copySign(Math.max(Math.abs(rotationSpeed), 0.10), rotationSpeed);
+        // Enforce a minimum power to overcome static friction
+        rotationSpeed = Math.copySign(Math.max(Math.abs(rotationSpeed), 0.10), rotationSpeed);
 
-    //     // Clamp the normalized speed to ensure we don't exceed the maximum speed
-    //     drive.arcadeDrive(0.0, rotationSpeed, false);
-    //   }
-    // )
-    // .until(() -> aimPIDController.atSetpoint())
-    // .withTimeout(3.0)
-    // .finallyDo(this::stop)
-    // .withName("TurnToHeadingDifferential");
+        // Clamp the normalized speed to ensure we don't exceed the maximum speed
+        drive.arcadeDrive(0.0, rotationSpeed, false);
+      }
+    )
+    .until(() -> aimPIDController.atSetpoint())
+    .withTimeout(3.0)
+    .finallyDo(this::stop)
+    .withName("TurnToHeadingDifferential");
 
     // OPTION 2 - PID & driveRobotRelative
     // return startRun(
@@ -815,29 +815,6 @@ public class DifferentialSubsystem extends SubsystemBase {
     // .withTimeout(3.0)
     // .finallyDo(this::stop)
     // .withName("TurnToHeadingDifferential");
-
-    // ORIGINAL - Gyro only, no PID (not recommended due to overshooting and oscillation)
-    return startRun(
-      () -> aimPIDController.reset(gyro.getRotation2d().getRadians()),
-      () -> {
-        // Calculate rotation speed to aim at the target heading using the "aim" PID controller
-        double rotationSpeed = aimPIDController.calculate(gyro.getRotation2d().getRadians(), Units.degreesToRadians(degrees));
-
-        // Clamp the rotation speed to the maximum rotational speed of the robot
-        rotationSpeed = MathUtil.clamp(
-          rotationSpeed, 
-          -DifferentialConstants.kMaxAngularSpeedRadsPerSecond, 
-          DifferentialConstants.kMaxAngularSpeedRadsPerSecond
-        );
-
-        // Drive the robot with the calculated rotation speed only
-        driveRobotRelative(new ChassisSpeeds(0.0, 0.0, rotationSpeed));  
-      }
-    )
-    .until(() -> Math.abs(Rotation2d.fromDegrees(degrees).minus(gyro.getRotation2d()).getDegrees()) < 1.0)
-    .withTimeout(3.0)
-    .finallyDo(this::stop)
-    .withName("TurnToHeadingDifferential");
   }
 
   /**
@@ -866,7 +843,7 @@ public class DifferentialSubsystem extends SubsystemBase {
    * @return Command to drive the specified distance
    */
   public Command driveDistanceCommand(double distance, double power) {
-    // OPTION 1
+    // OPTION 1 - simple power with distance scaling & tankDrive
     // scale power based on the distance remaining to ensure we slow down as we approach the target, 
     // but enforce a minimum power to overcome static friction
     // return startRun(
@@ -891,7 +868,7 @@ public class DifferentialSubsystem extends SubsystemBase {
     // .finallyDo(this::stop)
     // .withName("DriveDistanceDifferential");
 
-    // OPTION 2
+    // OPTION 2 - PID & driveRobotRelative
     // Use distance PID controller and lock heading with aim PID controller to prevent drifting.
     // This is more complex but results in more accurate and consistent driving, especially 
     // over longer distances.
@@ -927,7 +904,7 @@ public class DifferentialSubsystem extends SubsystemBase {
     // .finallyDo(this::stop)
     // .withName("DriveDistanceDifferential");
 
-    // OPTION 3
+    // OPTION 3 - distance PID + lock aim PID with arcadeDrive
     // Use distance PID controller and lock heading with aim PID controller to prevent drifting.
     // This is more complex but results in more accurate and consistent driving, especially 
     // over longer distances.
