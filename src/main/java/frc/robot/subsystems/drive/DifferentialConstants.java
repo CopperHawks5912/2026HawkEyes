@@ -157,7 +157,7 @@ public final class DifferentialConstants {
   
   // ==================== PID Constants used by driveRobotRelative ====================
 
-  // used for low level PID driving
+  // used for low level PID driving in driveRobotRelative
   public static final double kP = 2.25; 
   public static final double kI = 0.00;
   public static final double kD = 0.00;
