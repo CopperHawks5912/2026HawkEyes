@@ -421,10 +421,10 @@ public class DifferentialSubsystem extends SubsystemBase {
     double rightVoltage = MathUtil.clamp(rightFF + rightPID, -12.0, 12.0);
     
     // Anti-jitter
-    if (Math.abs(leftVoltage) < 0.05) {
+    if (Math.abs(leftVoltage) < DifferentialConstants.kDriveAntiJitterToleranceVolts) {
       leftVoltage = 0.0;
     }
-    if (Math.abs(rightVoltage) < 0.05) {
+    if (Math.abs(rightVoltage) < DifferentialConstants.kDriveAntiJitterToleranceVolts) {
       rightVoltage = 0.0;
     }
 
@@ -848,10 +848,10 @@ public class DifferentialSubsystem extends SubsystemBase {
     // over longer distances.
     return startRun(
       () -> {
-        resetEncoders();
         targetHeadingRadians = gyro.getRotation2d().getRadians();
         aimPIDController.reset(targetHeadingRadians);
         distancePIDController.reset();
+        resetEncoders();
       },
       () -> {
         // Calculate the average distance traveled by the encoders

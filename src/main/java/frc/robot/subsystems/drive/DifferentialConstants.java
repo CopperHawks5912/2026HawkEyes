@@ -157,15 +157,18 @@ public final class DifferentialConstants {
   
   // ==================== PID Constants used by driveRobotRelative ====================
 
+  // used for low level PID driving
   public static final double kP = 2.25; 
   public static final double kI = 0.00;
   public static final double kD = 0.00;
   public static final double kS = 0.22;
   public static final double kV = 2.60;
   public static final double kA = 0.00;
+  public static final double kDriveAntiJitterToleranceVolts = kS * 0.5;
   
   // ==================== PID Constants for Distance Control ====================
 
+  // used to calculate a distance to drive
   public static final double kDistanceP = 2.25; // 1.50 to 3.00
   public static final double kDistanceI = 0.00; // leave at 0.00
   public static final double kDistanceD = 0.00; // 0.00 to 0.20, go up to 0.05 at a time
@@ -173,6 +176,7 @@ public final class DifferentialConstants {
   
   // ==================== PID Constants for Aiming Control ====================
 
+  // used to calculate a heading turn to
   public static final double kAimP = 4.50; // 3.00 to 6.00
   public static final double kAimI = 0.00;
   public static final double kAimD = 0.05; // 0.05 to 0.20
