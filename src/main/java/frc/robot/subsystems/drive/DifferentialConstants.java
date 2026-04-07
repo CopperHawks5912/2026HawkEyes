@@ -155,61 +155,27 @@ public final class DifferentialConstants {
    */
   public static final double kVelocityConversionFactor = kPositionConversionFactor / 60.0;
   
-  // ==================== PID Constants for Velocity Control ====================
-  
-  /**
-   * PID proportional gain for velocity control - used by Pathplanner
-   */
-  public static final double kP = 6.0; // TODO: Tune this value
+  // ==================== PID Constants used by driveRobotRelative ====================
 
-  /**
-   * PID integral gain for velocity control - used by Pathplanner
-   */
-  public static final double kI = 0.0; // TODO: Tune this value
+  public static final double kP = 2.25; 
+  public static final double kI = 0.00;
+  public static final double kD = 0.00;
+  public static final double kS = 0.22;
+  public static final double kV = 2.60;
+  public static final double kA = 0.00;
   
-  /**
-   * PID derivative gain for velocity control - used by Pathplanner
-   */
-  public static final double kD = 0.0; // TODO: Tune this value
+  // ==================== PID Constants for Distance Control ====================
+
+  public static final double kDistanceP = 2.25; // 1.50 to 3.00
+  public static final double kDistanceI = 0.00; // leave at 0.00
+  public static final double kDistanceD = 0.00; // 0.00 to 0.20, go up to 0.05 at a time
+  public static final double kDistanceToleranceMeters = 0.01; // 1 cm
   
-  /**
-   * Feedforward kS - voltage needed to overcome static friction - used by Pathplanner
-   * Units: Volts
-   */
-  public static final double kS = 0.22; // TODO: Use SysId to characterize
-  
-  /**
-   * Feedforward kV - voltage needed per unit of velocity - used by Pathplanner
-   * Units: Volt-seconds/meter
-   */
-  public static final double kV = 2.6; // TODO: Use SysId to characterize
-  
-  /**
-   * Feedforward kA - voltage needed per unit of acceleration - used by Pathplanner
-   * Units: Volt-seconds²/meter
-   */
-  public static final double kA = 0.4; // TODO: Use SysId to characterize
-  
-  // ==================== PID Constants for Aiming ====================
-  
-  /**
-   * Aiming PID proportional gain - used by the aimAtHubCommand
-   */
-  public static final double kAimP = 2.25; // TODO: Tune this value
-  
-  /**
-   * Aiming PID integral gain - used by the aimAtHubCommand
-   */
-  public static final double kAimI = 0.0;
-  
-  /**
-   * Aiming PID derivative gain - used by the aimAtHubCommand
-   */
-  public static final double kAimD = 0.1; // TODO: Tune this value
-  
-  /**
-   * Aiming tolerance in radians (how close is "good enough") - used by the aimAtHubCommand
-   */
+  // ==================== PID Constants for Aiming Control ====================
+
+  public static final double kAimP = 4.50; // 3.00 to 6.00
+  public static final double kAimI = 0.00;
+  public static final double kAimD = 0.05; // 0.05 to 0.20
   public static final double kAimToleranceRad = Units.degreesToRadians(1.0);
   
   // ==================== Vision Parameters ====================

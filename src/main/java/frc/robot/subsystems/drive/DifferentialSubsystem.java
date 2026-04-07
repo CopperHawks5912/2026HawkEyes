@@ -31,6 +31,9 @@ import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
@@ -63,6 +66,9 @@ public class DifferentialSubsystem extends SubsystemBase {
   private final PIDController rightPIDController;
   private final SimpleMotorFeedforward feedForward;
 
+  // PID controller for distance control
+  private final PIDController distancePIDController;
+
   // PID controller for aiming
   private final ProfiledPIDController aimPIDController;
 
@@ -77,6 +83,12 @@ public class DifferentialSubsystem extends SubsystemBase {
   private boolean inverted = false;
   private boolean slowMode = false;
   private int addedVisionMeasurementCount = 0;
+  private double targetHeadingRadians = 0.0;
+
+  // NetworkTables entries for live PID tuning
+  private final NetworkTableEntry aimPEntry;
+  private final NetworkTableEntry aimIEntry;  
+  private final NetworkTableEntry aimDEntry;
   
   /**
    * Creates a new DifferentialSubsystem.
@@ -128,6 +140,14 @@ public class DifferentialSubsystem extends SubsystemBase {
       DifferentialConstants.kA
     );
 
+    // Initialize PID controller for distance control
+    distancePIDController = new PIDController(
+      DifferentialConstants.kDistanceP,
+      DifferentialConstants.kDistanceI,
+      DifferentialConstants.kDistanceD
+    );
+    distancePIDController.setTolerance(DifferentialConstants.kDistanceToleranceMeters);
+
     // Initialize PID controller for auto aiming
     aimPIDController = new ProfiledPIDController(
       DifferentialConstants.kAimP,
@@ -138,10 +158,19 @@ public class DifferentialSubsystem extends SubsystemBase {
         DifferentialConstants.kMaxAngularAccelRadsPerSecondSq
       )
     );
-
-    // CRITICAL: Enable continuous input for angle wrapping
     aimPIDController.enableContinuousInput(-Math.PI, Math.PI);
     aimPIDController.setTolerance(DifferentialConstants.kAimToleranceRad);
+
+    // In constructor, after initializing aimPIDController:
+    NetworkTable tuningTable = NetworkTableInstance.getDefault().getTable("Drive/AimTuning");
+    aimPEntry = tuningTable.getEntry("AimP");
+    aimIEntry = tuningTable.getEntry("AimI");
+    aimDEntry = tuningTable.getEntry("AimD");
+
+    // Initialize with current constants so they show up in Elastic immediately
+    aimPEntry.setDouble(DifferentialConstants.kAimP);
+    aimIEntry.setDouble(DifferentialConstants.kAimI);
+    aimDEntry.setDouble(DifferentialConstants.kAimD);
 
     // set up kinematics
     kinematics = new DifferentialDriveKinematics(DifferentialConstants.kTrackWidthMeters);
@@ -262,6 +291,14 @@ public class DifferentialSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
+    // Update aim PID gains from NetworkTables for live tuning
+    double aimP = aimPEntry.getDouble(DifferentialConstants.kAimP);
+    double aimI = aimIEntry.getDouble(DifferentialConstants.kAimI);
+    double aimD = aimDEntry.getDouble(DifferentialConstants.kAimD);    
+    if (aimP != aimPIDController.getP() || aimI != aimPIDController.getI() || aimD != aimPIDController.getD()) {
+      aimPIDController.setPID(aimP, aimI, aimD);
+    }
+    
     // Update the pose estimator with the latest readings
     poseEstimator.updateWithTime(
       Timer.getFPGATimestamp(), 
@@ -383,6 +420,14 @@ public class DifferentialSubsystem extends SubsystemBase {
     double leftVoltage = MathUtil.clamp(leftFF + leftPID, -12.0, 12.0);
     double rightVoltage = MathUtil.clamp(rightFF + rightPID, -12.0, 12.0);
     
+    // Anti-jitter
+    if (Math.abs(leftVoltage) < 0.05) {
+      leftVoltage = 0.0;
+    }
+    if (Math.abs(rightVoltage) < 0.05) {
+      rightVoltage = 0.0;
+    }
+
     // set the motor voltages directly for more precise control (feedforward + PID)
     leftLeaderMotor.setVoltage(leftVoltage);
     rightLeaderMotor.setVoltage(rightVoltage);
@@ -727,15 +772,18 @@ public class DifferentialSubsystem extends SubsystemBase {
       () -> {
         // Calculate rotation speed to aim at the target heading using the "aim" PID controller
         double rotationSpeed = aimPIDController.calculate(gyro.getRotation2d().getRadians(), Units.degreesToRadians(degrees));
-  
-        // Normalize rad/s to -1 to 1 range for arcadeDrive
-        double normalizedSpeed = MathUtil.clamp(rotationSpeed / DifferentialConstants.kMaxAngularSpeedRadsPerSecond, -1.0, 1.0);
 
-        // Enforce a minimum power to overcome static friction
-        normalizedSpeed = Math.copySign(Math.max(Math.abs(normalizedSpeed), 0.10), normalizedSpeed);
+        // Drive the robot with the calculated rotation speed only
+        driveRobotRelative(new ChassisSpeeds(0.0, 0.0, rotationSpeed));
+  
+        // // Normalize rad/s to -1 to 1 range for arcadeDrive
+        // rotationSpeed = MathUtil.clamp(rotationSpeed / DifferentialConstants.kMaxAngularSpeedRadsPerSecond, -1.0, 1.0);
+
+        // // Enforce a minimum power to overcome static friction
+        // rotationSpeed = Math.copySign(Math.max(Math.abs(rotationSpeed), 0.10), rotationSpeed);
 
         // Clamp the normalized speed to ensure we don't exceed the maximum speed
-        drive.arcadeDrive(0.0, normalizedSpeed, false);
+        // drive.arcadeDrive(0.0, rotationSpeed, false);
       }
     )
     .until(() -> aimPIDController.atSetpoint())
@@ -795,19 +843,55 @@ public class DifferentialSubsystem extends SubsystemBase {
     // .finallyDo(this::stop)
     // .withName("DriveDistanceDifferential");
 
-    // ALTERNATIVE - no power scaling but no subsystem command gap
+    // Use distance PID controller and lock heading with aim PID controller to prevent drifting.
+    // This is more complex but results in more accurate and consistent driving, especially 
+    // over longer distances.
     return startRun(
-      () -> resetEncoders(),
-      () -> drive.tankDrive(
-        Math.copySign(MathUtil.clamp(power, 0.0, 1.0), distance),
-        Math.copySign(MathUtil.clamp(power, 0.0, 1.0), distance),
-        false
-      )
+      () -> {
+        resetEncoders();
+        targetHeadingRadians = gyro.getRotation2d().getRadians();
+        aimPIDController.reset(targetHeadingRadians);
+        distancePIDController.reset();
+      },
+      () -> {
+        // Calculate the average distance traveled by the encoders
+        double distanceTravelled = (leftEncoder.getPosition() + rightEncoder.getPosition()) / 2.0;
+
+        // Calculate forward/backward speed from distance PID controller 
+        double xSpeed = distancePIDController.calculate(distanceTravelled, distance);
+
+        // Ensure velocity is valid
+        xSpeed = MathUtil.clamp(
+          xSpeed, 
+          -DifferentialConstants.kMaxSpeedMetersPerSecond, 
+          DifferentialConstants.kMaxSpeedMetersPerSecond
+        );
+
+        // Lock the robot to the current heading using the aim PID controller to prevent drifting
+        double rSpeed = aimPIDController.calculate(gyro.getRotation2d().getRadians(), targetHeadingRadians);
+
+        // Drive the robot with the calculated speeds
+        driveRobotRelative(new ChassisSpeeds(xSpeed, 0, rSpeed));
+      }
     )
-    .until(() -> Math.abs((leftEncoder.getPosition() + rightEncoder.getPosition()) / 2.0) >= Math.abs(distance))
+    .until(() -> distancePIDController.atSetpoint())
     .withTimeout(10.0)
     .finallyDo(this::stop)
     .withName("DriveDistanceDifferential");
+
+    // ALTERNATIVE - no power scaling but no subsystem command gap
+    // return startRun(
+    //   () -> resetEncoders(),
+    //   () -> drive.tankDrive(
+    //     Math.copySign(MathUtil.clamp(power, 0.0, 1.0), distance),
+    //     Math.copySign(MathUtil.clamp(power, 0.0, 1.0), distance),
+    //     false
+    //   )
+    // )
+    // .until(() -> Math.abs((leftEncoder.getPosition() + rightEncoder.getPosition()) / 2.0) >= Math.abs(distance))
+    // .withTimeout(10.0)
+    // .finallyDo(this::stop)
+    // .withName("DriveDistanceDifferential");
   }
 
   /**
