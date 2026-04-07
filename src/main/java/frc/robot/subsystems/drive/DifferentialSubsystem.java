@@ -771,27 +771,70 @@ public class DifferentialSubsystem extends SubsystemBase {
    * @return Command that turns the robot to the specified heading then stops
    */
   public Command turnToHeadingCommand(double degrees) {
+    // OPTION 1 - PID & arcadeDrive
+    // return startRun(
+    //   () -> aimPIDController.reset(gyro.getRotation2d().getRadians()),
+    //   () -> {
+    //     // Calculate rotation speed to aim at the target heading using the "aim" PID controller
+    //     double rotationSpeed = aimPIDController.calculate(gyro.getRotation2d().getRadians(), Units.degreesToRadians(degrees));
+
+    //     // Normalize rad/s to -1 to 1 range for arcadeDrive
+    //     rotationSpeed = MathUtil.clamp(rotationSpeed / DifferentialConstants.kMaxAngularSpeedRadsPerSecond, -1.0, 1.0);
+
+    //     // Enforce a minimum power to overcome static friction
+    //     rotationSpeed = Math.copySign(Math.max(Math.abs(rotationSpeed), 0.10), rotationSpeed);
+
+    //     // Clamp the normalized speed to ensure we don't exceed the maximum speed
+    //     drive.arcadeDrive(0.0, rotationSpeed, false);
+    //   }
+    // )
+    // .until(() -> aimPIDController.atSetpoint())
+    // .withTimeout(3.0)
+    // .finallyDo(this::stop)
+    // .withName("TurnToHeadingDifferential");
+
+    // OPTION 2 - PID & driveRobotRelative
+    // return startRun(
+    //   () -> aimPIDController.reset(gyro.getRotation2d().getRadians()),
+    //   () -> {
+    //     // Calculate rotation speed to aim at the target heading using the "aim" PID controller
+    //     double rotationSpeed = aimPIDController.calculate(gyro.getRotation2d().getRadians(), Units.degreesToRadians(degrees));
+
+    //     // Clamp the rotation speed to the maximum rotational speed of the robot
+    //     rotationSpeed = MathUtil.clamp(
+    //       rotationSpeed, 
+    //       -DifferentialConstants.kMaxAngularSpeedRadsPerSecond, 
+    //       DifferentialConstants.kMaxAngularSpeedRadsPerSecond
+    //     );
+
+    //     // Drive the robot with the calculated rotation speed only
+    //     driveRobotRelative(new ChassisSpeeds(0.0, 0.0, rotationSpeed));  
+    //   }
+    // )
+    // .until(() -> aimPIDController.atSetpoint())
+    // .withTimeout(3.0)
+    // .finallyDo(this::stop)
+    // .withName("TurnToHeadingDifferential");
+
+    // ORIGINAL - Gyro only, no PID (not recommended due to overshooting and oscillation)
     return startRun(
       () -> aimPIDController.reset(gyro.getRotation2d().getRadians()),
       () -> {
         // Calculate rotation speed to aim at the target heading using the "aim" PID controller
         double rotationSpeed = aimPIDController.calculate(gyro.getRotation2d().getRadians(), Units.degreesToRadians(degrees));
 
+        // Clamp the rotation speed to the maximum rotational speed of the robot
+        rotationSpeed = MathUtil.clamp(
+          rotationSpeed, 
+          -DifferentialConstants.kMaxAngularSpeedRadsPerSecond, 
+          DifferentialConstants.kMaxAngularSpeedRadsPerSecond
+        );
+
         // Drive the robot with the calculated rotation speed only
-        driveRobotRelative(new ChassisSpeeds(0.0, 0.0, rotationSpeed));
-  
-        // // Normalize rad/s to -1 to 1 range for arcadeDrive
-        // rotationSpeed = MathUtil.clamp(rotationSpeed / DifferentialConstants.kMaxAngularSpeedRadsPerSecond, -1.0, 1.0);
-
-        // // Enforce a minimum power to overcome static friction
-        // rotationSpeed = Math.copySign(Math.max(Math.abs(rotationSpeed), 0.10), rotationSpeed);
-
-        // // Clamp the normalized speed to ensure we don't exceed the maximum speed
-        // drive.arcadeDrive(0.0, rotationSpeed, false);
+        driveRobotRelative(new ChassisSpeeds(0.0, 0.0, rotationSpeed));  
       }
     )
-    .until(() -> aimPIDController.atSetpoint())
-    // .until(() -> Math.abs(Rotation2d.fromDegrees(degrees).minus(gyro.getRotation2d()).getDegrees()) < 1.0)
+    .until(() -> Math.abs(Rotation2d.fromDegrees(degrees).minus(gyro.getRotation2d()).getDegrees()) < 1.0)
     .withTimeout(3.0)
     .finallyDo(this::stop)
     .withName("TurnToHeadingDifferential");
@@ -823,6 +866,7 @@ public class DifferentialSubsystem extends SubsystemBase {
    * @return Command to drive the specified distance
    */
   public Command driveDistanceCommand(double distance, double power) {
+    // OPTION 1
     // scale power based on the distance remaining to ensure we slow down as we approach the target, 
     // but enforce a minimum power to overcome static friction
     // return startRun(
@@ -847,41 +891,7 @@ public class DifferentialSubsystem extends SubsystemBase {
     // .finallyDo(this::stop)
     // .withName("DriveDistanceDifferential");
 
-    // Use distance PID controller and lock heading with aim PID controller to prevent drifting.
-    // This is more complex but results in more accurate and consistent driving, especially 
-    // over longer distances.
-    return startRun(
-      () -> {
-        targetHeadingRadians = gyro.getRotation2d().getRadians();
-        aimPIDController.reset(targetHeadingRadians);
-        distancePIDController.reset();
-        resetEncoders();
-      },
-      () -> {
-        // Calculate the average distance traveled by the encoders
-        double distanceTravelled = (leftEncoder.getPosition() + rightEncoder.getPosition()) / 2.0;
-
-        // Calculate forward/backward speed from distance PID controller 
-        double xSpeed = distancePIDController.calculate(distanceTravelled, distance);
-
-        // Ensure velocity is valid
-        xSpeed = MathUtil.clamp(xSpeed, -DifferentialConstants.kMaxSpeedMetersPerSecond, DifferentialConstants.kMaxSpeedMetersPerSecond);
-
-        // Lock the robot to the current heading using the aim PID controller to prevent drifting
-        double rSpeed = aimPIDController.calculate(gyro.getRotation2d().getRadians(), targetHeadingRadians);
-
-        // Ensure rotation speed is valid
-        rSpeed = MathUtil.clamp(rSpeed, -DifferentialConstants.kMaxAngularSpeedRadsPerSecond, DifferentialConstants.kMaxAngularSpeedRadsPerSecond);
-        
-        // Drive the robot with the calculated speeds
-        driveRobotRelative(new ChassisSpeeds(xSpeed, 0, rSpeed));
-      }
-    )
-    .until(() -> distancePIDController.atSetpoint())
-    .withTimeout(10.0)
-    .finallyDo(this::stop)
-    .withName("DriveDistanceDifferential");
-
+    // OPTION 2
     // Use distance PID controller and lock heading with aim PID controller to prevent drifting.
     // This is more complex but results in more accurate and consistent driving, especially 
     // over longer distances.
@@ -899,23 +909,17 @@ public class DifferentialSubsystem extends SubsystemBase {
     //     // Calculate forward/backward speed from distance PID controller 
     //     double xSpeed = distancePIDController.calculate(distanceTravelled, distance);
 
-    //     // Normalize m/s to -1 to 1 range for arcadeDrive
-    //     xSpeed = MathUtil.clamp(xSpeed / DifferentialConstants.kMaxSpeedMetersPerSecond, -1.0, 1.0);
-
-    //     // Enforce a minimum power to overcome static friction
-    //     xSpeed = Math.copySign(Math.max(Math.abs(xSpeed), 0.10), xSpeed);
+    //     // Ensure velocity is valid
+    //     xSpeed = MathUtil.clamp(xSpeed, -DifferentialConstants.kMaxSpeedMetersPerSecond, DifferentialConstants.kMaxSpeedMetersPerSecond);
 
     //     // Lock the robot to the current heading using the aim PID controller to prevent drifting
     //     double rSpeed = aimPIDController.calculate(gyro.getRotation2d().getRadians(), targetHeadingRadians);
 
-    //     // Normalize rad/s to -1 to 1 range for arcadeDrive
-    //     rSpeed = MathUtil.clamp(rSpeed / DifferentialConstants.kMaxAngularSpeedRadsPerSecond, -1.0, 1.0);
-
-    //     // Enforce a minimum power to overcome static friction
-    //     rSpeed = Math.copySign(Math.max(Math.abs(rSpeed), 0.10), rSpeed);
+    //     // Ensure rotation speed is valid
+    //     rSpeed = MathUtil.clamp(rSpeed, -DifferentialConstants.kMaxAngularSpeedRadsPerSecond, DifferentialConstants.kMaxAngularSpeedRadsPerSecond);
 
     //     // Drive the robot with the calculated speeds
-    //     drive.arcadeDrive(xSpeed, rSpeed, false);
+    //     driveRobotRelative(new ChassisSpeeds(xSpeed, 0, rSpeed));
     //   }
     // )
     // .until(() -> distancePIDController.atSetpoint())
@@ -923,7 +927,49 @@ public class DifferentialSubsystem extends SubsystemBase {
     // .finallyDo(this::stop)
     // .withName("DriveDistanceDifferential");
 
-    // ALTERNATIVE - no power scaling but no subsystem command gap
+    // OPTION 3
+    // Use distance PID controller and lock heading with aim PID controller to prevent drifting.
+    // This is more complex but results in more accurate and consistent driving, especially 
+    // over longer distances.
+    return startRun(
+      () -> {
+        targetHeadingRadians = gyro.getRotation2d().getRadians();
+        aimPIDController.reset(targetHeadingRadians);
+        distancePIDController.reset();
+        resetEncoders();
+      },
+      () -> {
+        // Calculate the average distance traveled by the encoders
+        double distanceTravelled = (leftEncoder.getPosition() + rightEncoder.getPosition()) / 2.0;
+
+        // Calculate forward/backward speed from distance PID controller 
+        double xSpeed = distancePIDController.calculate(distanceTravelled, distance);
+
+        // Normalize m/s to -1 to 1 range for arcadeDrive
+        xSpeed = MathUtil.clamp(xSpeed / DifferentialConstants.kMaxSpeedMetersPerSecond, -1.0, 1.0);
+
+        // Enforce a minimum power to overcome static friction
+        xSpeed = Math.copySign(Math.max(Math.abs(xSpeed), 0.10), xSpeed);
+
+        // Lock the robot to the current heading using the aim PID controller to prevent drifting
+        double rSpeed = aimPIDController.calculate(gyro.getRotation2d().getRadians(), targetHeadingRadians);
+
+        // Normalize rad/s to -1 to 1 range for arcadeDrive
+        rSpeed = MathUtil.clamp(rSpeed / DifferentialConstants.kMaxAngularSpeedRadsPerSecond, -1.0, 1.0);
+
+        // Enforce a minimum power to overcome static friction
+        rSpeed = Math.copySign(Math.max(Math.abs(rSpeed), 0.10), rSpeed);
+
+        // Drive the robot with the calculated speeds
+        drive.arcadeDrive(xSpeed, rSpeed, false);
+      }
+    )
+    .until(() -> distancePIDController.atSetpoint())
+    .withTimeout(10.0)
+    .finallyDo(this::stop)
+    .withName("DriveDistanceDifferential");
+
+    // ORIGINAL - no power scaling but no subsystem command gap
     // return startRun(
     //   () -> resetEncoders(),
     //   () -> drive.tankDrive(
