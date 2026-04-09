@@ -82,9 +82,8 @@ public class Autos {
    * @return Command to run the backwardOneMeter routine
    */
   public Command turnAndTurnBack() {
-    return driveSubsystem.turnToHeadingCommand(20.0)
-      .andThen(Commands.waitSeconds(1.0))
-      .andThen(driveSubsystem.turnToHeadingCommand(0.0))
+    return driveSubsystem.turnToHeadingCommand(20.0, 2.0)
+      .andThen(driveSubsystem.turnToHeadingCommand(0.0, 1.0))
       .andThen(feedbackSubsystem.idleCommand())
       .withName("turnAndTurnBack");
   }
@@ -112,7 +111,7 @@ public class Autos {
       ),
 
       // Drive forward 18.5 inches (just touching tower)
-      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(28.5), 0.20),
+      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(26.5), 0.20),
       
       // Raise climber to level 1 position
       climberSubsystem.levelOneClimbCommand(),
@@ -140,23 +139,23 @@ public class Autos {
       driveSubsystem.driveDistanceCommand(Units.inchesToMeters(47.5), 0.20),
 
       // Turn to face the center of the hub
-      driveSubsystem.turnToHeadingCommand(15.0),
+      driveSubsystem.turnToHeadingCommand(20.0, 2.0),
       // driveSubsystem.turnDegreesCommand(5.0),
 
       Commands.parallel(
         // Launch fuel for 5.0 seconds
-        fuelSubsystem.launchPowerCommand().withTimeout(5.0).finallyDo(fuelSubsystem::stop),
+        fuelSubsystem.launchPowerCommand().withTimeout(4.0).finallyDo(fuelSubsystem::stop),
 
         // Wait a brief period and then lower the climber all the way
-        Commands.waitSeconds(2.5).andThen(climberSubsystem.downToLimitCommand())
+        Commands.waitSeconds(2.0).andThen(climberSubsystem.downToLimitCommand())
       ),
 
       // Turn to face the straight ahead direction again
-      driveSubsystem.turnToHeadingCommand(0.0),
+      driveSubsystem.turnToHeadingCommand(0.0, 1.0),
       // driveSubsystem.turnDegreesCommand(-5.0),
 
       // Drive forward 18.5 inches (just touching tower)
-      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(28.5), 0.20),
+      driveSubsystem.driveDistanceCommand(Units.inchesToMeters(26.5), 0.20),
       
       // Raise climber to level 1 position
       climberSubsystem.levelOneClimbCommand(),

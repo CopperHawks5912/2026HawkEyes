@@ -143,13 +143,17 @@ public class RobotContainer {
       .onTrue(driveSubsystem.setSlowModeCommand(true))
       .onFalse(driveSubsystem.setSlowModeCommand(false));
 
-    // launch fuel at a fixed power / RPM while holding right bumper (non-vision version)
+    // // launch fuel at a fixed power / RPM while holding right bumper (non-vision version)
     driverXbox.rightBumper().and(() -> !visionSubsystem.isEnabled()).whileTrue(
       fuelSubsystem.launchPowerCommand()
     );
     // driverXbox.rightBumper().and(() -> !visionSubsystem.isEnabled()).whileTrue(
     //   fuelSubsystem.launchRpsCommand()
     // );
+
+    // DEBUGGING - don't uncomment at competition
+    // driverXbox.leftBumper().whileTrue(driveSubsystem.turnToHeadingCommand(20.0, 2.0));
+    // driverXbox.rightBumper().whileTrue(driveSubsystem.turnToHeadingCommand(0.0, 1.0));
 
     // manual climber control with DPAD
     driverXbox.povUp().and(RobotModeTriggers.teleop()).whileTrue(climberSubsystem.upCommand());
